@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 
 # Create your models here.
 
@@ -8,7 +9,7 @@ class Student(models.Model):
     student_number = models.CharField(max_length=10)
     first_name = models.CharField(max_length=64)
     last_name = models.CharField(max_length=64)
-    course_code = models.IntegerField()
+    course_code = models.CharField(max_length=5)
 
 # Course
 class Course(models.Model):
@@ -16,8 +17,11 @@ class Course(models.Model):
     course_name = models.CharField(max_length=64)
 
 # User
-class User(models.Model):
-    student_number = models.CharField(max_length=64)
-    email = models.CharField(max_length=64)
-    password = models.CharField(max_length=20)
+class User(AbstractBaseUser):
+    student_number = models.CharField(max_length=64, unique=True)
+    email = models.EmailField(max_length=254, unique=True)
+    password = models.CharField(max_length=22)
     is_admin = models.BooleanField(default=False)
+
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['student_number']

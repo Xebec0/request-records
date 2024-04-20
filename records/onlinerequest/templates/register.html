@@ -38,6 +38,13 @@
                 {% csrf_token %}
 
                 <h2 class="mb-4">Create an account</h2>
+
+                <!-- Email input -->
+                <div data-mdb-input-init class="form-outline mb-4">
+                  <input type="number" id="form2Example1" name="student_number" class="form-control" />
+                  <label class="form-label" for="form2Example1">Student Number</label>
+                </div>
+                
                 <!-- Email input -->
                 <div data-mdb-input-init class="form-outline mb-4">
                   <input type="email" id="form2Example1" name="email" class="form-control" />
@@ -46,10 +53,15 @@
               
                 <!-- Password input -->
                 <div data-mdb-input-init class="form-outline mb-4">
-                  <input type="password" id="form2Example2" class="form-control" />
+                  <input type="password" id="form2Example2" name="password" class="form-control" />
                   <label class="form-label" for="form2Example2">Password</label>
                 </div>
-              
+
+                <!-- Error message -->
+                {% if message %}
+                  <p class="text-danger text-center" style="width: 100%; background-color: rgb(235, 187, 187);">{{ message }}</p>
+                {% endif %}
+                
                 <!-- 2 column grid layout for inline styling -->
                 <div class="row mb-4">
                   <div class="col d-flex justify-content-center">
