@@ -3,6 +3,7 @@ from django.urls import path
 from onlinerequest.views import views
 from onlinerequest.views import register
 from onlinerequest.views import login
+from onlinerequest.views import dummy
 
 # Define URL paths here
 urlpatterns = [
@@ -15,5 +16,8 @@ urlpatterns = [
     path('register/', register.index),
 
     # Login
-    path('login/', login.index)
+    path('login/', login.index),
+
+    # Populate table
+    path('dummy/', dummy.index)
 ]
