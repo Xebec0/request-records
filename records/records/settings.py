@@ -27,7 +27,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-    'onlinerequest.apps.OnlinerequestConfig'
+    'onlinerequest.apps.OnlinerequestConfig',
+    'bootstrap5'
 ]
 
 MIDDLEWARE = [
