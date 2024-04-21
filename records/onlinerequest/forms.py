@@ -3,7 +3,28 @@ from .models import User
 from django.contrib.auth.forms import ReadOnlyPasswordHashField
 
 class UserRegistrationForm(forms.ModelForm):
-    student_number = forms.CharField(max_length=64)
+    student_number = forms.CharField(
+        max_length=64,
+        error_messages={
+            'required': 'Please enter your student number.',
+            'unique': 'Invalid student number.'
+        }
+    )
+
+    email = forms.CharField(
+        max_length=64,
+        error_messages={
+            'required': 'Please enter your email.',
+            'unique': 'Invalid student email.'
+        }
+    )
+ 
+    password = forms.CharField(
+        max_length=64,
+        error_messages={
+            'required': 'Please enter your password.',
+        }
+    )   
 
     class Meta:
         model = User

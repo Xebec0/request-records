@@ -10,11 +10,10 @@ def index(request):
 
         if form.is_valid():
             user = form.save()
-            return HttpResponse("Posted")
+            return JsonResponse({'status' : True, 'message' : "Registered succesfully"})
         else:
-            # Get error messages from the form
-            error_messages = "\n".join([f"{field}: {', '.join(errors)}" for field, errors in form.errors.items()])
-            return HttpResponse(f"Not valid: {error_messages}")
-        
+            last_error_message = list(form.errors.items())[0]
+            return JsonResponse({'status' : False,'message' : last_error_message[1]})
     else:
         return render(request, "register.html")
+    

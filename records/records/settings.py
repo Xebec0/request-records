@@ -117,3 +117,9 @@ STATICFILES_DIRS = [
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+# Authentication
+AUTH_USER_MODEL = 'onlinerequest.User'
+
+AUTHENTICATION_BACKENDS = ['onlinerequest.backends.EmailBackend']
