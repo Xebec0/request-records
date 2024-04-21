@@ -1,18 +1,35 @@
+{% load bootstrap4 %}
+
 <!DOCTYPE html>
-
-{% load static %}
-
 <html>
-    <head>
-        <meta charset="utf-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <title></title>
-        <meta name="description" content="">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link rel="stylesheet" href="{% static 'css/main.css' %}">
-    </head>
-    <body>
-        <h1 id="test">Hello world</h1>
-        <script src="" async defer></script>
-    </body>
+  <head>
+    {% load static %} {% bootstrap_css %}
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>Academic File Request System</title>
+    <meta name="description" content="" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="{% static 'css/main.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/landing-page.css' %}" />
+  </head>
+
+  <body class="viewport-width-height">
+    {% bootstrap_javascript jquery='full' %}
+
+    <div class="container-fluid h-100 p-0">
+      <div class="jumbotron h-100 viewport-width-height">
+        <h1 class="mt-5">Academic File Request System</h1>
+        <p class="lead">Streamline Your Academic File Requests</p>
+        <hr class="my-4" />
+        <p>
+          The Academic File Request System provides a centralized platform for
+          students, faculty, and staff to request and manage various academic
+          documents efficiently. Whether you need transcripts, recommendation
+          letters, or other important records, our user-friendly interface
+          ensures a seamless experience. Stay organized and in control of your
+          academic file needs with our secure and reliable system.
+        </p>
+      </div>
+    </div>
+  </body>
 </html>
