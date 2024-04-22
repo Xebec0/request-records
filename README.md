@@ -3,6 +3,18 @@
 
 # Functional Requirements
 
+Signup (Requires the following)
+1. Username
+2. Password
+3. Student Number
+4. Email
+5. An image or pdf file of organizational proof of membership.
+
+Login
+1. Student Number
+2. Password
+3. A page or popup to show if account is still for confirmation.
+
 Faculty/Student Side:
 1.	Select Documents to Request: Users (faculty or students) should be able to select the type of document they want to request from a list of available options.
 2.	Upload Required Files: Users should be able to upload any required files or documents that are necessary for the request.
