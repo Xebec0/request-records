@@ -21,7 +21,13 @@ class User(AbstractBaseUser):
     student_number = models.CharField(max_length=64, unique=True)
     email = models.EmailField(max_length=254, unique=True)
     password = models.CharField(max_length=22)
-    is_admin = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=False)
+
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['student_number']
+
+class RegisterRequest(models.Model):
+    user = models.OneToOneField(User, on_delete = models.CASCADE, related_name = "register_request")
+    valid_id = models.CharField(max_length=254)
+
