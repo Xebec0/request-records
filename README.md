@@ -26,5 +26,5 @@ Admin Side:
 2.	View All Requests: Administrators should be able to view a list of all requests made by faculty or students.
 3.	Filter Requests: Administrators should be able to filter requests based on the user type (faculty or student).
 4.	Edit Request Status: Administrators should be able to update the status of a request (Processing, Accepted, or Rejected).
--- Admin assigned can set or edit where the document is currently for processing (Ex. registrar, cashier, admin, office of the president)
-5.	Upload Requested Document: Administrators should be able to upload the requested document for accepted requests.
+5. Admin assigned can set or edit where the document is currently for processing (Ex. registrar, cashier, admin, office of the president)
+6.	Upload Requested Document: Administrators should be able to upload the requested document for accepted requests.
