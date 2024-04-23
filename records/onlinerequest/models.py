@@ -36,6 +36,14 @@ class User(AbstractBaseUser):
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['student_number']
 
+# Profile
+class Profile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    student_number = models.CharField(max_length=64)
+    course = models.ForeignKey(Course, on_delete=models.CASCADE)  # ForeignKey to Course (many students can enroll in one course)
+    fname = models.CharField(max_length=64)
+    lname = models.CharField(max_length=64)
+
 class RegisterRequest(models.Model):
     user = models.OneToOneField(User, on_delete = models.CASCADE, related_name = "register_request")
     valid_id = models.CharField(max_length=254)
