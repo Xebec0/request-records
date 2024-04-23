@@ -61,6 +61,16 @@
                   <label class="form-label" for="password">Password</label>
                 </div>
 
+                <!-- User type input -->
+                <div data-mdb-input-init class="form-outline mb-4">
+                  <select class="form-select" aria-label="Default select example" name="user_type">
+                    <option selected>What are you?</option>
+                    <option value="1">I am a faculty</option>
+                    <option value="2">I am a student</option>
+                  </select>
+                </div>
+
+
                 <!-- Upload picture -->
                 <div class="mb-3">
                   <input class="form-control" type="file" name="formFile" id="formFile">
@@ -86,6 +96,7 @@
                 <div class="row">
                   <button type="submit" data-mdb-button-init data-mdb-ripple-init class="btn btn-primary">Sign up</button>
                 </div>
+                
               
                 <!-- Register buttons -->
                 <div class="text-center">

@@ -18,11 +18,20 @@ class Course(models.Model):
 
 # User
 class User(AbstractBaseUser):
+
+    USER_TYPE_CHOICES = (
+      (1, 'student'),
+      (2, 'teacher'),
+      (3, 'secretary'),
+      (4, 'supervisor'),
+      (5, 'admin'),
+    )
+
     student_number = models.CharField(max_length=64, unique=True)
     email = models.EmailField(max_length=254, unique=True)
     password = models.CharField(max_length=22)
     is_active = models.BooleanField(default=False)
-
+    user_type = models.PositiveSmallIntegerField(choices = USER_TYPE_CHOICES, default = 1)
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['student_number']

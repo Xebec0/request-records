@@ -24,11 +24,17 @@ class UserRegistrationForm(forms.ModelForm):
         error_messages={
             'required': 'Please enter your password.',
         }
-    )   
+    ) 
+
+    user_type = forms.IntegerField(
+        error_messages={
+            'required': 'Please enter your user type.',
+        }
+    )
 
     class Meta:
         model = User
-        fields = ['email', 'student_number', 'password']
+        fields = ['email', 'student_number', 'password', 'user_type']
 
     def save(self, commit = True):
         user = super().save(commit = False)
