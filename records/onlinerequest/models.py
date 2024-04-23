@@ -1,11 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 
-# Create your models here.
-
-
-# Student
-class Student(models.Model):
+# Records (Separate db, this is where main records for teachers and students are saved)
+class Record(models.Model):
     student_number = models.CharField(max_length=10)
     first_name = models.CharField(max_length=64)
     last_name = models.CharField(max_length=64)
@@ -39,10 +36,9 @@ class User(AbstractBaseUser):
 # Profile
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    student_number = models.CharField(max_length=64)
     course = models.ForeignKey(Course, on_delete=models.CASCADE)  # ForeignKey to Course (many students can enroll in one course)
-    fname = models.CharField(max_length=64)
-    lname = models.CharField(max_length=64)
+    first_name = models.CharField(max_length=64)
+    last_name = models.CharField(max_length=64)
 
 class RegisterRequest(models.Model):
     user = models.OneToOneField(User, on_delete = models.CASCADE, related_name = "register_request")

@@ -1,5 +1,6 @@
 from django import forms
 from .models import User
+from .models import Record
 from django.contrib.auth.forms import ReadOnlyPasswordHashField
 
 class UserRegistrationForm(forms.ModelForm):
@@ -31,6 +32,16 @@ class UserRegistrationForm(forms.ModelForm):
             'required': 'Please enter your user type.',
         }
     )
+
+    def clean_student_number(self):
+        student_number = self.cleaned_data.get('student_number')
+
+        if student_number:
+            # Check if the student number exists in your model
+            if not Record.objects.filter(student_number=student_number).exists():
+                raise forms.ValidationError('Invalid student number.')
+
+        return student_number
 
     class Meta:
         model = User

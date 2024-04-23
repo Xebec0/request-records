@@ -1,10 +1,14 @@
 from django.shortcuts import render
 from django.http import HttpResponse
 from django.http import JsonResponse
-from ..models import User
-from ..models import RegisterRequest
-from ..forms import UserRegistrationForm
 from django.conf import settings
+from ..forms import UserRegistrationForm
+from ..models import RegisterRequest
+from ..models import Course
+from ..models import Record
+from ..models import User
+from ..models import Profile
+
 import os
 
 def index(request):
@@ -15,6 +19,9 @@ def index(request):
             # User is saved
             user = form.save()
 
+            # Profile is saved
+            create_profile(user)
+
             # Access the uploaded file
             uploaded_file = request.FILES.get('formFile')
 
@@ -22,7 +29,7 @@ def index(request):
                 # Save the file to a specific location
                 file_path = handle_uploaded_file(uploaded_file)
                 RegisterRequest.objects.create(user = user, valid_id = file_path)
-
+            
             return JsonResponse({'status' : True, 'message' : "Registered succesfully"})
         else:
             last_error_message = list(form.errors.items())[0]
@@ -45,4 +52,11 @@ def handle_uploaded_file(file):
             destination.write(chunk)
 
     return file_path
+
+def create_profile(user):
+    user_record = Record.objects.get(student_number = user.student_number) # Fetch record object
+    course = Course.objects.get(course_code = user_record.course_code) # Get course name
+    profile = Profile.objects.create(user=user, course = course, first_name = user_record.first_name, last_name = user_record.last_name)
+    return profile
+
     

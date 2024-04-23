@@ -16,7 +16,6 @@ def index(request):
         if user is not None:
             if not user.is_active:
                 return JsonResponse({'status': False, 'message': 'Account not yet activated. Please contact your administrator.'})
-        
             login(request, user)
             return JsonResponse({'status': True, 'message': 'Logged in'})
         else:
