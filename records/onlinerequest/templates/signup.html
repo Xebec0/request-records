@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    {% load static %}
+
+    <meta charset="UTF-8" />
+    <title>Login and Registration Form</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- Fontawesome CDN Link -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
+    />
+    <!-- Jquery -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <!-- Toastify -->
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css"
+    />
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{% static 'css/signup.css' %}" />
+  </head>
+  <body>
+    <div class="container">
+      <input type="checkbox" id="flip" />
+      <div class="cover">
+        <div class="front">
+          <img src="{% static  'images/files.jpg' %}" alt="" />
+        </div>
+        <div class="back">
+          <div class="text">
+            <span class="text-1"
+              >Complete miles of journey <br />
+              with one step</span
+            >
+            <span class="text-2">Let's get started</span>
+          </div>
+        </div>
+      </div>
+      <div class="forms">
+        <div class="form-content">
+          <div class="login-form">
+            <div class="title">Login</div>
+            <form method="POST">
+              {% csrf_token %}
+              <div class="input-boxes">
+                <div class="input-box">
+                  <i class="fas fa-envelope"></i>
+                  <input
+                    id="email"
+                    name="email"
+                    type="text"
+                    placeholder="Enter your email"
+                  />
+                </div>
+                <div class="input-box">
+                  <i class="fas fa-lock"></i>
+                  <input
+                    id="password"
+                    name="password"
+                    type="password"
+                    placeholder="Enter your password"
+                  />
+                </div>
+                <div class="text"><a href="#">Forgot password?</a></div>
+                <div class="button input-box">
+                  <input id="btnSignIn" type="submit" value="Sumbit" />
+                </div>
+                <div class="text sign-up-text">
+                  Don't have an account? <label for="flip">Sigup now</label>
+                </div>
+              </div>
+            </form>
+          </div>
+
+          <div class="signup-form">
+            <div class="title">Signup</div>
+            <form method="POST">
+              {% csrf_token %}
+              <div class="input-boxes">
+                <div class="input-box">
+                  <i class="fas fa-user"></i>
+                  <input
+                    id="studentNumber"
+                    name="student_number"
+                    type="text"
+                    placeholder="Enter your student number"
+                  />
+                </div>
+                <div class="input-box">
+                  <i class="fas fa-envelope"></i>
+                  <input
+                    id="signupEmail"
+                    name="email"
+                    type="text"
+                    placeholder="Enter your email"
+                  />
+                </div>
+                <div class="input-box">
+                  <i class="fas fa-lock"></i>
+                  <input
+                    id="signupPassword"
+                    name="password"
+                    type="password"
+                    placeholder="Enter your password"
+                  />
+                </div>
+                <div class="button input-box">
+                  <input id="btnSignUp" type="submit" value="Sumbit" />
+                </div>
+                <div class="text sign-up-text">
+                  Already have an account? <label for="flip">Login now</label>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      $(document).ready(function () {
+        function showToast(options) {
+          let toast = Toastify({
+            text: options.message,
+            duration: 2000,
+            newWindow: true,
+            close: true,
+            gravity: "top",
+            position: "right",
+            stopOnFocus: true,
+            style: {
+              background: options.color,
+            },
+          });
+
+          toast.showToast();
+        }
+
+        $("form").on("submit", function (e) {
+          e.preventDefault(); // Prevent the form from submitting normally
+
+          // Get form data
+          var formData = $(this).serialize();
+          var $form = $(this);
+          var isSignUpForm = $("#flip").prop("checked");
+          var url = isSignUpForm ? "/register/" : "/login/";
+
+          // Send AJAX POST request
+          $.ajax({
+            type: "POST",
+            url: url,
+            data: formData,
+            success: function (response) {
+              showToast({
+                message: response.message,
+                color: response.status ? "#008000" : "#FF0000",
+              });
+
+              if (response.status) {
+                enableControls($form, false);
+
+                setTimeout(() => {
+                  window.location.href = "/";
+                }, 2000);
+              }
+            },
+            error: function (xhr, errmsg, err) {
+              console.log(errmsg);
+            },
+          });
+        });
+
+        function resetInputFields(form) {
+          form.find("input[type='text'], input[type='password']").val("");
+        }
+
+        function enableControls($form, isEnable) {
+          $form.find("input").prop("disabled", !isEnable);
+        }
+
+        // Handle form flip
+        $("#flip").on("change", function () {
+          var isSignUpForm = $(this).prop("checked");
+          var $loginForm = $(".login-form form");
+          var $signUpForm = $(".signup-form form");
+
+          if (isSignUpForm) {
+            resetInputFields($loginForm);
+            enableControls($loginForm, false);
+            enableControls($signUpForm, true);
+          } else {
+            resetInputFields($signUpForm);
+            enableControls($loginForm, true);
+            enableControls($signUpForm, false);
+          }
+        });
+      });
+    </script>
+    <script
+      type="text/javascript"
+      src="https://cdn.jsdelivr.net/npm/toastify-js"
+    ></script>
+  </body>
+</html>

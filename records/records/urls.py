@@ -19,5 +19,8 @@ urlpatterns = [
     path('login/', login.index),
 
     # Populate table
-    path('dummy/', dummy.index)
+    path('dummy/', dummy.index),
+
+    # Signup - Login with Register
+    path('signup/', views.signup_view, name="signup")
 ]
