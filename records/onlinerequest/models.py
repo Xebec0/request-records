@@ -61,3 +61,11 @@ class Request(models.Model):
 
     def __str__(self):
         return self.title
+
+    def delete(self, *args, **kwargs):
+            # Store the title of the request before deletion
+            deleted_title = self.title
+            # Call the parent class delete method to perform the deletion
+            super().delete(*args, **kwargs)
+            # Return a string indicating that the request has been deleted
+            return f"Request '{deleted_title}' has been deleted"

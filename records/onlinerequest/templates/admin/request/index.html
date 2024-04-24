@@ -69,7 +69,7 @@
                 init() // onload
 
                 function init(){
-                    getDocuments();
+                    getRequests();
                 }
 
                 function showToast(options){
@@ -110,7 +110,7 @@
 
                             if (response.status){
                                 resetInputFields();
-                                getDocuments();
+                                getRequests();
                             }
                         },
                         error: function(xhr, errmsg, err) {
@@ -119,9 +119,8 @@
                     });
                 });
 
-                function getDocuments(){
+                function getRequests(){
                     // Send AJAX POST request
-
                     $.ajax({
                         type: 'GET',
                         url: '/request/list/', // Replace with your Django URL and include any required parameters or query string
@@ -129,6 +128,32 @@
                             let data = JSON.parse(response);
                             createRequestTable(data);
                             console.log(data);
+                        },
+                        error: function(xhr, errmsg, err) {
+                            console.log(errmsg);
+                        }
+                    });
+                }
+
+                function deleteRequest(id){
+                    var csrftoken = getCookie('csrftoken');
+
+                    // Send AJAX POST request
+                    $.ajax({
+                        type: 'POST',
+                        url: '/request/' + id + '/delete/', // Replace with your Django URL and include any required parameters or query string
+                        headers: {
+                            'X-CSRFToken': csrftoken
+                        },
+                        success: function(response) {
+                            showToast({
+                                'message': response.message,
+                                'color': response.status ? '#008000' : '#FF0000'
+                            })
+
+                            if (response.status){
+                                getRequests();
+                            }
                         },
                         error: function(xhr, errmsg, err) {
                             console.log(errmsg);
@@ -148,38 +173,43 @@
                     // Get the table body
                     var tableBody = document.getElementById("requestsTable").getElementsByTagName("tbody")[0];
 
+                    // Reset table
+                    tableBody.innerHTML = "";
+
                     // Loop through the models and create rows
-                    for (var i = 0; i < data.length; i++) {
-                        var model = data[i];
-                        var fields = model.fields;
+                    for (let i = data.length - 1; i >= 0; i--) {
+                        let model = data[i];
+                        let fields = model.fields;
 
                         // Create a new row
-                        var row = document.createElement("tr");
+                        let row = document.createElement("tr");
+                        row.id = model.pk;
 
                         // Create cells and populate with field values
-                        var titleCell = document.createElement("td");
+                        let titleCell = document.createElement("td");
                         titleCell.textContent = fields.title;
                         row.appendChild(titleCell);
 
-                        var descriptionCell = document.createElement("td");
+                        let descriptionCell = document.createElement("td");
                         descriptionCell.textContent = fields.description;
                         row.appendChild(descriptionCell);
 
-                        var noOfFilesRequiredCell = document.createElement("td");
+                        let noOfFilesRequiredCell = document.createElement("td");
                         noOfFilesRequiredCell.textContent = fields.no_of_files_required;
                         row.appendChild(noOfFilesRequiredCell);
 
-                        var documentCell = document.createElement("td");
+                        let documentCell = document.createElement("td");
                         documentCell.textContent = fields.document;
                         row.appendChild(documentCell);
 
                         // Create a cell for the delete button
-                        var actionCell = document.createElement("td");
-                        var deleteButton = document.createElement("button");
+                        let actionCell = document.createElement("td");
+                        let deleteButton = document.createElement("button");
                         deleteButton.textContent = "Delete";
                         deleteButton.addEventListener("click", function() {
                             // Add your delete logic here
-                            console.log("Delete button clicked for row:", row);
+                            console.log("Delete:", row.id);
+                            deleteRequest(row.id);
                         });
                         actionCell.appendChild(deleteButton);
                         row.appendChild(actionCell);
@@ -188,6 +218,24 @@
                         tableBody.appendChild(row);
                     }
                 }
+
+                // Function to get CSRF cookie value
+                function getCookie(name) {
+                    var cookieValue = null;
+                    if (document.cookie && document.cookie !== '') {
+                        var cookies = document.cookie.split(';');
+                        for (var i = 0; i < cookies.length; i++) {
+                            var cookie = cookies[i].trim();
+                            // Does this cookie string begin with the name we want?
+                            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                                break;
+                            }
+                        }
+                    }
+                    return cookieValue;
+                }
+
             });
         </script>
         <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>

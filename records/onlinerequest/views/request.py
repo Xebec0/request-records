@@ -24,6 +24,16 @@ def index(request):
         documents = Document.objects.all()
         return render(request, 'admin/request/index.html', {'documents': documents})
     
+def delete_request(request, id):
+    request = Request.objects.get(id=id)
+    deleted = request.delete()
+
+    if deleted:
+        return JsonResponse({'status': True, 'message': deleted})
+    else:
+        return JsonResponse({'False': True, 'message': 'Invalid row'})
+
+    
 def get_requests(request):
     requests = Request.objects.all()
     requests_json = serializers.serialize('json', requests)

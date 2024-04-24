@@ -27,5 +27,6 @@ urlpatterns = [
 
     # Request
     path('request/', request.index),
-    path('request/list/', request.get_requests)
+    path('request/list/', request.get_requests),
+    path('request/<int:id>/delete/', request.delete_request)
 ]
