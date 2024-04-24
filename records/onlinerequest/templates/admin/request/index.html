@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>Create Request</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+            
+        <!-- Toastify -->
+        <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+
+        <style>
+            table {
+                border-collapse: collapse;
+                width: 100%;
+            }
+
+            th, td {
+                border: 1px solid black;
+                padding: 8px;
+                text-align: left;
+            }
+
+            th {
+                background-color: #f2f2f2;
+            }
+        </style>
+    </head>
+    <body>
+        <h2>Create request</h2>
+        <form method="POST">
+            {% csrf_token %}
+            <select name="documents" id="documents">
+                {% if documents %}
+                {% for document in documents %}
+                    {% if document.active %}
+                        <option value="{{ document.code }}">{{ document.description }} </option>
+                    {% endif%}
+                {% endfor %}
+                {% endif %}
+            </select>
+            <input type="text" id="title" name="title" placeholder="title" required>
+            <input type="number" id="no_of_files_required" name="no_of_files_required" placeholder="no of files" required>
+            <input type="text" id="description" name="description" placeholder="description" required>
+            <button type="submit">Create request</button>
+        </form>
+
+        <h2>Created request</h2>
+        <div id="request">
+            <table id="requestsTable">
+                <thead>
+                  <tr>
+                    <th>Title</th>
+                    <th>Description</th>
+                    <th>No. of Files Required</th>
+                    <th>Document</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+        </div>
+
+        <script>
+            $(document).ready(function() {
+                init() // onload
+
+                function init(){
+                    getDocuments();
+                }
+
+                function showToast(options){
+                    let toast = Toastify({
+                        text: options.message,
+                        duration: 2000,
+                        newWindow: true,
+                        close: true,
+                        gravity: "top",
+                        position: "right",
+                        stopOnFocus: true,
+                        style: {
+                            background: options.color,
+                        },
+                    });
+
+                    toast.showToast();
+                }
+
+                $('form').on('submit', function(e) {
+                    e.preventDefault(); // Prevent the form from submitting normally
+
+                    // Get form data
+                    var formData = new FormData($('form')[0]);
+
+                    // Send AJAX POST request
+                    $.ajax({
+                        type: 'POST',
+                        url: '/request/', // Replace with your Django URL
+                        data: formData,
+                        processData: false,
+                        contentType: false,
+                        success: function(response) {
+                            showToast({
+                                'message': response.message,
+                                'color': response.status ? '#008000' : '#FF0000'
+                            })
+
+                            if (response.status){
+                                resetInputFields();
+                                getDocuments();
+                            }
+                        },
+                        error: function(xhr, errmsg, err) {
+                            console.log(errmsg);
+                        }
+                    });
+                });
+
+                function getDocuments(){
+                    // Send AJAX POST request
+
+                    $.ajax({
+                        type: 'GET',
+                        url: '/request/list/', // Replace with your Django URL and include any required parameters or query string
+                        success: function(response) {
+                            let data = JSON.parse(response);
+                            createRequestTable(data);
+                            console.log(data);
+                        },
+                        error: function(xhr, errmsg, err) {
+                            console.log(errmsg);
+                        }
+                    });
+                }
+
+                function resetInputFields(){
+                    let fileCount = document.querySelector("#no_of_files_required");
+                    let description = document.querySelector("#description");
+                    let title = document.querySelector("#title");
+                    
+                    fileCount.value = description.value = title.value = "";
+                }
+
+                function createRequestTable(data){
+                    // Get the table body
+                    var tableBody = document.getElementById("requestsTable").getElementsByTagName("tbody")[0];
+
+                    // Loop through the models and create rows
+                    for (var i = 0; i < data.length; i++) {
+                        var model = data[i];
+                        var fields = model.fields;
+
+                        // Create a new row
+                        var row = document.createElement("tr");
+
+                        // Create cells and populate with field values
+                        var titleCell = document.createElement("td");
+                        titleCell.textContent = fields.title;
+                        row.appendChild(titleCell);
+
+                        var descriptionCell = document.createElement("td");
+                        descriptionCell.textContent = fields.description;
+                        row.appendChild(descriptionCell);
+
+                        var noOfFilesRequiredCell = document.createElement("td");
+                        noOfFilesRequiredCell.textContent = fields.no_of_files_required;
+                        row.appendChild(noOfFilesRequiredCell);
+
+                        var documentCell = document.createElement("td");
+                        documentCell.textContent = fields.document;
+                        row.appendChild(documentCell);
+
+                        // Create a cell for the delete button
+                        var actionCell = document.createElement("td");
+                        var deleteButton = document.createElement("button");
+                        deleteButton.textContent = "Delete";
+                        deleteButton.addEventListener("click", function() {
+                            // Add your delete logic here
+                            console.log("Delete button clicked for row:", row);
+                        });
+                        actionCell.appendChild(deleteButton);
+                        row.appendChild(actionCell);
+
+                        // Append the row to the table body
+                        tableBody.appendChild(row);
+                    }
+                }
+            });
+        </script>
+        <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    </body>
+</html>

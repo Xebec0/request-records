@@ -44,3 +44,20 @@ class RegisterRequest(models.Model):
     user = models.OneToOneField(User, on_delete = models.CASCADE, related_name = "register_request")
     valid_id = models.CharField(max_length=254)
 
+# Request
+class Document(models.Model):
+    code = models.CharField(max_length=64)
+    description = models.CharField(max_length=64)
+    active = models.BooleanField(default=True)
+
+    def __str__(self):
+        return f"{self.code} - {self.description}"
+
+class Request(models.Model):
+    title = models.CharField(max_length=256)
+    description = models.CharField(max_length=256)
+    no_of_files_required = models.PositiveIntegerField()
+    document = models.ForeignKey(Document, on_delete=models.CASCADE, related_name='requests')
+
+    def __str__(self):
+        return self.title

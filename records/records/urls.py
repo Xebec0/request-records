@@ -4,6 +4,7 @@ from onlinerequest.views import views
 from onlinerequest.views import register
 from onlinerequest.views import login
 from onlinerequest.views import dummy
+from onlinerequest.views import request
 
 # Define URL paths here
 urlpatterns = [
@@ -22,5 +23,9 @@ urlpatterns = [
     path('dummy/', dummy.index),
 
     # Signup - Login with Register
-    path('signup/', views.signup_view, name="signup")
+    path('signup/', views.signup_view, name="signup"),
+
+    # Request
+    path('request/', request.index),
+    path('request/list/', request.get_requests)
 ]
