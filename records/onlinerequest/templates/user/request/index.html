@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title></title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+            
+        <!-- Toastify -->
+        <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+
+        <style>
+            #container {
+                max-width: 500px;
+                margin: 0 auto;
+                padding: 20px;
+                background-color: #f5f5f5;
+                border: 1px solid #ddd;
+                border-radius: 5px;
+            }
+
+            input[type="text"],
+            textarea {
+                width: 100%;
+                padding: 10px;
+                margin-bottom: 15px;
+                border: 1px solid #ccc;
+                border-radius: 3px;
+                box-sizing: border-box;
+            }
+
+            #files_required {
+                list-style-type: none;
+                padding: 0;
+            }
+
+            #files_required li {
+                background-color: #e9e9e9;
+                padding: 5px 10px;
+                margin-bottom: 5px;
+                border-radius: 3px;
+            }
+        </style>
+    </head>
+    <body>
+        <h2>Create request</h2>
+        <select name="request" id="request">
+            {% for request_obj in all_requests %}
+                <option value="{{ request_obj.id }}">{{ request_obj.title }}</option>
+            {% endfor %}
+        </select>
+        <button id="btnCreate" type="button">Create</button>
+        <hr>
+        <h2>Fill up the form</h2>
+        <div id="container"></div>
+        <script>
+            $(document).ready(function() {
+                // Events
+                $('#btnCreate').click(function() {
+                    let selectedRequest = document.querySelector("#request")
+
+                    showToast({message: "Creating request form please wait..."})
+                    getRequest(selectedRequest.value, createRequestForm);
+                });
+
+                // Methods
+                function showToast(options){
+                    let toast = Toastify({
+                        text: options.message,
+                        duration: 2000,
+                        newWindow: true,
+                        close: true,
+                        gravity: "top",
+                        position: "right",
+                        stopOnFocus: true,
+                        style: {
+                            background: options.color,
+                        },
+                    });
+
+                    toast.showToast(); 
+                }
+
+                // Web services
+                function getRequest(id, successCallBack, errorCallBack){
+                    // Get request object as JSON
+                    $.ajax({
+                        type: 'GET',
+                        url: '/request/' + id + '/', // Replace with your Django URL and include any required parameters or query string
+                        success: function(response) {
+                            successCallBack(response);
+                        },
+                        error: function(xhr, errmsg, err) {
+                            console.log(errmsg);
+                        }
+                    });
+                }
+                
+                function createRequestForm(response){
+
+                    let data = JSON.parse(response)[0]['fields'];
+
+                    // Debug do not remove
+                    console.log(data)
+
+                    const container = document.getElementById("container");
+                    container.innerHTML = "";
+
+                    // Create input field for title
+                    const titleInput = document.createElement("input");
+                    titleInput.type = "text";
+                    titleInput.id = "title";
+                    titleInput.name = "title";
+                    titleInput.value = data.title;
+                    container.appendChild(titleInput);
+
+                    // Create textarea for description
+                    const descriptionTextarea = document.createElement("textarea");
+                    descriptionTextarea.id = "description";
+                    descriptionTextarea.name = "description";
+                    descriptionTextarea.textContent = data.description;
+                    container.appendChild(descriptionTextarea);
+
+                    // Create label
+                    const h2 = document.createElement("h2");
+                    h2.innerHTML = "Required Files:";
+                    container.appendChild(h2);
+
+                    // Create upload input for files_required
+                    const requiredFiles = (data.files_required).split(',');
+                    requiredFiles.forEach((requiredFile) => {
+                        let fileInput = document.createElement("input");
+                        fileInput.setAttribute("type", "file");
+                        fileInput.setAttribute("placeholder", "file");
+                        fileInput.setAttribute("id", requiredFile);
+                        container.appendChild(fileInput);
+                    })
+
+                    // Create submit button
+                    const btnSubmitRequest = document.createElement("button");
+                    btnSubmitRequest.id = "btnSubmitRequest";
+                    btnSubmitRequest.textContent = "Submit Request";
+                    btnSubmitRequest.addEventListener("click", () => {
+                        submitRequest();
+                    })
+                    btnSubmitRequest.type = "button";
+
+                    container.appendChild(btnSubmitRequest);
+                }
+
+                function submitRequest(){
+                    const files = document.querySelectorAll('input[type="file"]');
+                    var csrftoken = getCookie('csrftoken');
+
+                    // Create form data
+                    var formData = new FormData();
+
+                    files.forEach((file, index) => {
+                        // Append each file to the FormData object
+                        formData.append(`${file.id}`, file.files[0]);
+                    });
+
+                    // Send AJAX POST request
+                    $.ajax({
+                        type: 'POST',
+                        url: '/request/user/create/', // Replace with your Django URL
+                        data: formData,
+                        processData: false,
+                        contentType: false,
+                        headers: {
+                            'X-CSRFToken': csrftoken
+                        },
+                        success: function(response) {
+                            showToast({
+                                'message': response.message,
+                                'color': response.status ? '#008000' : '#FF0000'
+                            })
+                        },
+                        error: function(xhr, errmsg, err) {
+                        console.log(errmsg);
+                        }
+                    });
+                }
+            });
+
+            // Function to get CSRF cookie value
+            function getCookie(name) {
+                var cookieValue = null;
+                    if (document.cookie && document.cookie !== '') {
+                        var cookies = document.cookie.split(';');
+                        for (var i = 0; i < cookies.length; i++) {
+                            var cookie = cookies[i].trim();
+                            // Does this cookie string begin with the name we want?
+                            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                                break;
+                            }
+                        }
+                    }
+                return cookieValue;
+            }            
+        </script>
+        <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    </body>
+</html>

@@ -30,7 +30,7 @@
         </style>
     </head>
     <body>
-        <h2>Create request</h2>
+        <h2>Create request form</h2>
         <form method="POST">
             {% csrf_token %}
             <select name="documents" id="documents">
@@ -43,12 +43,12 @@
                 {% endif %}
             </select>
             <input type="text" id="title" name="title" placeholder="title" required>
-            <input type="number" id="no_of_files_required" name="no_of_files_required" placeholder="no of files" required>
+            <input type="text" id="files_required" name="files_required" placeholder="no of files" required>
             <input type="text" id="description" name="description" placeholder="description" required>
             <button type="submit">Create request</button>
         </form>
 
-        <h2>Created request</h2>
+        <h2>Created request forms</h2>
         <div id="request">
             <table id="requestsTable">
                 <thead>
@@ -162,7 +162,7 @@
                 }
 
                 function resetInputFields(){
-                    let fileCount = document.querySelector("#no_of_files_required");
+                    let fileCount = document.querySelector("#files_required");
                     let description = document.querySelector("#description");
                     let title = document.querySelector("#title");
                     
@@ -195,7 +195,7 @@
                         row.appendChild(descriptionCell);
 
                         let noOfFilesRequiredCell = document.createElement("td");
-                        noOfFilesRequiredCell.textContent = fields.no_of_files_required;
+                        noOfFilesRequiredCell.textContent = fields.files_required;
                         row.appendChild(noOfFilesRequiredCell);
 
                         let documentCell = document.createElement("td");

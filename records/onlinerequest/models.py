@@ -56,7 +56,7 @@ class Document(models.Model):
 class Request(models.Model):
     title = models.CharField(max_length=256)
     description = models.CharField(max_length=256)
-    no_of_files_required = models.PositiveIntegerField()
+    files_required = models.CharField(max_length=256)
     document = models.ForeignKey(Document, on_delete=models.CASCADE, related_name='requests')
 
     def __str__(self):
@@ -69,3 +69,6 @@ class Request(models.Model):
             super().delete(*args, **kwargs)
             # Return a string indicating that the request has been deleted
             return f"Request '{deleted_title}' has been deleted"
+    
+    def files_required_as_list(self):
+        return self.files_required.split(',')

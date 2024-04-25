@@ -5,6 +5,7 @@ from onlinerequest.views import register
 from onlinerequest.views import login
 from onlinerequest.views import dummy
 from onlinerequest.views import request
+from onlinerequest.views import request_user
 
 # Define URL paths here
 urlpatterns = [
@@ -28,5 +29,10 @@ urlpatterns = [
     # Request
     path('request/', request.index),
     path('request/list/', request.get_requests),
-    path('request/<int:id>/delete/', request.delete_request)
+    path('request/<int:id>/delete/', request.delete_request),
+
+    # Request - User
+    path('request/user/', request_user.index),
+    path('request/<int:id>/', request_user.get_request),
+    path('request/user/create/', request_user.create_request),
 ]
