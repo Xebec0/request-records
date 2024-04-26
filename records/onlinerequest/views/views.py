@@ -8,3 +8,6 @@ def index(request):
 
 def signup_view(request):
     return render(request, 'signup.html')
+
+def admin_dashboard(request):
+    return render (request, "admin/dashboard.html")

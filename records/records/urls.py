@@ -26,6 +26,9 @@ urlpatterns = [
     # Signup - Login with Register
     path('signup/', views.signup_view, name="signup"),
 
+    # Admin - Dashboard
+    path('admin-app/dashboard/', views.admin_dashboard, name="admin_dashboard"),
+
     # Request - Admin
     path('request/', request.index),
     path('request/list/', request.get_requests),
