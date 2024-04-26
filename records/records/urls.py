@@ -26,7 +26,7 @@ urlpatterns = [
     # Signup - Login with Register
     path('signup/', views.signup_view, name="signup"),
 
-    # Request
+    # Request - Admin
     path('request/', request.index),
     path('request/list/', request.get_requests),
     path('request/<int:id>/delete/', request.delete_request),
