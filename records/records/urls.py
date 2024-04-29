@@ -6,6 +6,7 @@ from onlinerequest.views import login
 from onlinerequest.views import dummy
 from onlinerequest.views import request
 from onlinerequest.views import request_user
+from onlinerequest.views import record
 
 # Define URL paths here
 urlpatterns = [
@@ -13,6 +14,9 @@ urlpatterns = [
 
     # Main index page
     path('', views.index),
+
+    # Student register
+    path('student/', record.index),
 
     # Register
     path('register/', register.index),

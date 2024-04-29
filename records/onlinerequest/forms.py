@@ -38,7 +38,7 @@ class UserRegistrationForm(forms.ModelForm):
 
         if student_number:
             # Check if the student number exists in your model
-            if not Record.objects.filter(student_number=student_number).exists():
+            if not Record.objects.filter(user_number = student_number).exists():
                 raise forms.ValidationError('Invalid student number.')
 
         return student_number
