@@ -1,7 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 
-# Records (Separate db, this is where main records for teachers and students are saved)
+# Records
 class Record(models.Model):
     user_number = models.CharField(max_length=10)
     first_name = models.CharField(max_length=64)
@@ -15,6 +15,18 @@ class Record(models.Model):
 class Course(models.Model):
     code = models.CharField(max_length=64)
     description = models.CharField(max_length=64)
+
+# Requirement
+class Requirement(models.Model):
+    code = models.CharField(max_length=64)
+    description = models.CharField(max_length=64)
+
+    def __str__(self):
+        return f"{self.code} - {self.description}"
+    
+# Code Table
+class Code(models.Model):
+    table_name = models.CharField(max_length=64)
 
 # User
 class User(AbstractBaseUser):

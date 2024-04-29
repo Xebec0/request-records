@@ -7,6 +7,7 @@ from onlinerequest.views import dummy
 from onlinerequest.views import request
 from onlinerequest.views import request_user
 from onlinerequest.views import record
+from onlinerequest.views import codetable
 
 # Define URL paths here
 urlpatterns = [
@@ -16,7 +17,7 @@ urlpatterns = [
     path('', views.index),
 
     # Student register
-    path('student/', record.index),
+    path('record/', record.index),
 
     # Register
     path('register/', register.index),
@@ -42,4 +43,7 @@ urlpatterns = [
     path('request/user/', request_user.index),
     path('request/<int:id>/', request_user.get_request),
     path('request/user/create/', request_user.create_request),
+
+    # Code Table (This is where to update code tables)
+    path('codetable/', codetable.index),
 ]

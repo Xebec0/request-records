@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title></title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="">
+
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+        <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    </head>
+    <body>
+        <h2>Add requirements</h2>
+        <hr>
+        <form method="POST" id="formRequirements">
+            {% csrf_token %}
+            <input type="text" name="description" id="formRequirementsDescription" required>
+            <input type="hidden" name="table_name" value="Requirement">
+            <button type="submit">Add requirements</button>
+        </form>
+        <h2>Add document</h2>
+        <form method="POST" id="formRequirements2">
+            {% csrf_token %}
+            <input type="text" name="description" id="formRequirements2Description"  required>
+            <input type="hidden" name="table_name" value="Document">
+            <button type="submit">Add requirements</button>
+        </form>
+        <script>
+            $(document).ready( function() {
+                function showToast(options){
+                    let toast = Toastify({
+                        text: options.message,
+                        duration: 2000,
+                        newWindow: true,
+                        close: true,
+                        gravity: "top",
+                        position: "right",
+                        stopOnFocus: true,
+                        style: {
+                            background: options.color,
+                        },
+                    });
+
+                    toast.showToast();
+                }
+
+                $('#formRequirements').on('submit', function(e) {
+                    e.preventDefault(); // Prevent the form from submitting normally
+
+                    // Get form data
+                    var formData = new FormData($('#formRequirements')[0]);
+
+                    // Send AJAX POST request
+                    $.ajax({
+                        type: 'POST',
+                        url: '/codetable/', // Replace with your Django URL
+                        data: formData,
+                        processData: false,
+                        contentType: false,
+                        success: function(response) {
+                            showToast({
+                                'message': response.message,
+                                'color': response.status ? '#008000' : '#FF0000'
+                            })
+
+                            // Clear description
+                            $("#formRequirementsDescription").val("");
+                        },
+                        error: function(xhr, errmsg, err) {
+                            console.log(errmsg);
+                        }
+                    });
+                });
+
+                $('#formRequirements2').on('submit', function(e) {
+                    e.preventDefault(); // Prevent the form from submitting normally
+
+                    // Get form data
+                    var formData = new FormData($('#formRequirements2')[0]);
+
+                    // Send AJAX POST request
+                    $.ajax({
+                        type: 'POST',
+                        url: '/codetable/', // Replace with your Django URL
+                        data: formData,
+                        processData: false,
+                        contentType: false,
+                        success: function(response) {
+                            showToast({
+                                'message': response.message,
+                                'color': response.status ? '#008000' : '#FF0000'
+                            })
+
+                            // Clear description
+                            $("#formRequirements2Description").val("");                                                        // Clear description
+                        },
+                        error: function(xhr, errmsg, err) {
+                            console.log(errmsg);
+                        }
+                    });
+                });
+            });
+        </script>
+        <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    </body>
+</html>

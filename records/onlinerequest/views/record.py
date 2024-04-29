@@ -8,18 +8,19 @@ from ..models import Record
 def index(request):
     if request.method == "POST":
 
-        record = Record.objects.create(
-            user_number = request.POST.get('user_number'),
-            first_name = request.POST.get('fname'),
-            last_name = request.POST.get('lname'),
-            course_code = request.POST.get('course')
-        )
+        try:
+            record = Record(
+                user_number = request.POST.get('user_number'),
+                first_name = request.POST.get('fname'),
+                last_name = request.POST.get('lname'),
+                course_code = request.POST.get('course')
+            )
 
-        if record:
+            record.save()
             return JsonResponse({'status': True, 'message': str(record) + " created."})
-        else:
-            return JsonResponse({'status' : True, 'message': "Invalid."})
+        except Exception as e:
+            return JsonResponse({'status': False, 'message': 'Error: ' + str(e)})
     else:
         courses = Course.objects.all()
-        return render(request, 'student/index.html', {'courses': courses})
+        return render(request, 'record/index.html', {'courses': courses})
     
