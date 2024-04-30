@@ -66,20 +66,19 @@ class Document(models.Model):
     active = models.BooleanField(default=True)
 
     def __str__(self):
-        return f"{self.code} - {self.description}"
+        return f"{self.description}"
 
 class Request(models.Model):
-    title = models.CharField(max_length=256)
     description = models.CharField(max_length=256)
     files_required = models.CharField(max_length=256)
     document = models.ForeignKey(Document, on_delete=models.CASCADE, related_name='requests')
 
     def __str__(self):
-        return self.title
-
+        return self.description
+    
     def delete(self, *args, **kwargs):
             # Store the title of the request before deletion
-            deleted_title = self.title
+            deleted_title = self.description
             # Call the parent class delete method to perform the deletion
             super().delete(*args, **kwargs)
             # Return a string indicating that the request has been deleted

@@ -3,18 +3,18 @@ from django.http import HttpResponse
 from django.http import JsonResponse
 from ..models import Document
 from ..models import Request
+from ..serializers import RequestSerializer
 from django.core import serializers
 
 
 def index(request):
     if request.method == "POST":
-        post_title = request.POST.get("title")
         post_document = request.POST.get("documents")
         post_files_required = request.POST.get("files_required")
         post_description = request.POST.get("description")
 
         document = Document.objects.get(code = post_document)
-        created_request = Request.objects.create(document = document, title = post_title, files_required = post_files_required, description = post_description)
+        created_request = Request.objects.create(document = document, files_required = post_files_required, description = post_description)
         
         if created_request:
             return JsonResponse({"status": True, "message": "Request Created"})
@@ -36,5 +36,6 @@ def delete_request(request, id):
     
 def get_requests(request):
     requests = Request.objects.all()
-    requests_json = serializers.serialize('json', requests)
+    requests_json = RequestSerializer(requests, many=True).data  # Serialize the queryset
+    print(requests_json)
     return JsonResponse(requests_json, safe=False)

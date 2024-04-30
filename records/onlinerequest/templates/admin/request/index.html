@@ -62,10 +62,6 @@
                                                         </select>
                                                     </div>
                                                     <div class="mb-3">
-                                                        <label for="title" class="form-label">Title</label>
-                                                        <input type="text" class="form-control" id="title" name="title" placeholder="Title" required>
-                                                    </div>
-                                                    <div class="mb-3">
                                                         <label for="files_required" class="form-label">No. of Files Required</label>
                                                         <input type="text" class="form-control" id="files_required" name="files_required" placeholder="No. of Files" required>
                                                     </div>
@@ -88,7 +84,6 @@
                                     <table id="datatable">
                                         <thead>
                                         <tr>
-                                            <th class="text-start">Title</th>
                                             <th class="text-start">Description</th>
                                             <th class="text-start">No. of Files Required</th>
                                             <th class="text-start">Document</th>
@@ -183,9 +178,8 @@
                         type: 'GET',
                         url: '/request/list/',
                         success: function(response) {
-                            let data = JSON.parse(response);
-                            createRequestTable(data);
-                            console.log(data);
+                            createRequestTable(response);
+                            console.log(response);
                         },
                         error: function(xhr, errmsg, err) {
                             console.log(errmsg);
@@ -222,12 +216,12 @@
                 function resetInputFields(){
                     let fileCount = document.querySelector("#files_required");
                     let description = document.querySelector("#description");
-                    let title = document.querySelector("#title");
                     
-                    fileCount.value = description.value = title.value = "";
+                    fileCount.value = description.value = "";
                 }
 
                 function createRequestTable(data) {
+                    console.log(data);
                     // Destroy existing DataTable if it exists
                     if ($.fn.DataTable.isDataTable('#datatable')) {
                         $('#datatable').DataTable().destroy();
@@ -237,26 +231,29 @@
                     var table = $('#datatable').DataTable({
                         data: data,
                         columns: [
-                            { data: 'fields.title' },
-                            { data: 'fields.description' },
-                            { data: 'fields.files_required' },
-                            { data: 'fields.document' },
+                            { data: 'description' },
+                            { data: 'files_required' },
+                            { data: 'document' },
                             {
-                                data: null,
+                            data: null,
                                 render: function (data, type, row) {
                                     return '<button class="btn btn-sm btn-primary delete-btn">Delete</button>';
                                 }
                             }
                         ],
-                        
                         responsive: true
                     });
 
-                    // Add event listener for delete buttons
+                    // Unbind any previously bound event handlers
+                    $('#datatable tbody').off('click', '.delete-btn');
+
+                    // Bind the click event handler using event delegation
                     $('#datatable tbody').on('click', '.delete-btn', function () {
-                        var rowData = table.row($(this).parents('tr')).data();
-                        deleteRequest(rowData.pk);
+                        var row = table.row($(this).parents('tr'));
+                        var rowData = row.data();
+                        deleteRequest(rowData.id);
                     });
+
                 }
 
                 // Function to get CSRF cookie value

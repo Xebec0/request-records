@@ -28,6 +28,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     'onlinerequest.apps.OnlinerequestConfig',
+    'rest_framework'
 ]
 
 MIDDLEWARE = [
