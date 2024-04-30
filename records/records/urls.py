@@ -32,7 +32,8 @@ urlpatterns = [
     path('signup/', views.signup_view, name="signup"),
 
     # Admin - Dashboard
-    path('admin-app/dashboard/', views.admin_dashboard, name="admin_dashboard"),
+    path('admin-panel/dashboard/', views.admin_dashboard, name="admin_dashboard"),
+    path('admin-panel/', views.admin_dashboard, name="admin_dashboard"),
 
     # Request - Admin
     path('request/', request.index),
@@ -46,4 +47,5 @@ urlpatterns = [
 
     # Code Table (This is where to update code tables)
     path('codetable/', codetable.index),
+    path('admin-panel/codetable/', codetable.index)
 ]
