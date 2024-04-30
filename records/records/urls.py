@@ -16,8 +16,9 @@ urlpatterns = [
     # Main index page
     path('', views.index),
 
-    # Student register
+    # Student/User Records
     path('record/', record.index),
+    path('record/list/', record.get_user_data),
     path('admin-panel/user-records/', record.index),
 
     # Register

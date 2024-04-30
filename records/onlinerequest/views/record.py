@@ -3,6 +3,7 @@ from django.http import HttpResponse
 from django.http import JsonResponse
 from ..models import Course
 from ..models import Record
+from django.core import serializers
 
 # Create records in this view
 def index(request):
@@ -24,3 +25,8 @@ def index(request):
         courses = Course.objects.all()
         return render(request, 'record/index.html', {'courses': courses})
     
+def get_user_data(request):
+    users = Record.objects.all()
+    users_json = serializers.serialize('json',users)
+    return JsonResponse(users_json, safe=False)
+        

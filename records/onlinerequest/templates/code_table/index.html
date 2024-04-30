@@ -31,29 +31,29 @@
                             </div>
                             <div class="card-body">
                                 <div class="mb-3">
-                                    <h5>Requirements</h5>
+                                    <span class="fs-6">1. Requirements</span>
                                     <form method="POST" id="formRequirements" class="row g-3 align-items-center">
                                         {% csrf_token %}
                                         <div class="col-auto">
-                                            <input type="text" name="description" id="formRequirementsDescription" class="form-control" required placeholder="Enter requirement">
+                                            <input type="text" name="description" id="formRequirementsDescription" class="form-control form-control-sm" required placeholder="Enter requirement">
                                         </div>
                                         <input type="hidden" name="table_name" value="Requirement">
                                         <div class="col-auto">
-                                            <button type="submit" class="btn btn-primary">Add</button>
+                                            <button type="submit" class="btn btn-sm btn-primary">Add</button>
                                         </div>
                                     </form>
                                 </div>
                             
                                 <div class="mb-3">
-                                    <h5>Documents</h5>
+                                    <span class="fs-6">2. Documents</span>
                                     <form method="POST" id="formRequirements2" class="row g-3 align-items-center">
                                         {% csrf_token %}
                                         <div class="col-auto">
-                                            <input type="text" name="description" id="formRequirements2Description" class="form-control" required placeholder="Enter document type">
+                                            <input type="text" name="description" id="formRequirements2Description" class="form-control form-control-sm" required placeholder="Enter document type">
                                         </div>
                                         <input type="hidden" name="table_name" value="Document">
                                         <div class="col-auto">
-                                            <button type="submit" class="btn btn-primary">Add</button>
+                                            <button type="submit" class="btn btn-sm btn-primary">Add</button>
                                         </div>
                                     </form>
                                 </div>

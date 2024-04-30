@@ -4,8 +4,6 @@ from django.http import JsonResponse
 from django.contrib.auth import authenticate, login
 from ..models import User
 
-
-
 def index(request):
     if request.method == "POST":
         email = request.POST.get("email")

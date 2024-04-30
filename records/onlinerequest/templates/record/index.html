@@ -10,6 +10,12 @@
         <link rel="stylesheet" href="">
 
         {% include 'header.html' %}
+
+        <style>
+            table.dataTable thead th{
+                padding: 10px;
+            }
+        </style>
     </head>
     <body class="sb-nav-fixed">
         <div id="layoutSidenav">
@@ -26,41 +32,73 @@
                         </ol>
                         <div class="card mb-4">
                             <div class="card-header">
-                                <i class="fas fa-chart-area me-1"></i>
-                                Codetables
+                                <div class="d-flex justify-content-between">
+                                    <span class="fs-6"> <i class="fa fa-list" aria-hidden="true"></i> List of users</span>
+                                    <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#recordModal">
+                                        <i class="fas fa-plus me-2"></i>Add Record
+                                    </button>
+                                </div>
                             </div>
                             <div class="card-body">
-                                <form action="" class="needs-validation">
-                                    {% csrf_token %}
-                                    <div class="mb-3">
-                                        <label for="user_number" class="form-label">User Number:</label>
-                                        <input type="number" class="form-control" id="user_number" name="user_number" required minlength="10" placeholder="Enter user number" required>
+                                <!-- List of users table -->
+
+                                <div id="record">
+                                    <table id="datatable">
+                                        <thead>
+                                        <tr>
+                                            <th>User Number</th>
+                                            <th>First Name</th>
+                                            <th>Last Name</th>
+                                            <th>Course Code</th>
+                                            <th>Action</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody id="recordsTable"></tbody>
+                                    </table>
+                                </div>
+
+                                <!-- Modal -->
+                                <div class="modal fade" id="recordModal" tabindex="-1" aria-labelledby="recordModalLabel" aria-hidden="true">
+                                    <div class="modal-dialog">
+                                      <div class="modal-content">
+                                        <div class="modal-header">
+                                          <h5 class="modal-title" id="recordModalLabel">Add Record</h5>
+                                          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                          <form id="recordForm" method="post">
+                                            {% csrf_token %}
+                                            <div class="mb-3">
+                                              <label for="userNumber" class="form-label">User Number</label>
+                                              <input type="text" class="form-control form-control-sm" id="userNumber" name="user_number" required>
+                                            </div>
+                                            <div class="mb-3">
+                                              <label for="firstName" class="form-label">First Name</label>
+                                              <input type="text" class="form-control form-control-sm" id="firstName" name="fname" required>
+                                            </div>
+                                            <div class="mb-3">
+                                              <label for="lastName" class="form-label">Last Name</label>
+                                              <input type="text" class="form-control form-control-sm" id="lastName" name="lname" required>
+                                            </div>
+                                            <div class="mb-3">
+                                              <label for="courseCode" class="form-label">Course Code</label>
+                                              <select class="form-select form-select-sm" id="courseCode" name="course" required>
+                                                <option value="" disabled selected>Select a course</option>
+                                                {% for course in courses %}
+                                                <option value="{{ course.code }}">{{ course.code }} - {{ course.name }}</option>
+                                                {% endfor %}
+                                              </select>
+                                            </div>
+                                          </form>
+                                        </div>
+                                        <div class="modal-footer">
+                                          <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+                                          <button type="submit" id="submitBtn" form="recordForm" class="btn btn-primary btn-sm">Save Record</button>
+                                        </div>
+                                      </div>
                                     </div>
-                                
-                                    <div class="mb-3">
-                                        <label for="fname" class="form-label">First name:</label>
-                                        <input type="text" class="form-control" id="fname" name="fname" required placeholder="Enter first name" required>
-                                    </div>
-                                
-                                    <div class="mb-3">
-                                        <label for="lname" class="form-label">Last name:</label>
-                                        <input type="text" class="form-control" id="lname" name="lname" required placeholder="Enter last name" required>
-                                    </div>
-                                
-                                    <div class="mb-3">
-                                        <label for="course" class="form-label">Courses:</label>
-                                        <select name="course" id="course" class="form-select">
-                                            {% for course in courses %}
-                                                <option value="{{ course.code }}">{{ course.description }}</option>
-                                            {% endfor %}
-                                        </select>
-                                    </div>
-                                
-                                    <button type="submit" class="btn btn-primary">Submit</button>
-                                </form>                  
-                            </div>                            
-                        </div>
-                    </div>
+                                  </div>
+                                </div>  
                 </main>
                 <footer class="py-4 bg-light mt-auto">
                     <div class="container-fluid px-4">
@@ -82,6 +120,13 @@
         <script src="" async defer></script>
         <script>
             $(document).ready(function() {
+                init()
+
+                function init(){
+                    getUserRecords();
+                    initModalEvents();
+                }
+
                 function showToast(options){
                     let toast = Toastify({
                         text: options.message,
@@ -119,6 +164,8 @@
                             })
 
                             if (response.status){
+                                getUserRecords();
+                                resetInputFields();
                             }
                         },
                         error: function(xhr, errmsg, err) {
@@ -126,6 +173,65 @@
                         }
                     });
                 });
+
+                function getUserRecords(){
+                    // Send AJAX POST request
+                    $.ajax({
+                        type: 'GET',
+                        url: '/record/list/',
+                        success: function(response) {
+                            let data = JSON.parse(response);
+                            createUserRecordTable(data);
+                            console.log(data);
+                        },
+                        error: function(xhr, errmsg, err) {
+                            console.log(errmsg);
+                        }
+                    });
+                }
+
+                function createUserRecordTable(data) {
+                    // Destroy existing DataTable if it exists
+                    if ($.fn.DataTable.isDataTable('#datatable')) {
+                        $('#datatable').DataTable().destroy();
+                    }
+
+                    // Create a new DataTable
+                    var table = $('#datatable').DataTable({
+                        data: data,
+                        columns: [
+                            { data: 'fields.user_number' },
+                            { data: 'fields.first_name' },
+                            { data: 'fields.last_name' },
+                            { data: 'fields.course_code' },
+                            {
+                                data: null,
+                                render: function (data, type, row) {
+                                    return '<button class="btn btn-sm btn-primary delete-btn">Delete</button>';
+                                }
+                            }
+                        ],
+                        
+                        responsive: true
+                    });
+
+                    // Add event listener for delete buttons
+                    // $('#datatable tbody').on('click', '.delete-btn', function () {
+                    //     var rowData = table.row($(this).parents('tr')).data();
+                    //     deleteRequest(rowData.pk);
+                    // });
+                }
+
+                function initModalEvents() {
+                    $('#submitBtn').click(function() {
+                        $('#recordModal').modal('hide');
+                    });
+                }
+                
+                function resetInputFields() {
+                    const inputFields = document.querySelectorAll('#recordForm input, #recordForm select');
+                    inputFields.forEach(field => field.value = '');
+                }
             });
         </script>
     </body>
