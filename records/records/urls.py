@@ -18,6 +18,7 @@ urlpatterns = [
 
     # Student register
     path('record/', record.index),
+    path('admin-panel/user-records/', record.index),
 
     # Register
     path('register/', register.index),
@@ -37,6 +38,7 @@ urlpatterns = [
 
     # Request - Admin
     path('request/', request.index),
+    path('admin-panel/request/', request.index),
     path('request/list/', request.get_requests),
     path('request/<int:id>/delete/', request.delete_request),
 

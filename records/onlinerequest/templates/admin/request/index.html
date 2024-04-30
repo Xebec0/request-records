@@ -7,62 +7,119 @@
         <meta name="description" content="">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <link rel="stylesheet" href="">
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-            
-        <!-- Toastify -->
-        <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
 
+        {% include 'header.html' %}
         <style>
-            table {
-                border-collapse: collapse;
-                width: 100%;
-            }
-
-            th, td {
-                border: 1px solid black;
-                padding: 8px;
-                text-align: left;
-            }
-
-            th {
-                background-color: #f2f2f2;
+            table.dataTable thead th{
+                padding: 10px;
             }
         </style>
     </head>
-    <body>
-        <h2>Create request form</h2>
-        <form method="POST">
-            {% csrf_token %}
-            <select name="documents" id="documents">
-                {% if documents %}
-                {% for document in documents %}
-                    {% if document.active %}
-                        <option value="{{ document.code }}">{{ document.description }} </option>
-                    {% endif%}
-                {% endfor %}
-                {% endif %}
-            </select>
-            <input type="text" id="title" name="title" placeholder="title" required>
-            <input type="text" id="files_required" name="files_required" placeholder="no of files" required>
-            <input type="text" id="description" name="description" placeholder="description" required>
-            <button type="submit">Create request</button>
-        </form>
+    <body class="sb-nav-fixed">
+        <div id="layoutSidenav">
+            {% include 'admin/admin-topnav.html' %}
+            {% include 'admin/admin-sidenav.html' %}
 
-        <h2>Created request forms</h2>
-        <div id="request">
-            <table id="requestsTable">
-                <thead>
-                  <tr>
-                    <th>Title</th>
-                    <th>Description</th>
-                    <th>No. of Files Required</th>
-                    <th>Document</th>
-                    <th>Action</th>
-                  </tr>
-                </thead>
-                <tbody></tbody>
-              </table>
+            <div id="layoutSidenav_content">
+                <main>
+                    <div class="container-fluid px-4">
+                        <h1 class="mt-4">Create Request Forms</h1>
+                        <ol class="breadcrumb mb-4">
+                            <li class="breadcrumb-item active">Add new user information</li>
+                        </ol>
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="fs-5">Existing Forms</span>
+                                    <button type="button" class="btn btn-primary ms-auto" data-bs-toggle="modal" data-bs-target="#createRequestModal">
+                                        <i class="fas fa-plus me-2"></i> Create New Request
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                               
+                                <div class="modal fade" id="createRequestModal" tabindex="-1" aria-labelledby="createRequestModalLabel" aria-hidden="true">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="createRequestModalLabel">Create Request Form</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <form method="POST">
+                                                    {% csrf_token %}
+                                                    <div class="mb-3">
+                                                        <label for="documents" class="form-label">Document</label>
+                                                        <select class="form-select" name="documents" id="documents">
+                                                            {% if documents %}
+                                                            {% for document in documents %}
+                                                            {% if document.active %}
+                                                            <option value="{{ document.code }}">{{ document.description }}</option>
+                                                            {% endif %}
+                                                            {% endfor %}
+                                                            {% endif %}
+                                                        </select>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label for="title" class="form-label">Title</label>
+                                                        <input type="text" class="form-control" id="title" name="title" placeholder="Title" required>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label for="files_required" class="form-label">No. of Files Required</label>
+                                                        <input type="text" class="form-control" id="files_required" name="files_required" placeholder="No. of Files" required>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label for="description" class="form-label">Description</label>
+                                                        <textarea class="form-control" id="description" name="description" rows="3" placeholder="Description" required></textarea>
+                                                    </div>
+                                                    <div class="d-flex justify-content-end">
+                                                        <button type="submit" class="btn btn-primary ms-auto"">
+                                                            Submit
+                                                        </button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                
+                                <div id="request">
+                                    <table id="datatable">
+                                        <thead>
+                                        <tr>
+                                            <th class="text-start">Title</th>
+                                            <th class="text-start">Description</th>
+                                            <th class="text-start">No. of Files Required</th>
+                                            <th class="text-start">Document</th>
+                                            <th class="text-start">Action</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody id="requestsTable"></tbody>
+                                    </table>
+                                </div>
+
+                                
+                            </div>                            
+                            
+                        </div>
+                    </div>
+                </main>
+                <footer class="py-4 bg-light mt-auto">
+                    <div class="container-fluid px-4">
+                        <div class="d-flex align-items-center justify-content-between small">
+                            <div class="text-muted">Copyright &copy; Academic File Request System 2024</div>
+                            <div>
+                                <a href="#">Privacy Policy</a>
+                                &middot;
+                                <a href="#">Terms &amp; Conditions</a>
+                            </div>
+                        </div>
+                    </div>
+                </footer>
+            </div>
         </div>
+
+        {% include 'footer.html' %}
 
         <script>
             $(document).ready(function() {
@@ -169,54 +226,37 @@
                     fileCount.value = description.value = title.value = "";
                 }
 
-                function createRequestTable(data){
-                    // Get the table body
-                    var tableBody = document.getElementById("requestsTable").getElementsByTagName("tbody")[0];
-
-                    // Reset table
-                    tableBody.innerHTML = "";
-
-                    // Loop through the models and create rows
-                    for (let i = data.length - 1; i >= 0; i--) {
-                        let model = data[i];
-                        let fields = model.fields;
-
-                        // Create a new row
-                        let row = document.createElement("tr");
-                        row.id = model.pk;
-
-                        // Create cells and populate with field values
-                        let titleCell = document.createElement("td");
-                        titleCell.textContent = fields.title;
-                        row.appendChild(titleCell);
-
-                        let descriptionCell = document.createElement("td");
-                        descriptionCell.textContent = fields.description;
-                        row.appendChild(descriptionCell);
-
-                        let noOfFilesRequiredCell = document.createElement("td");
-                        noOfFilesRequiredCell.textContent = fields.files_required;
-                        row.appendChild(noOfFilesRequiredCell);
-
-                        let documentCell = document.createElement("td");
-                        documentCell.textContent = fields.document;
-                        row.appendChild(documentCell);
-
-                        // Create a cell for the delete button
-                        let actionCell = document.createElement("td");
-                        let deleteButton = document.createElement("button");
-                        deleteButton.textContent = "Delete";
-                        deleteButton.addEventListener("click", function() {
-                            // Add your delete logic here
-                            console.log("Delete:", row.id);
-                            deleteRequest(row.id);
-                        });
-                        actionCell.appendChild(deleteButton);
-                        row.appendChild(actionCell);
-
-                        // Append the row to the table body
-                        tableBody.appendChild(row);
+                function createRequestTable(data) {
+                    // Destroy existing DataTable if it exists
+                    if ($.fn.DataTable.isDataTable('#datatable')) {
+                        $('#datatable').DataTable().destroy();
                     }
+
+                    // Create a new DataTable
+                    var table = $('#datatable').DataTable({
+                        data: data,
+                        columns: [
+                            { data: 'fields.title' },
+                            { data: 'fields.description' },
+                            { data: 'fields.files_required' },
+                            { data: 'fields.document' },
+                            {
+                                data: null,
+                                render: function (data, type, row) {
+                                    return '<button class="btn btn-primary delete-btn">Delete</button>';
+                                }
+                            }
+                        ],
+                        
+                        theme: "classic",
+                        responsive: true
+                    });
+
+                    // Add event listener for delete buttons
+                    $('#datatable tbody').on('click', '.delete-btn', function () {
+                        var rowData = table.row($(this).parents('tr')).data();
+                        deleteRequest(rowData.pk);
+                    });
                 }
 
                 // Function to get CSRF cookie value
@@ -238,6 +278,5 @@
 
             });
         </script>
-        <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     </body>
 </html>
