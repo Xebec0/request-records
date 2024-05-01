@@ -5,6 +5,7 @@ from django.conf import settings
 from ..models import Request
 from ..models import User_Request
 from ..models import Document
+from ..models import Requirement
 from django.core import serializers
 
 import os
@@ -66,3 +67,10 @@ def handle_uploaded_file(source, file):
             destination.write(chunk)
 
     return file_path
+
+def get_document_description(request, doc_code):
+    try:
+        document = Requirement.objects.get(code=doc_code)
+        return JsonResponse({'description': document.description})
+    except Requirement.DoesNotExist:
+        return JsonResponse({'description': 'Document not found'}, status=404)

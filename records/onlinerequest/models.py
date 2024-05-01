@@ -74,6 +74,14 @@ class Document(models.Model):
     def __str__(self):
         return self.description
 
+# Requirement
+class Requirement(models.Model):
+    code = models.CharField(max_length=64)
+    description = models.CharField(max_length=64)
+
+    def __str__(self):
+        return self.description
+
 class Request(models.Model):
     description = models.CharField(max_length=256)
     files_required = models.CharField(max_length=256)

@@ -9,16 +9,12 @@
         <link rel="stylesheet" href="">
 
         {% include 'header.html' %}
-        
-        <style>
-            table.dataTable thead th{
-                padding: 10px;
-            }
-        </style>
     </head>
     <body class="sb-nav-fixed">
+        {% include 'admin/admin-topnav.html' %}
+
         <div id="layoutSidenav">
-            {% include 'admin/admin-topnav.html' %}
+            
             {% include 'admin/admin-sidenav.html' %}
 
             <div id="layoutSidenav_content">

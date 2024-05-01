@@ -4,10 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
-    {% include 'header.html' %}
     {% load static %}
+    {% include 'header.html' %}
 </head>
 <body>
+
+    
     <table>
         <th>Document</th>
         <th>Status</th>
@@ -24,6 +26,8 @@
             {% endfor %}
         {% endif %}
     </table>
+
+
     <footer class="py-4 bg-light mt-auto">
         <div class="container-fluid px-4">
             <div class="d-flex align-items-center justify-content-between small">
