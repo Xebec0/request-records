@@ -51,6 +51,7 @@ urlpatterns = [
     path('request/user/', request_user.index),
     path('request/<int:id>/', request_user.get_request),
     path('request/user/create/', request_user.create_request),
+    path('user/request/', request_user.display_user_requests),
 
     # Code Table (This is where to update code tables)
     path('codetable/', codetable.index),

@@ -41,6 +41,10 @@ def create_request(request):
     return JsonResponse({"success" : True})
 
 
+def display_user_requests(request):
+    user_requests = User_Request.objects.filter(user = request.user)
+    return render(request, 'user/request/view-user-request.html', {'user_requests': user_requests})
+
 def get_request(request, id): 
     request = Request.objects.get(id = id)
     request_json = serializers.serialize('json', [request])
