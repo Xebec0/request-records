@@ -11,3 +11,6 @@ def signup_view(request):
 
 def admin_dashboard(request):
     return render (request, "admin/dashboard.html")
+
+def user_dashboard(request):
+    return render (request, "user/dashboard.html")
