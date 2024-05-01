@@ -8,6 +8,7 @@ from onlinerequest.views import request
 from onlinerequest.views import request_user
 from onlinerequest.views import record
 from onlinerequest.views import codetable
+from onlinerequest.views import admin_user_requests
 
 # Define URL paths here
 urlpatterns = [
@@ -50,5 +51,7 @@ urlpatterns = [
 
     # Code Table (This is where to update code tables)
     path('codetable/', codetable.index),
-    path('admin-panel/codetable/', codetable.index)
+    path('admin-panel/codetable/', codetable.index),
+
+    path('admin-panel/users/requests/', admin_user_requests.index),
 ]

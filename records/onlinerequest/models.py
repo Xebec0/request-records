@@ -48,6 +48,9 @@ class User(AbstractBaseUser):
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['student_number']
 
+    def get_user_type_display(self):
+        return dict(self.USER_TYPE_CHOICES).get(self.user_type, 'Unknown')
+
 # Profile
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -66,12 +69,12 @@ class Document(models.Model):
     active = models.BooleanField(default=True)
 
     def __str__(self):
-        return f"{self.description}"
+        return self.description
 
 class Request(models.Model):
     description = models.CharField(max_length=256)
     files_required = models.CharField(max_length=256)
-    document = models.ForeignKey(Document, on_delete=models.CASCADE, related_name='requests')
+    document = models.ForeignKey(Document, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.description
@@ -86,3 +89,13 @@ class Request(models.Model):
     
     def files_required_as_list(self):
         return self.files_required.split(',')
+
+
+# User - Request Model
+class User_Request(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user_requests')
+    request = models.ForeignKey(Request, on_delete=models.CASCADE, related_name='user_requests')
+    status = models.CharField(max_length=64)
+    uploads = models.CharField(max_length=256)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)

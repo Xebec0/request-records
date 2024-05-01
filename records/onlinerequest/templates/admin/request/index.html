@@ -62,8 +62,14 @@
                                                         </select>
                                                     </div>
                                                     <div class="mb-3">
-                                                        <label for="files_required" class="form-label">No. of Files Required</label>
-                                                        <input type="text" class="form-control" id="files_required" name="files_required" placeholder="No. of Files" required>
+                                                        <label for="files_required" class="form-label">Required Files</label>
+                                                        <select class="form-select" id="requirements" multiple required>
+                                                            {% if requirements %}
+                                                            {% for requirement in requirements %}
+                                                            <option value="{{ requirement.code }}">{{ requirement.description }}</option>
+                                                            {% endfor %}
+                                                            {% endif %}
+                                                        </select>
                                                     </div>
                                                     <div class="mb-3">
                                                         <label for="description" class="form-label">Description</label>
@@ -147,7 +153,8 @@
 
                     // Get form data
                     var formData = new FormData($('form')[0]);
-
+                    formData.append('requirements', getSelectedValues('requirements'));
+                    
                     // Send AJAX POST request
                     $.ajax({
                         type: 'POST',
@@ -214,14 +221,13 @@
                 }
 
                 function resetInputFields(){
-                    let fileCount = document.querySelector("#files_required");
+                    let fileCount = document.querySelector("#requirements");
                     let description = document.querySelector("#description");
                     
                     fileCount.value = description.value = "";
                 }
 
                 function createRequestTable(data) {
-                    console.log(data);
                     // Destroy existing DataTable if it exists
                     if ($.fn.DataTable.isDataTable('#datatable')) {
                         $('#datatable').DataTable().destroy();
@@ -273,6 +279,12 @@
                     return cookieValue;
                 }
 
+
+                function getSelectedValues(id) {
+                    const selectElement = document.getElementById(id);
+                    const selectedValues = Array.from(selectElement.selectedOptions).map(option => option.value);
+                    return selectedValues.join(',');
+                }
             });
         </script>
     </body>

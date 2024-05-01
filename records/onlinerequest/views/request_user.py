@@ -3,6 +3,7 @@ from django.http import HttpResponse
 from django.http import JsonResponse
 from django.conf import settings
 from ..models import Request
+from ..models import User_Request
 from ..models import Document
 from django.core import serializers
 
@@ -10,15 +11,20 @@ import os
 
 def index(request):
     all_requests = Request.objects.all()
+    print(all_requests)
     return render(request, 'user/request/index.html', {'all_requests': all_requests})
 
 def create_request(request):
 
     # Upload required files
     for file_name in request.FILES:
-        file = request.FILES.get(file_name)
-        file_path = handle_uploaded_file(file)
-        print(file_path)
+        try:
+            file = request.FILES.get(file_name)
+            file_path = handle_uploaded_file(file)
+            file_prefix = "<" + file_name + ">"
+            print(file_prefix + file_path)
+        except Exception as e:
+            return({"message" : e})
         
     return JsonResponse({"success" : True})
 

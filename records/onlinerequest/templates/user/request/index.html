@@ -48,7 +48,7 @@
         <h2>Create request</h2>
         <select name="request" id="request">
             {% for request_obj in all_requests %}
-                <option value="{{ request_obj.id }}">{{ request_obj.title }}</option>
+                <option value="{{ request_obj.id }}">{{ request_obj.document }}</option>
             {% endfor %}
         </select>
         <button id="btnCreate" type="button">Create</button>
@@ -85,10 +85,9 @@
 
                 // Web services
                 function getRequest(id, successCallBack, errorCallBack){
-                    // Get request object as JSON
                     $.ajax({
                         type: 'GET',
-                        url: '/request/' + id + '/', // Replace with your Django URL and include any required parameters or query string
+                        url: '/request/' + id + '/',
                         success: function(response) {
                             successCallBack(response);
                         },
@@ -107,14 +106,6 @@
 
                     const container = document.getElementById("container");
                     container.innerHTML = "";
-
-                    // Create input field for title
-                    const titleInput = document.createElement("input");
-                    titleInput.type = "text";
-                    titleInput.id = "title";
-                    titleInput.name = "title";
-                    titleInput.value = data.title;
-                    container.appendChild(titleInput);
 
                     // Create textarea for description
                     const descriptionTextarea = document.createElement("textarea");

@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    {% include 'header.html' %}
+</head>
+<body>
+    <table>
+        <tr>
+          <th>User Number</th>
+          <th>Email</th>
+          <th>Type</th>
+          <th>Action</th>
+        </tr>
+        {% if users %}
+        {% for user in users %}
+        <tr id="tr{{ user.id }}">
+            <td>{{ user.student_number }}</td>
+            <td>{{ user.email }}</td>
+            <td>{{ user.get_user_type_display }}</td>
+            <td>
+                <button onclick="approveUser('{{ user.id }}')">Approve</button>
+            </td>
+        </tr>
+        {% endfor %}
+        {% endif %}
+    </table>
+    <footer>
+        {% include 'footer.html' %}
+    </footer>
+    <script>
+        function showToast(options){
+            let toast = Toastify({
+                text: options.message,
+                duration: 2000,
+                newWindow: true,
+                close: true,
+                gravity: "top",
+                position: "right",
+                stopOnFocus: true,
+                style: {
+                    background: options.color,
+                },
+            });
+
+            toast.showToast();
+        }        
+
+        function approveUser(userId){
+            var csrftoken = getCookie('csrftoken');
+
+            var formData = new FormData($('form')[0]);
+            formData.append('user_id', userId);
+
+            // Send AJAX POST request
+            $.ajax({
+                type: "POST",
+                data: formData,
+                url: '/admin-panel/users/requests/',
+                processData: false,
+                contentType: false,
+                headers: {
+                    'X-CSRFToken': csrftoken
+                },
+                success: function (response) {
+                    showToast({
+                        message: response.message,
+                        color: response.status ? "#008000" : "#FF0000",
+                    });
+
+                    if (response.status) {
+                    }
+                },
+                error: function (xhr, errmsg, err) {
+                    console.log(errmsg);
+                },
+            });
+
+            // Deleted associated row
+            let row = document.getElementById("tr" + userId);
+            row.innerHTML = "";
+        } 
+
+        
+        // Function to get CSRF cookie value
+        function getCookie(name) {
+            var cookieValue = null;
+            
+            if (document.cookie && document.cookie !== '') {
+                var cookies = document.cookie.split(';');
+                for (var i = 0; i < cookies.length; i++) {
+                    var cookie = cookies[i].trim();
+                    // Does this cookie string begin with the name we want?
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }        
+            }
+            return cookieValue;
+        }
+    </script>
+</body>
+</html>
