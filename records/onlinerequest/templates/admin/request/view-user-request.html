@@ -38,7 +38,7 @@
                                             <span class="fw-normal fs-6 mb-2">{{ user_request.user.student_number }}</span>
                                         </h6>
                                         <h6 class="fw-bold">Status:
-                                            <span class="fw-normal fs-6 mb-2">{{ user_request.status }}</span>
+                                            <span id="requestStatus" class="fw-normal fs-6 mb-2">{{ user_request.status }}</span>
                                         </h6>
                                     </div>
                                 </div>
@@ -59,7 +59,11 @@
                                 </div>
                                 <div class="row mt-3">
                                     <div class="col-md-6">
-                                        <button class="btn btn-success">Approve request</button>
+                                        <div class="mb-3">
+                                            <label for="requestedFile" class="form-label fw-bold">Upload requested file:</label>
+                                            <input type="file" class="form-control" id="requestedFile" name="file" required>
+                                        </div>
+                                        <button class="btn btn-success" id="btnApproveRequest" onclick="approveRequest('{{user_request.id}}')">Approve request</button>
                                     </div>
                                 </div>
                                 {% endif %}
@@ -86,5 +90,77 @@
 
         {% include 'footer.html' %}     
         <script src="" async defer></script>
+        <script>
+            function showToast(options){
+                let toast = Toastify({
+                    text: options.message,
+                    duration: options.duration,
+                    newWindow: true,
+                    close: true,
+                    gravity: "top",
+                    position: "right",
+                    stopOnFocus: true,
+                    style: {
+                        background: options.color,
+                    },
+                });
+
+                toast.showToast();
+            }
+
+            function approveRequest(id){
+                var csrftoken = getCookie('csrftoken');
+                let formData = new FormData();
+                let file = document.getElementById("requestedFile");
+                formData.append('requested_file', file.files[0]);
+
+                // Send AJAX POST request
+                $.ajax({
+                    type: 'POST',
+                    url: '/admin-panel/user-request/' + id, 
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    headers: {
+                        'X-CSRFToken': csrftoken
+                    },
+                    success: function(response) {
+                        showToast({
+                            'message': response.message,
+                            'color': response.status ? '#008000' : '#FF0000',
+                            'duration': 4000,
+                        })
+
+                        if (response.status) {
+                            let status = document.getElementById("requestStatus");
+                            let btnApproveRequest = document.getElementById("btnApproveRequest");
+                            let fileInput = document.getElementById("requestedFile");
+                            status.textContent = response.request_status
+                            fileInput.disabled = true;
+                            btnApproveRequest.disabled = true;
+                        }
+                    },
+                    error: function(xhr, errmsg, err) {
+                        console.log(errmsg);
+                    }
+                });
+            }
+
+            function getCookie(name) {
+                var cookieValue = null;
+                if (document.cookie && document.cookie !== '') {
+                    var cookies = document.cookie.split(';');
+                    for (var i = 0; i < cookies.length; i++) {
+                        var cookie = cookies[i].trim();
+                        // Does this cookie string begin with the name we want?
+                        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                            break;
+                            }
+                        }
+                }
+                return cookieValue;
+            }
+        </script>    
     </body>
 </html>
