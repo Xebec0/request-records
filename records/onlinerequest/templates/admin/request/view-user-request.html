@@ -11,94 +11,80 @@
         {% include 'header.html' %}
         {% load static %}
     </head>
-    <body>
-        {% if user_request %}
-            <h3>User Number: {{ user_request.user.student_number }}</h3>
-            <h3>Status: <span id="requestStatus"> {{ user_request.status }} </span></h3>
-            <h3>Submitted requirements: </h3>
-            {% if uploads %}
-                {%  for upload in uploads %}
-                    <p>{{ upload.code }} <a href="{% static upload.path %}" download>Download here</a></p>
-                {% endfor %}
-            {% endif %}
-            <label for="file">Upload requested file:</label>
-            <input type="file" name="file" id="requestedFile" required>
-            <button id="btnApproveRequest" onclick="approveRequest('{{user_request.id}}')">Approve request</button>
-        {% endif %}
-        <footer>
-            {% include 'footer.html' %}
-        </footer>  
-        <script>
-            function showToast(options){
-                let toast = Toastify({
-                    text: options.message,
-                    duration: options.duration,
-                    newWindow: true,
-                    close: true,
-                    gravity: "top",
-                    position: "right",
-                    stopOnFocus: true,
-                    style: {
-                        background: options.color,
-                    },
-                });
+    <body class="sb-nav-fixed">
+        <div id="layoutSidenav">
+            {% include 'admin/admin-topnav.html' %}
+            {% include 'admin/admin-sidenav.html' %}
 
-                toast.showToast();
-            }
 
-            function approveRequest(id){
-                var csrftoken = getCookie('csrftoken');
-                let formData = new FormData();
-                let file = document.getElementById("requestedFile");
-                formData.append('requested_file', file.files[0]);
+            <div id="layoutSidenav_content">
+                <main>
+                    <div class="container-fluid px-4">
+                        <h1 class="mt-4">View user requests</h1>
+                        <ol class="breadcrumb mb-4">
+                            <li class="breadcrumb-item active">User request status and information</li>
+                        </ol>
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="fs-6"> <i class="fa fa-list-ul" aria-hidden="true"></i> Existing Forms</span>
+                                </div>
+                            </div>
+                            <div class="card-body"> 
+                                {% if user_request %}
+                                <div class="row border-bottom">
+                                    <div class="col-md-6">
+                                        <h6 class="fw-bold">User Number:
+                                            <span class="fw-normal fs-6 mb-2">{{ user_request.user.student_number }}</span>
+                                        </h6>
+                                        <h6 class="fw-bold">Status:
+                                            <span class="fw-normal fs-6 mb-2">{{ user_request.status }}</span>
+                                        </h6>
+                                    </div>
+                                </div>
+                                <div class="row mt-2">
+                                    <div class="col-md-6">
+                                        <h6 class="fw-bold mb-3">Submitted requirements:</h6>
+                                        {% if uploads %}
+                                        <ul class="list-group">
+                                            {% for upload in uploads %}
+                                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                {{ upload.code }}
+                                                <a href="{% static upload.path %}" download class="btn btn-primary btn-sm">Download</a>
+                                            </li>
+                                            {% endfor %}
+                                        </ul>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="row mt-3">
+                                    <div class="col-md-6">
+                                        <button class="btn btn-success">Approve request</button>
+                                    </div>
+                                </div>
+                                {% endif %}
+                            </div>                       
+                            
+                        </div>
+                    </div>
+                </main>
+                <footer class="py-4 bg-light mt-auto">
+                    <div class="container-fluid px-4">
+                        <div class="d-flex align-items-center justify-content-between small">
+                            <div class="text-muted">Copyright &copy; Academic File Request System 2024</div>
+                            <div>
+                                <a href="#">Privacy Policy</a>
+                                &middot;
+                                <a href="#">Terms &amp; Conditions</a>
+                            </div>
+                        </div>
+                    </div>
+                </footer>
+            </div>
 
-                // Send AJAX POST request
-                $.ajax({
-                    type: 'POST',
-                    url: '/admin-panel/user-request/' + id, 
-                    data: formData,
-                    processData: false,
-                    contentType: false,
-                    headers: {
-                        'X-CSRFToken': csrftoken
-                    },
-                    success: function(response) {
-                        showToast({
-                            'message': response.message,
-                            'color': response.status ? '#008000' : '#FF0000',
-                            'duration': 4000,
-                        })
+        </div>
 
-                        if (response.status) {
-                            let status = document.getElementById("requestStatus");
-                            let btnApproveRequest = document.getElementById("btnApproveRequest");
-                            let fileInput = document.getElementById("requestedFile");
-                            status.textContent = response.request_status
-                            fileInput.disabled = true;
-                            btnApproveRequest.disabled = true;
-                        }
-                    },
-                    error: function(xhr, errmsg, err) {
-                        console.log(errmsg);
-                    }
-                });
-            }
-
-            function getCookie(name) {
-                var cookieValue = null;
-                if (document.cookie && document.cookie !== '') {
-                    var cookies = document.cookie.split(';');
-                    for (var i = 0; i < cookies.length; i++) {
-                        var cookie = cookies[i].trim();
-                        // Does this cookie string begin with the name we want?
-                        if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                            break;
-                            }
-                        }
-                }
-                return cookieValue;
-            }
-        </script>      
+        {% include 'footer.html' %}     
+        <script src="" async defer></script>
     </body>
 </html>
