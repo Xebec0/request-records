@@ -41,6 +41,9 @@ urlpatterns = [
     # Request - Admin
     path('request/', request.index),
     path('admin-panel/request/', request.index),
+    path('admin-panel/user-request/', request.display_user_requests),
+    path('admin-panel/user-request/<int:id>/delete', request.delete_user_request),
+    path('admin-panel/user-request/<int:id>', request.display_user_request),
     path('request/list/', request.get_requests),
     path('request/<int:id>/delete/', request.delete_request),
 

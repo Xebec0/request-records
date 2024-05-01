@@ -100,9 +100,10 @@
                 function createRequestForm(response){
 
                     let data = JSON.parse(response)[0]['fields'];
+                    let requestID = JSON.parse(response)[0]['pk'];
 
                     // Debug do not remove
-                    console.log(data)
+                    console.log(requestID)
 
                     const container = document.getElementById("container");
                     container.innerHTML = "";
@@ -134,20 +135,21 @@
                     btnSubmitRequest.id = "btnSubmitRequest";
                     btnSubmitRequest.textContent = "Submit Request";
                     btnSubmitRequest.addEventListener("click", () => {
-                        submitRequest();
+                        submitRequest(requestID);
                     })
                     btnSubmitRequest.type = "button";
 
                     container.appendChild(btnSubmitRequest);
                 }
 
-                function submitRequest(){
+                function submitRequest(id){
                     const files = document.querySelectorAll('input[type="file"]');
                     var csrftoken = getCookie('csrftoken');
 
                     // Create form data
                     var formData = new FormData();
 
+                    formData.append("id", id);
                     files.forEach((file, index) => {
                         // Append each file to the FormData object
                         formData.append(`${file.id}`, file.files[0]);

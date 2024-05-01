@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title></title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="">
+        {% include 'header.html' %}
+    </head>
+    <body>
+        <table>
+            <tr>
+                <th>User</th>
+                <th>Documents</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+            {% if user_requests %}
+                {% for user_request in user_requests %}
+                    <tr id="tr{{ user_request.id }}">
+                        <td>{{ user_request.user }}</td>
+                        <td>{{ user_request.request }}</td>
+                        <td>{{ user_request.status }}</td>
+                        <td>
+                            <button onclick="viewRequest('{{ user_request.id }}')"> View </button>
+                            <button onclick="deleteRequest('{{ user_request.id }}')"> Delete </button>
+                        </td>
+                    </tr>
+                {% endfor %}
+            {% endif %}
+        </table>
+        <footer>
+            {% include 'footer.html' %}
+        </footer>
+        <script>
+            function showToast(options){
+                let toast = Toastify({
+                    text: options.message,
+                    duration: 2000,
+                    newWindow: true,
+                    close: true,
+                    gravity: "top",
+                    position: "right",
+                    stopOnFocus: true,
+                    style: {
+                        background: options.color,
+                    },
+                });
+
+                toast.showToast();
+            } 
+
+            function deleteRequest(id) {
+                var csrftoken = getCookie('csrftoken');
+
+                // Send AJAX POST request
+                $.ajax({
+                    type: 'POST',
+                    url: '/admin-panel/user-request/' + id + '/delete', 
+                    headers: {
+                        'X-CSRFToken': csrftoken
+                    },
+                    success: function(response) {
+                        showToast({
+                            'message': response.message,
+                            'color': response.status ? '#008000' : '#FF0000'
+                        })
+
+                        if (response.status) {
+                            deleteRow(id);
+                        }
+                    },
+                    error: function(xhr, errmsg, err) {
+                        console.log(errmsg);
+                    }
+                });
+            }
+
+            function viewRequest(id){
+                window.location.replace('/admin-panel/user-request/' + id);
+            }
+
+            function deleteRow(id){
+                let row = document.getElementById("tr" + id);
+                row.innerHTML = "";
+            }
+
+            function getCookie(name) {
+                var cookieValue = null;
+                if (document.cookie && document.cookie !== '') {
+                    var cookies = document.cookie.split(';');
+                    for (var i = 0; i < cookies.length; i++) {
+                        var cookie = cookies[i].trim();
+                        // Does this cookie string begin with the name we want?
+                        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                            break;
+                            }
+                        }
+                }
+                return cookieValue;
+            }
+
+        </script>
+    </body>
+</html>

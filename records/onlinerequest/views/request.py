@@ -4,6 +4,7 @@ from django.http import JsonResponse
 from ..models import Document
 from ..models import Request
 from ..models import Requirement
+from ..models import User_Request
 from ..serializers import RequestSerializer
 from django.core import serializers
 
@@ -24,8 +25,46 @@ def index(request):
     else:
         documents = Document.objects.all()
         requirements = Requirement.objects.all()
-
         return render(request, 'admin/request/index.html', {'documents': documents, 'requirements': requirements})
+
+def display_user_requests(request):
+    user_requests = User_Request.objects.all()
+    return render(request, 'admin/request/user-request.html', {'user_requests': user_requests })
+
+def display_user_request(request, id):
+    user_request = User_Request.objects.get(id = id)
+
+    uploads = []
+    for record in user_request.uploads.split(','):
+        if record:
+            test = record.replace(">", "").replace("<", "").split('&')
+            print(test[0] + "-" + test[1])
+
+    for user_request_upload in user_request.uploads.split(','):
+        if user_request_upload:
+            upload = user_request_upload.replace("<", "").replace(">", "").split('&')
+            uploads.append({
+                'code' : getCodeDescription(Requirement, upload[0]),
+                'path' : upload[1]
+            })
+
+    context = {
+        'user_request': user_request,
+        'uploads': uploads,
+    }        
+
+    return render(request, 'admin/request/view-user-request.html', context)
+
+def getCodeDescription(model, key):
+    model_instance = model.objects.get(code = key)
+    return model_instance.description
+
+
+def delete_user_request(request, id):
+    user_request = User_Request.objects.get(id = id)
+    user_request.delete()
+
+    return JsonResponse({'status' : True, 'message': "Deleted succesfully."})
     
 def delete_request(request, id):
     request = Request.objects.get(id=id)
@@ -35,7 +74,6 @@ def delete_request(request, id):
         return JsonResponse({'status': True, 'message': deleted})
     else:
         return JsonResponse({'False': True, 'message': 'Invalid row'})
-
     
 def get_requests(request):
     requests = Request.objects.all()

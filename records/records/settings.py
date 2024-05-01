@@ -109,8 +109,12 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
+# This is the directory where Django will collect all static files for deployment
+STATIC_ROOT = os.path.join(BASE_DIR, 'static_root')
+
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static'),
+    BASE_DIR
 ]
 
 # Default primary key field type

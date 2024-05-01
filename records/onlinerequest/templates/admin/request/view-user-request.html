@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title></title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="">
+        {% include 'header.html' %}
+        {% load static %}
+    </head>
+    <body>
+        {% if user_request %}
+            <h3>User Number: {{ user_request.user.student_number }}</h3>
+            <h3>Status: {{ user_request.status }}</h3>
+            <h3>Submitted requirements: </h3>
+            {% if uploads %}
+                {%  for upload in uploads %}
+                    <p>{{ upload.code }} <a href="{% static upload.path %}" download>Download here</a></p>
+                {% endfor %}
+            {% endif %}
+        {% endif %}
+
+        <button>Approve request</button>
+        <footer>
+            {% include 'footer.html' %}
+        </footer>        
+        <script src="" async defer></script>
+    </body>
+</html>

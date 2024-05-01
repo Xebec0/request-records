@@ -48,6 +48,9 @@ class User(AbstractBaseUser):
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['student_number']
 
+    def __str__(self):
+        return self.student_number
+
     def get_user_type_display(self):
         return dict(self.USER_TYPE_CHOICES).get(self.user_type, 'Unknown')
 
@@ -77,7 +80,7 @@ class Request(models.Model):
     document = models.ForeignKey(Document, on_delete=models.CASCADE)
 
     def __str__(self):
-        return self.description
+        return self.document.description
     
     def delete(self, *args, **kwargs):
             # Store the title of the request before deletion
@@ -96,6 +99,10 @@ class User_Request(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user_requests')
     request = models.ForeignKey(Request, on_delete=models.CASCADE, related_name='user_requests')
     status = models.CharField(max_length=64)
-    uploads = models.CharField(max_length=256)
+    uploads = models.CharField(max_length=999)
+    requested = models.CharField(max_length=256, default="")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    def uploads_as_list(self):
+        return self.uploads.split('')
