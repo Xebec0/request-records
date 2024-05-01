@@ -27,9 +27,6 @@
                             <div class="card-header">
                                 <div class="d-flex justify-content-between align-items-center">
                                     <span class="fs-6"> <i class="fa fa-plus" aria-hidden="true"></i> Create Requests</span>
-                                    <button type="button" class="btn btn-sm btn-primary ms-auto" data-bs-toggle="modal" data-bs-target="#createRequestModal">
-                                        <i class="fas fa-plus me-2"></i> Create New Request
-                                    </button>
                                 </div>
                             </div>
                             <div class="card-body h-100 p-4">
@@ -76,6 +73,23 @@
 
 
         <script>
+            function showToast(options) {
+                let toast = Toastify({
+                    text: options.message,
+                    duration: 2000,
+                    newWindow: true,
+                    close: true,
+                    gravity: "top",
+                    position: "right",
+                    stopOnFocus: true,
+                    style: {
+                        background: options.color,
+                    },
+                });
+
+                toast.showToast();
+            }
+
             $(document).ready(function() {
                 // Events
                 $('#btnCreate').click(function() {
@@ -84,24 +98,6 @@
                     showToast({message: "Creating request form please wait..."})
                     getRequest(selectedRequest.value, createRequestForm);
                 });
-
-                // Methods
-                function showToast(options){
-                    let toast = Toastify({
-                        text: options.message,
-                        duration: 2000,
-                        newWindow: true,
-                        close: true,
-                        gravity: "top",
-                        position: "right",
-                        stopOnFocus: true,
-                        style: {
-                            background: options.color,
-                        },
-                    });
-
-                    toast.showToast(); 
-                }
 
                 // Web services
                 function getRequest(id, successCallBack, errorCallBack){
@@ -131,11 +127,10 @@
                     container.appendChild(h2ForRequiredFiles);
 
                     // Create textarea for description
-                    const descriptionTextarea = document.createElement("textarea");
+                    const descriptionTextarea = document.createElement("p");
                     descriptionTextarea.id = "description";
                     descriptionTextarea.name = "description";
                     descriptionTextarea.textContent = data.description;
-                    descriptionTextarea.classList.add("form-control", "mb-3"); // Add Bootstrap classes
                     container.appendChild(descriptionTextarea);
 
                     // Create label
@@ -161,6 +156,7 @@
                         fileInput.setAttribute("type", "file");
                         fileInput.setAttribute("id", requiredFile);
                         fileInput.classList.add("form-control");
+                        fileInput.required = true;
 
                         fileInputContainer.appendChild(fileLabel);
                         fileInputContainer.appendChild(fileInput);
@@ -180,6 +176,10 @@
                 }
 
                 function submitRequest(id){
+                    if (!validateForm()) {
+                        showToast({ message: 'Form submission failed due to missing required files.', color: '#FF0000' });
+                        return; // Do not proceed with form submission
+                    }
                     const files = document.querySelectorAll('input[type="file"]');
                     var csrftoken = getCookie('csrftoken');
 
@@ -243,7 +243,20 @@
                         }
                     }
                 return cookieValue;
-            }            
+            }
+            
+            function validateForm() {
+                const fileInputs = document.querySelectorAll('input[type="file"][required]');
+                let isValid = true;
+
+                fileInputs.forEach(input => {
+                    if (!input.value) {
+                    isValid = false;
+                    }
+                });
+
+                return isValid;
+            }
         </script>
     </body>
 </html>

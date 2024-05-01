@@ -1,32 +1,78 @@
+{% load static %}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
-    {% load static %}
+    
     {% include 'header.html' %}
 </head>
-<body>
+<body class="sb-nav-fixed">
 
-    
-    <table>
-        <th>Document</th>
-        <th>Status</th>
-        <th>Requested File</th>
-        {% if user_requests %}
-            {% for user_request in user_requests %}
-                <tr>
-                    <td> {{ user_request.request }} </td>
-                    <td> {{ user_request.status }} </td>
-                    <td>
-                        <a href="{% static user_request.requested  %}" download> Download </a>
-                    </td>
-                </tr>
-            {% endfor %}
-        {% endif %}
-    </table>
+    {% include 'user/user-topnav.html' %}
 
+    <div id="layoutSidenav">
+        {% include 'user/user-sidenav.html' %}
+
+        <div id="layoutSidenav_content">
+            <main>
+                <div class="container-fluid px-4">
+                    <h1 class="mt-4">List of user requests</h1>
+                    <ol class="breadcrumb mb-4">
+                        <li class="breadcrumb-item active">List of user request status and information</li>
+                    </ol>
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="fs-6">Requests</span>
+                            </div>
+                        </div>
+                        <div class="card-body">                         
+
+                            <table id="datatable">
+                                <th>Document</th>
+                                <th>Status</th>
+                                <th>Requested File</th>
+                                {% if user_requests %}
+                                    {% for user_request in user_requests %}
+                                        <tr>
+                                            <td>{{ user_request.request }}</td>
+                                            <td>{{ user_request.status }}</td>
+                                            <td>
+                                                {% if user_request.requested %}
+                                                    <a href="{% static user_request.requested %}" download>Download</a>
+                                                {% else %}
+                                                    In process
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                {% endif %}
+                            </table>
+
+                            
+                        </div>                            
+                        
+                    </div>
+                </div>
+            </main>
+            <footer class="py-4 bg-light mt-auto">
+                <div class="container-fluid px-4">
+                    <div class="d-flex align-items-center justify-content-between small">
+                        <div class="text-muted">Copyright &copy; Academic File Request System 2024</div>
+                        <div>
+                            <a href="#">Privacy Policy</a>
+                            &middot;
+                            <a href="#">Terms &amp; Conditions</a>
+                        </div>
+                    </div>
+                </div>
+            </footer>
+        </div>
+
+    </div>
 
     <footer class="py-4 bg-light mt-auto">
         <div class="container-fluid px-4">
@@ -40,6 +86,12 @@
             </div>
         </div>
     </footer>
+    
     {% include 'footer.html' %}     
+    <script>
+        $('#datatable').DataTable({
+                responsive: true
+            });
+    </script>
 </body>
 </html>
