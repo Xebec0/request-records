@@ -1,11 +1,13 @@
 /* Google Font Link */
 @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600;700&display=swap");
+
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
   font-family: "Poppins", sans-serif;
 }
+
 body {
   min-height: 100vh;
   display: flex;
@@ -16,6 +18,7 @@ body {
   background-position: center;
   padding: 30px;
 }
+
 .container {
   position: relative;
   max-width: 850px;
@@ -25,6 +28,7 @@ body {
   box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
   perspective: 2700px;
 }
+
 .container .cover {
   position: absolute;
   top: 0;
@@ -36,9 +40,11 @@ body {
   transform-origin: left;
   transform-style: preserve-3d;
 }
-.container #flip:checked ~ .cover {
+
+.container #flip:checked~.cover {
   transform: rotateY(-180deg);
 }
+
 .container .cover .front,
 .container .cover .back {
   position: absolute;
@@ -47,10 +53,12 @@ body {
   height: 100%;
   width: 100%;
 }
+
 .cover .back {
   transform: rotateY(180deg);
   backface-visibility: hidden;
 }
+
 .container .cover::before,
 .container .cover::after {
   content: "";
@@ -61,11 +69,13 @@ body {
   opacity: 0.5;
   z-index: 12;
 }
+
 .container .cover::after {
   opacity: 0.3;
   transform: rotateY(180deg);
   backface-visibility: hidden;
 }
+
 .container .cover img {
   position: absolute;
   height: 100%;
@@ -73,6 +83,7 @@ body {
   object-fit: cover;
   z-index: 10;
 }
+
 .container .cover .text {
   position: absolute;
   z-index: 130;
@@ -83,6 +94,7 @@ body {
   align-items: center;
   justify-content: center;
 }
+
 .cover .text .text-1,
 .cover .text .text-2 {
   font-size: 26px;
@@ -90,30 +102,36 @@ body {
   color: #fff;
   text-align: center;
 }
+
 .cover .text .text-2 {
   font-size: 15px;
   font-weight: 500;
 }
+
 .container .forms {
   height: 100%;
   width: 100%;
   background: #fff;
 }
+
 .container .form-content {
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
+
 .form-content .login-form,
 .form-content .signup-form {
   width: calc(100% / 2 - 25px);
 }
+
 .forms .form-content .title {
   position: relative;
   font-size: 24px;
   font-weight: 500;
   color: #333;
 }
+
 .forms .form-content .title:before {
   content: "";
   position: absolute;
@@ -123,12 +141,15 @@ body {
   width: 25px;
   background: #7d2ae8;
 }
+
 .forms .signup-form .title:before {
   width: 20px;
 }
+
 .forms .form-content .input-boxes {
   margin-top: 30px;
 }
+
 .forms .form-content .input-box {
   display: flex;
   align-items: center;
@@ -137,7 +158,9 @@ body {
   margin: 10px 0;
   position: relative;
 }
-.form-content .input-box input {
+
+.form-content .input-box input,
+.form-content .input-box select {
   height: 100%;
   width: 100%;
   outline: none;
@@ -148,31 +171,41 @@ body {
   border-bottom: 2px solid rgba(0, 0, 0, 0.2);
   transition: all 0.3s ease;
 }
+
 .form-content .input-box input:focus,
-.form-content .input-box input:valid {
+.form-content .input-box input:valid,
+.form-content .input-box select:focus,
+.form-content .input-box select:valid {
   border-color: #7d2ae8;
 }
+
 .form-content .input-box i {
   position: absolute;
   color: #7d2ae8;
   font-size: 17px;
 }
+
 .forms .form-content .text {
   font-size: 14px;
   font-weight: 500;
   color: #333;
 }
+
 .forms .form-content .text a {
   text-decoration: none;
 }
+
 .forms .form-content .text a:hover {
   text-decoration: underline;
 }
+
 .forms .form-content .button {
   color: #fff;
   margin-top: 40px;
 }
-.forms .form-content .button input {
+
+.forms .form-content .button input,
+.forms .form-content .button select {
   color: #fff;
   background: #7d2ae8;
   border-radius: 6px;
@@ -180,39 +213,62 @@ body {
   cursor: pointer;
   transition: all 0.4s ease;
 }
+
 .forms .form-content .button input:hover {
   background: #5b13b9;
 }
+
 .forms .form-content label {
   color: #5b13b9;
   cursor: pointer;
 }
+
 .forms .form-content label:hover {
   text-decoration: underline;
 }
+
 .forms .form-content .login-text,
 .forms .form-content .sign-up-text {
   text-align: center;
   margin-top: 25px;
 }
+
 .container #flip {
   display: none;
 }
+
+input[type="file"] {
+  display: none;
+}
+
+.custom-file-upload {
+  width: 100%;
+  border: 1px solid #ccc;
+  display: inline-block;
+  padding: 6px 12px;
+  cursor: pointer;
+  text-decoration: none !important;
+}
+
 @media (max-width: 730px) {
   .container .cover {
     display: none;
   }
+
   .form-content .login-form,
   .form-content .signup-form {
     width: 100%;
   }
+
   .form-content .signup-form {
     display: none;
   }
-  .container #flip:checked ~ .forms .signup-form {
+
+  .container #flip:checked~.forms .signup-form {
     display: block;
   }
-  .container #flip:checked ~ .forms .login-form {
+
+  .container #flip:checked~.forms .login-form {
     display: none;
   }
 }

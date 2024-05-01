@@ -108,6 +108,21 @@
                     placeholder="Enter your password"
                   />
                 </div>
+
+                <div class="input-box">
+                  <i class="fas fa-user"></i>
+                    <select name="user_type">
+                      <option value="1">I am a faculty</option>
+                      <option value="2" selected>I am a student</option>
+                    </select>
+                </div>
+
+                <!-- Upload picture -->
+                <div class="input-box" style="text-align: center;">
+                  <label for="formFile" class="custom-file-upload">Upload a proof of school affiliation</label>
+                  <input class="form-control" type="file" name="formFile" id="formFile">
+                </div>
+
                 <div class="button input-box">
                   <input id="btnSignUp" type="submit" value="Sumbit" />
                 </div>
