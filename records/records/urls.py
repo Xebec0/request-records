@@ -38,6 +38,10 @@ urlpatterns = [
     path('admin-panel/dashboard/', views.admin_dashboard, name="admin_dashboard"),
     path('admin-panel/', views.admin_dashboard, name="admin_dashboard"),
 
+    # User - Dashboard
+    path('user/dashboard/', views.user_dashboard),
+    path('user/', views.user_dashboard),
+
     # Request - Admin
     path('request/', request.index),
     path('admin-panel/request/', request.index),
@@ -50,8 +54,11 @@ urlpatterns = [
     # Request - User
     path('request/user/', request_user.index),
     path('request/<int:id>/', request_user.get_request),
+    path('get-document-description/<str:doc_code>/', request_user.get_document_description),
     path('request/user/create/', request_user.create_request),
-    path('user/request/', request_user.display_user_requests),
+
+    path('user/create-request/', request_user.index),
+    path('user/view-request/', request_user.display_user_requests),
 
     # Code Table (This is where to update code tables)
     path('codetable/', codetable.index),
