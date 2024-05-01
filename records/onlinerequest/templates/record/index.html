@@ -10,12 +10,6 @@
         <link rel="stylesheet" href="">
 
         {% include 'header.html' %}
-
-        <style>
-            table.dataTable thead th{
-                padding: 10px;
-            }
-        </style>
     </head>
     <body class="sb-nav-fixed">
         <div id="layoutSidenav">
@@ -50,10 +44,9 @@
                                             <th>First Name</th>
                                             <th>Last Name</th>
                                             <th>Course Code</th>
-                                            <th>Action</th>
                                         </tr>
                                         </thead>
-                                        <tbody id="recordsTable"></tbody>
+                                        <tbody></tbody>
                                     </table>
                                 </div>
 
@@ -203,23 +196,11 @@
                             { data: 'fields.user_number' },
                             { data: 'fields.first_name' },
                             { data: 'fields.last_name' },
-                            { data: 'fields.course_code' },
-                            {
-                                data: null,
-                                render: function (data, type, row) {
-                                    return '<button class="btn btn-sm btn-primary delete-btn">Delete</button>';
-                                }
-                            }
+                            { data: 'fields.course_code' }
                         ],
-                        
-                        responsive: true
-                    });
 
-                    // Add event listener for delete buttons
-                    // $('#datatable tbody').on('click', '.delete-btn', function () {
-                    //     var rowData = table.row($(this).parents('tr')).data();
-                    //     deleteRequest(rowData.pk);
-                    // });
+                        responsive: true
+                    });              
                 }
 
                 function initModalEvents() {
