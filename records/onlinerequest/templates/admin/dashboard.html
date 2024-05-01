@@ -10,6 +10,9 @@
         <meta name="author" content="" />
         <title>Dashboard - SB Admin</title>
         {% include 'header.html' %}
+
+        <!-- Custom CSS -->
+        <link rel="stylesheet" href="{% static 'css/admin-dashboard.css' %}" />
     </head>
 
     <body class="sb-nav-fixed">
@@ -38,16 +41,13 @@
             <div id="layoutSidenav_content">
                 <main>
                     <div class="container-fluid px-4">
-                        <h1 class="mt-4">Dashboard</h1>
-                        <ol class="breadcrumb mb-4">
-                            <li class="breadcrumb-item active">Dashboard</li>
-                        </ol>
-                        <div class="card mb-4">
-                            <div class="card-header">
+
+                        <div class="card my-3">
+                            <!-- <div class="card-header">
                                 Dashboard elements goes here
-                            </div>
-                            <div class="card-body">
-                                <!-- datatablesSimple -->
+                            </div> -->
+                            <div class="card-body text-white">
+                                <h1>Dashboard</h1>
                             </div>
                         </div>
                     </div>
