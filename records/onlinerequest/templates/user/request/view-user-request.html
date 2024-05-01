@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    {% include 'header.html' %}
+    {% load static %}
+</head>
+<body>
+    <table>
+        <th>Document</th>
+        <th>Status</th>
+        <th>Requested File</th>
+        {% if user_requests %}
+            {% for user_request in user_requests %}
+                <tr>
+                    <td> {{ user_request.request }} </td>
+                    <td> {{ user_request.status }} </td>
+                    <td>
+                        <a href="{% static user_request.requested  %}" download> Download </a>
+                    </td>
+                </tr>
+            {% endfor %}
+        {% endif %}
+    </table>
+    <footer class="py-4 bg-light mt-auto">
+        <div class="container-fluid px-4">
+            <div class="d-flex align-items-center justify-content-between small">
+                <div class="text-muted">Copyright &copy; Academic File Request System 2024</div>
+                <div>
+                    <a href="#">Privacy Policy</a>
+                    &middot;
+                    <a href="#">Terms &amp; Conditions</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+    {% include 'footer.html' %}     
+</body>
+</html>
