@@ -127,3 +127,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTH_USER_MODEL = 'onlinerequest.User'
 
 AUTHENTICATION_BACKENDS = ['onlinerequest.backends.EmailBackend']
+
+# Middleware
+LOGIN_REDIRECT_URL=''

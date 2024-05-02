@@ -7,13 +7,15 @@ from ..models import User_Request
 from ..models import Document
 from ..models import Requirement
 from django.core import serializers
-
+from django.contrib.auth.decorators import login_required
 import os
 
+@login_required
 def index(request):
     all_requests = Request.objects.all()
     return render(request, 'user/request/index.html', {'all_requests': all_requests})
 
+@login_required
 def create_request(request):
     request_form = Request.objects.get(id = request.POST.get('id'))
     user = request.user
@@ -41,16 +43,18 @@ def create_request(request):
     
     return JsonResponse({"success" : True})
 
-
+@login_required
 def display_user_requests(request):
     user_requests = User_Request.objects.filter(user = request.user)
     return render(request, 'user/request/view-user-request.html', {'user_requests': user_requests})
 
+@login_required
 def get_request(request, id): 
     request = Request.objects.get(id = id)
     request_json = serializers.serialize('json', [request])
     return JsonResponse(request_json, safe=False)
 
+@login_required
 def handle_uploaded_file(source, file):
     # Define the path where you want to save the file
     static_dir = os.path.join(settings.MEDIA_ROOT, 'onlinerequest', 'static', 'user_request', str(source))
@@ -68,6 +72,7 @@ def handle_uploaded_file(source, file):
 
     return file_path
 
+@login_required
 def get_document_description(request, doc_code):
     try:
         document = Requirement.objects.get(code=doc_code)

@@ -8,7 +8,7 @@ from onlinerequest.views import request
 from onlinerequest.views import request_user
 from onlinerequest.views import record
 from onlinerequest.views import codetable
-from onlinerequest.views import admin_user_requests
+from onlinerequest.views import user_approval_view
 
 # Define URL paths here
 urlpatterns = [
@@ -56,7 +56,6 @@ urlpatterns = [
     path('request/<int:id>/', request_user.get_request),
     path('get-document-description/<str:doc_code>/', request_user.get_document_description),
     path('request/user/create/', request_user.create_request),
-
     path('user/create-request/', request_user.index),
     path('user/view-request/', request_user.display_user_requests),
 
@@ -64,5 +63,5 @@ urlpatterns = [
     path('codetable/', codetable.index),
     path('admin-panel/codetable/', codetable.index),
 
-    path('admin-panel/user-accounts/', admin_user_requests.index),
+    path('admin-panel/user-accounts/', user_approval_view.index),
 ]
