@@ -6,30 +6,79 @@
     <title>Document</title>
     {% include 'header.html' %}
 </head>
-<body>
-    <table>
-        <tr>
-          <th>User Number</th>
-          <th>Email</th>
-          <th>Type</th>
-          <th>Action</th>
-        </tr>
-        {% if users %}
-        {% for user in users %}
-        <tr id="tr{{ user.id }}">
-            <td>{{ user.student_number }}</td>
-            <td>{{ user.email }}</td>
-            <td>{{ user.get_user_type_display }}</td>
-            <td>
-                <button onclick="approveUser('{{ user.id }}')">Approve</button>
-            </td>
-        </tr>
-        {% endfor %}
-        {% endif %}
-    </table>
-    <footer>
-        {% include 'footer.html' %}
-    </footer>
+<body class="sb-nav-fixed">
+    {% include 'admin/admin-topnav.html' %}
+
+    <div id="layoutSidenav">
+            
+        {% include 'admin/admin-sidenav.html' %}
+
+        <div id="layoutSidenav_content">
+            <main>
+                <div class="container-fluid px-4">
+                    <h1 class="mt-4">Approve user accounts</h1>
+                    <ol class="breadcrumb mb-4">
+                        <li class="breadcrumb-item active">Check new user signups, approve them</li>
+                    </ol>
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="fs-6"> <i class="fa fa-list" aria-hidden="true"></i> Existing Forms</span>
+                                <button type="button" class="btn btn-sm btn-primary ms-auto" data-bs-toggle="modal" data-bs-target="#createRequestModal">
+                                    <i class="fas fa-plus me-2"></i> Create New Request
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                           
+                            <table id="datatable">
+                                <thead>
+                                <tr>
+                                  <th>User Number</th>
+                                  <th>Email</th>
+                                  <th>Type</th>
+                                  <th>Action</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% if users %}
+                                {% for user in users %}
+                                <tr id="tr{{ user.id }}">
+                                    <td>{{ user.student_number }}</td>
+                                    <td>{{ user.email }}</td>
+                                    <td>{{ user.get_user_type_display }}</td>
+                                    <td>
+                                        <button class="btn btn-primary btn-sm" onclick="approveUser('{{ user.id }}')">Approve</button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                                {% endif %}
+                                </tbody>
+                            </table>
+
+                        </div>                            
+                       
+                    </div>
+                </div>
+            </main>
+            <footer class="py-4 bg-light mt-auto">
+                <div class="container-fluid px-4">
+                    <div class="d-flex align-items-center justify-content-between small">
+                        <div class="text-muted">Copyright &copy; Academic File Request System 2024</div>
+                        <div>
+                            <a href="#">Privacy Policy</a>
+                            &middot;
+                            <a href="#">Terms &amp; Conditions</a>
+                        </div>
+                    </div>
+                </div>
+            </footer>
+        </div>
+
+    </div>
+
+    {% include 'footer.html' %}
+
     <script>
         function showToast(options){
             let toast = Toastify({
@@ -101,6 +150,10 @@
             }
             return cookieValue;
         }
+
+        $('#datatable').DataTable({
+                responsive: true
+        });
     </script>
 </body>
 </html>

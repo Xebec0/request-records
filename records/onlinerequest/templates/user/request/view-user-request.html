@@ -32,9 +32,12 @@
                         <div class="card-body">                         
 
                             <table id="datatable">
-                                <th>Document</th>
-                                <th>Status</th>
-                                <th>Requested File</th>
+                                <thead>
+                                    <th>Document</th>
+                                    <th>Status</th>
+                                    <th>Requested File</th>
+                                </thead>
+                                <tbody>
                                 {% if user_requests %}
                                     {% for user_request in user_requests %}
                                         <tr>
@@ -42,7 +45,7 @@
                                             <td>{{ user_request.status }}</td>
                                             <td>
                                                 {% if user_request.requested %}
-                                                    <a href="{% static user_request.requested %}" download>Download</a>
+                                                    <a class="btn btn-primary btn-sm" href="{% static user_request.requested %}" download>Download</a>
                                                 {% else %}
                                                     In process
                                                 {% endif %}
@@ -50,6 +53,7 @@
                                         </tr>
                                     {% endfor %}
                                 {% endif %}
+                                </tbody>
                             </table>
 
                             
@@ -91,7 +95,7 @@
     <script>
         $('#datatable').DataTable({
                 responsive: true
-            });
+        });
     </script>
 </body>
 </html>

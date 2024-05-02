@@ -61,9 +61,12 @@
                                     <div class="col-md-6">
                                         <div class="mb-3">
                                             <label for="requestedFile" class="form-label fw-bold">Upload requested file:</label>
-                                            <input type="file" class="form-control" id="requestedFile" name="file" required>
+                                            <input type="file" class="form-control" id="requestedFile" name="file">
                                         </div>
-                                        <button class="btn btn-success" id="btnApproveRequest" onclick="approveRequest('{{user_request.id}}')">Approve request</button>
+                                        <div class="d-flex">
+                                            <input type="text" class="form-control me-2" id="newStatus" placeholder="Enter new status">
+                                            <button class="btn btn-success" id="btnUpdateStatus" onclick="updateStatus('{{user_request.id}}')">Update Status</button>
+                                        </div>
                                     </div>
                                 </div>
                                 {% endif %}
@@ -108,16 +111,49 @@
                 toast.showToast();
             }
 
-            function approveRequest(id){
+            function updateStatus(id) {
                 var csrftoken = getCookie('csrftoken');
+                let newStatus = document.getElementById("newStatus").value;
                 let formData = new FormData();
-                let file = document.getElementById("requestedFile");
-                formData.append('requested_file', file.files[0]);
+                let fileInput = document.getElementById("requestedFile");
+
+                // Validate input
+                if (newStatus.trim() === "") {
+                    showToast({
+                        'message': 'Status cannot be blank',
+                        'color': '#FF0000',
+                        'duration': 4000,
+                    });
+                    return;
+                }
+
+                if (/[^a-zA-Z0-9\s]/.test(newStatus)) {
+                    showToast({
+                        'message': 'Status cannot contain special characters',
+                        'color': '#FF0000',
+                        'duration': 4000,
+                    });
+                    return;
+                }
+
+                formData.append('new_status', newStatus);
+
+                if (newStatus.toLowerCase() === "completed") {
+                    if (fileInput.files.length === 0) {
+                        showToast({
+                            'message': 'Please upload a file before marking the request as "Completed"',
+                            'color': '#FF0000',
+                            'duration': 4000,
+                        });
+                    } else {
+                        formData.append('requested_file', fileInput.files[0]);
+                    }
+                }
 
                 // Send AJAX POST request
                 $.ajax({
                     type: 'POST',
-                    url: '/admin-panel/user-request/' + id, 
+                    url: '/admin-panel/user-request/' + id,
                     data: formData,
                     processData: false,
                     contentType: false,
@@ -133,11 +169,7 @@
 
                         if (response.status) {
                             let status = document.getElementById("requestStatus");
-                            let btnApproveRequest = document.getElementById("btnApproveRequest");
-                            let fileInput = document.getElementById("requestedFile");
                             status.textContent = response.request_status
-                            fileInput.disabled = true;
-                            btnApproveRequest.disabled = true;
                         }
                     },
                     error: function(xhr, errmsg, err) {

@@ -64,5 +64,5 @@ urlpatterns = [
     path('codetable/', codetable.index),
     path('admin-panel/codetable/', codetable.index),
 
-    path('admin-panel/users/requests/', admin_user_requests.index),
+    path('admin-panel/user-accounts/', admin_user_requests.index),
 ]

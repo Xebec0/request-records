@@ -34,23 +34,24 @@ def display_user_requests(request):
 
 def display_user_request(request, id):
     if request.method == "POST":
-
+        new_status = request.POST.get('new_status')
         requested_file = request.FILES.get('requested_file')
 
-        if requested_file is None:
-            return JsonResponse({'status': False, 'message' : "Please submit the requested file before approving the request."})
-
-        file_path = handle_uploaded_file(id, requested_file)
-
         # Update user_request
-        user_request = User_Request.objects.get(id = id)
-        user_request.requested = file_path
-        user_request.status = "Completed"
+        user_request = User_Request.objects.get(id=id)
+
+        if new_status.lower() == "completed":
+            if requested_file is None:
+                return JsonResponse({'status': False, 'message': "Please upload a file before marking the request as 'Completed'"})
+            file_path = handle_uploaded_file(id, requested_file)
+            user_request.requested = file_path
+
+        user_request.status = new_status
         user_request.save()
 
-        return JsonResponse({'status': True, 'message': 'Request completed. Please head back to the request tab.', 'request_status' : user_request.status})
+        return JsonResponse({'status': True, 'message': 'Request status updated successfully.', 'request_status': user_request.status})
     else:
-        user_request = User_Request.objects.get(id = id)
+        user_request = User_Request.objects.get(id=id)
 
         uploads = []
         for record in user_request.uploads.split(','):
@@ -62,14 +63,14 @@ def display_user_request(request, id):
             if user_request_upload:
                 upload = user_request_upload.replace("<", "").replace(">", "").split('&')
                 uploads.append({
-                    'code' : getCodeDescription(Requirement, upload[0]),
-                    'path' : upload[1]
+                    'code': getCodeDescription(Requirement, upload[0]),
+                    'path': upload[1]
                 })
 
         context = {
             'user_request': user_request,
             'uploads': uploads,
-        }      
+        }
 
     return render(request, 'admin/request/view-user-request.html', context)
 

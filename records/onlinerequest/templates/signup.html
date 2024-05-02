@@ -176,11 +176,25 @@
               });
 
               if (response.status) {
+
+                if (isSignUpForm) {
+                  // Show success toast for signup
+                  showToast({
+                    message: "Sign up successful!",
+                    color: "#008000",
+                  });
+
+                  setTimeout(() => {
+                  window.location.href = "/signup/";
+                }, 2000);
+                }else{
+                  setTimeout(() => {
+                  window.location.href = "/user/";
+                }, 2000);
+                }
+
                 enableControls($form, false);
 
-                setTimeout(() => {
-                  window.location.href = "/";
-                }, 2000);
               }
             },
             error: function (xhr, errmsg, err) {
