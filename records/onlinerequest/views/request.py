@@ -6,16 +6,10 @@ from ..models import Request
 from ..models import Requirement
 from ..models import User_Request
 from ..serializers import RequestSerializer
-from django.contrib.auth.decorators import login_required
-from django.http import HttpResponseForbidden
 from django.conf import settings
 import os
 
-@login_required
 def index(request):
-    if request.user.user_type != "5":
-        return HttpResponseForbidden("You do not have permission to access this route.")
-
     if request.method == "POST":
         post_document = request.POST.get("documents")
         post_files_required = request.POST.get("requirements")
@@ -33,19 +27,11 @@ def index(request):
         requirements = Requirement.objects.all()
         return render(request, 'admin/request/index.html', {'documents': documents, 'requirements': requirements})
 
-@login_required
-def display_user_requests(request):
-    if request.user.user_type != "5":
-        return HttpResponseForbidden("You do not have permission to access this route.")
-    
+def display_user_requests(request):    
     user_requests = User_Request.objects.all()
     return render(request, 'admin/request/user-request.html', {'user_requests': user_requests })
 
-@login_required
 def display_user_request(request, id):
-    if request.user.user_type != "5":
-        return HttpResponseForbidden("You do not have permission to access this route.")
-
     if request.method == "POST":
         new_status = request.POST.get('new_status')
         requested_file = request.FILES.get('requested_file')
@@ -91,21 +77,13 @@ def getCodeDescription(model, key):
     model_instance = model.objects.get(code = key)
     return model_instance.description
 
-@login_required
 def delete_user_request(request, id):
-    if request.user.user_type != "5":
-        return HttpResponseForbidden("You do not have permission to access this route.")
-    
     user_request = User_Request.objects.get(id = id)
     user_request.delete()
 
     return JsonResponse({'status' : True, 'message': "Deleted succesfully."})
     
-@login_required
 def delete_request(request, id):
-    if request.user.user_type != "5":
-        return HttpResponseForbidden("You do not have permission to access this route.")
-
     request = Request.objects.get(id=id)
     deleted = request.delete()
 
@@ -114,11 +92,7 @@ def delete_request(request, id):
     else:
         return JsonResponse({'False': True, 'message': 'Invalid row'})
     
-@login_required
 def get_requests(request):
-    if request.user.user_type != "5":
-        return HttpResponseForbidden("You do not have permission to access this route.")
-    
     requests = Request.objects.all()
     requests_json = RequestSerializer(requests, many=True).data  # Serialize the queryset
     return JsonResponse(requests_json, safe=False)

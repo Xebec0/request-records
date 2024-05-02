@@ -204,9 +204,13 @@
                         },
                         success: function(response) {
                             showToast({
-                                'message': response.message,
+                                'message': 'Request submitted successfully!',
                                 'color': response.status ? '#008000' : '#FF0000'
-                            })
+                            });
+
+                            setTimeout(function () {
+                                window.location.href = '/user/view-request/';
+                            }, 1500);
                         },
                         error: function(xhr, errmsg, err) {
                         console.log(errmsg);
