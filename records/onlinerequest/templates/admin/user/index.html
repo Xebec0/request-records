@@ -31,30 +31,33 @@
                         </div>
                         <div class="card-body">
                            
-                            <table id="datatable">
-                                <thead>
-                                <tr>
-                                  <th>User Number</th>
-                                  <th>Email</th>
-                                  <th>Type</th>
-                                  <th>Action</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                {% if users %}
-                                {% for user in users %}
-                                <tr id="tr{{ user.id }}">
-                                    <td>{{ user.student_number }}</td>
-                                    <td>{{ user.email }}</td>
-                                    <td>{{ user.get_user_type_display }}</td>
-                                    <td>
-                                        <button class="btn btn-primary btn-sm" onclick="approveUser('{{ user.id }}')">Approve</button>
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                                {% endif %}
-                                </tbody>
-                            </table>
+                            <form id="approveForm" method="POST">
+                                {% csrf_token %}
+                                <table id="datatable">
+                                    <thead>
+                                        <tr>
+                                            <th>User Number</th>
+                                            <th>Email</th>
+                                            <th>Type</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% if users %}
+                                        {% for user in users %}
+                                        <tr id="tr{{ user.id }}">
+                                            <td>{{ user.student_number }}</td>
+                                            <td>{{ user.email }}</td>
+                                            <td>{{ user.get_user_type_display }}</td>
+                                            <td>
+                                                <button class="btn btn-primary btn-sm" type="button" onclick="approveUser('{{ user.id }}')">Approve</button>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                        {% endif %}
+                                    </tbody>
+                                </table>
+                            </form>                            
 
                         </div>                            
                        
@@ -98,21 +101,17 @@
         }        
 
         function approveUser(userId){
-            var csrftoken = getCookie('csrftoken');
-
-            var formData = new FormData($('form')[0]);
+            var form = document.getElementById('approveForm');
+            var formData = new FormData(form);
             formData.append('user_id', userId);
 
             // Send AJAX POST request
             $.ajax({
                 type: "POST",
                 data: formData,
-                url: '/admin-panel/users/requests/',
+                url: '/admin-panel/user-accounts/',
                 processData: false,
                 contentType: false,
-                headers: {
-                    'X-CSRFToken': csrftoken
-                },
                 success: function (response) {
                     showToast({
                         message: response.message,
@@ -131,25 +130,6 @@
             let row = document.getElementById("tr" + userId);
             row.innerHTML = "";
         } 
-
-        
-        // Function to get CSRF cookie value
-        function getCookie(name) {
-            var cookieValue = null;
-            
-            if (document.cookie && document.cookie !== '') {
-                var cookies = document.cookie.split(';');
-                for (var i = 0; i < cookies.length; i++) {
-                    var cookie = cookies[i].trim();
-                    // Does this cookie string begin with the name we want?
-                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                        break;
-                    }
-                }        
-            }
-            return cookieValue;
-        }
 
         $('#datatable').DataTable({
                 responsive: true

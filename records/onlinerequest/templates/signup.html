@@ -15,11 +15,8 @@
     <!-- Jquery -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <!-- Toastify -->
-    <link
-      rel="stylesheet"
-      type="text/css"
-      href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css"
-    />
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     <!-- Custom CSS -->
     <link rel="stylesheet" href="{% static 'css/signup.css' %}" />
   </head>
@@ -117,12 +114,6 @@
                     </select>
                 </div>
 
-                <!-- Upload picture -->
-                <div class="input-box" style="text-align: center;">
-                  <label for="formFile" class="custom-file-upload">Upload a proof of school affiliation</label>
-                  <input class="form-control" type="file" name="formFile" id="formFile">
-                </div>
-
                 <div class="button input-box">
                   <input id="btnSignUp" type="submit" value="Sumbit" />
                 </div>
@@ -162,7 +153,7 @@
           var formData = $(this).serialize();
           var $form = $(this);
           var isSignUpForm = $("#flip").prop("checked");
-          var url = isSignUpForm ? "/register/" : "/login/";
+          var url = isSignUpForm ? '/register/' : '/login/';
 
           // Send AJAX POST request
           $.ajax({
@@ -176,25 +167,30 @@
               });
 
               if (response.status) {
-
                 if (isSignUpForm) {
-                  // Show success toast for signup
-                  showToast({
-                    message: "Sign up successful!",
-                    color: "#008000",
-                  });
-
                   setTimeout(() => {
-                  window.location.href = "/signup/";
-                }, 2000);
-                }else{
+                    window.location.href = "/signup/";
+                  }, 2000);
+                } else {
                   setTimeout(() => {
-                  window.location.href = "/user/";
-                }, 2000);
+                    window.location.href = "/user/";
+                  }, 2000);
                 }
 
                 enableControls($form, false);
-
+              } else {
+                // Display validation errors
+                if (response.errors) {
+                  for (var field in response.errors) {
+                    if (response.errors.hasOwnProperty(field)) {
+                      var errorMessage = response.errors[field][0];
+                      showToast({
+                        message: errorMessage,
+                        color: "#FF0000",
+                      });
+                    }
+                  }
+                }
               }
             },
             error: function (xhr, errmsg, err) {
@@ -229,9 +225,5 @@
         });
       });
     </script>
-    <script
-      type="text/javascript"
-      src="https://cdn.jsdelivr.net/npm/toastify-js"
-    ></script>
   </body>
 </html>
