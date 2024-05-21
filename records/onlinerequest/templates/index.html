@@ -1,33 +1,98 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    {% load static %}
-    <meta charset="utf-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Academic File Request System</title>
-    <meta name="description" content="" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="stylesheet" href="{% static 'css/bootstrap.css' %}" />
-    <link rel="stylesheet" href="{% static 'css/main.css' %}" />
-    <link rel="stylesheet" href="{% static 'css/landing-page.css' %}" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .jumbotron {
+            background-color: #007bff;
+            color: #fff;
+            padding: 4rem 2rem;
+        }
+        .card {
+            border: none;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .card-title {
+            font-weight: bold;
+        }
+        .nav-pills .nav-link.active {
+            background-color: #007bff;
+        }
+    </style>
+</head>
+<body class="d-flex flex-column min-vh-100">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">Academic File Request System</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/signup/">Sign Up</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/login/">Log In</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
 
-    <script src="{% static 'scripts/bootstrap.js' %}"></script>
-  </head>
-  <body>
-    <div class="content-container">
-      <div class="blurred-bg h-100"></div>
-      <div class="content h-100">
-        <h1 class="mt-5 fs-1 text-center text-white">
-          Academic File Request System
-        </h1>
-        <hr />
-        <p class="lead text-center text-white">
-          Your One-Stop Solution for Academic Document Requests
-        </p>
-        <a href="/signup/" class="btn btn-primary">Get Started</a>
-      </div>
+    <div class="jumbotron text-center">
+        <h1 class="display-4">Academic File Request System</h1>
+        <p class="lead">Your One-Stop Solution for Academic Document Requests</p>
+        <hr class="my-4">
+        <a href="/signup/" class="btn btn-light btn-lg">Get Started</a>
     </div>
 
-    
-  </body>
+    <div class="container my-4">
+        <h2 class="text-center mb-4">Request Forms</h2>
+        {% if request_forms %}
+            <div class="row justify-content-center">
+                <div class="col-md-8">
+                    <ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
+                        {% for request_form in request_forms %}
+                            <li class="nav-item" role="presentation">
+                                <a class="nav-link {% if forloop.first %}active{% endif %}" id="pills-{{ request_form.id }}-tab" data-bs-toggle="pill" href="#pills-{{ request_form.id }}" role="tab" aria-controls="pills-{{ request_form.id }}" aria-selected="{% if forloop.first %}true{% else %}false{% endif %}">
+                                    {{ request_form.document.description }}
+                                </a>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                    <div class="tab-content" id="pills-tabContent">
+                        {% for request_form in request_forms %}
+                            <div class="tab-pane fade {% if forloop.first %}show active{% endif %}" id="pills-{{ request_form.id }}" role="tabpanel" aria-labelledby="pills-{{ request_form.id }}-tab">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h5 class="card-title">{{ request_form.document.description }}</h5>
+                                        <p class="card-text">Description: {{ request_form.description }}</p>
+                                        <p class="card-text">Files Required: {{ request_form.files_required }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <p class="text-center">No request forms found.</p>
+        {% endif %}
+    </div>
+
+    <footer class="footer mt-auto bg-dark text-light text-center py-3">
+        <div class="container">
+            <p>&copy; {% now "Y" %} Academic File Request System. All rights reserved.</p>
+        </div>
+    </footer>
+
+    {% include 'footer.html' %}
+</body>
 </html>

@@ -41,7 +41,7 @@
         </div>
         <div class="sb-sidenav-footer">
             <div class="small">Logged in as:</div>
-            Username
-        </div>
+            {{ user_record.first_name|default:'Username' }} {{ user_record.last_name|default:'' }}
+        </div>        
     </nav>
 </div>

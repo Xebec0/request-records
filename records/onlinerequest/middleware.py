@@ -16,7 +16,7 @@ class UserTypeMiddleware:
 
         elif request.user.user_type != 5:
             if request.path.startswith('/admin-panel/'):
-                return redirect('user_dashboard/')  # Redirect non-admin users accessing admin pages
+                return redirect('/user/dashboard/')  # Redirect non-admin users accessing admin pages
 
         response = self.get_response(request)
         return response

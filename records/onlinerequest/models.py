@@ -82,6 +82,7 @@ class Requirement(models.Model):
     def __str__(self):
         return self.description
 
+# Request 
 class Request(models.Model):
     description = models.CharField(max_length=256)
     files_required = models.CharField(max_length=256)
