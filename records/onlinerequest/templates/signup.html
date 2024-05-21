@@ -96,6 +96,16 @@
                     placeholder="Enter your email"
                   />
                 </div>
+                <div class="input-box" id="verificationContainer" style="display: none;">
+                  <i class="fas fa-anchor"></i>
+                  <input
+                    id="verificationCode"
+                    name="verification_code"
+                    type="text"
+                    placeholder="Enter verification code"
+                  />
+                  <button type="button" id="sendVerificationBtn" style="margin-left: 10px;">Get Code</button>
+                </div>
                 <div class="input-box">
                   <i class="fas fa-lock"></i>
                   <input
@@ -129,6 +139,15 @@
 
     <script>
       $(document).ready(function () {
+        $("#signupEmail").on("input", function () {
+          var email = $(this).val();
+          if (email.trim() !== "") {
+            $("#verificationContainer").show();
+          } else {
+            $("#verificationContainer").hide();
+          }
+        });
+
         function showToast(options) {
           let toast = Toastify({
             text: options.message,
@@ -207,6 +226,27 @@
           $form.find("input").prop("disabled", !isEnable);
         }
 
+        $("#sendVerificationBtn").on("click", function () {
+          var email = $("#signupEmail").val();
+          $.ajax({
+            type: "POST",
+            url: "/send-verification-email/",
+            data: {
+              email: email,
+              csrfmiddlewaretoken: $("input[name=csrfmiddlewaretoken]").val(),
+            },
+            success: function (response) {
+              showToast({
+                message: response.message,
+                color: response.status ? "#008000" : "#FF0000",
+              });
+            },
+            error: function (xhr, errmsg, err) {
+              console.log(errmsg);
+            },
+          });
+        });
+
         // Handle form flip
         $("#flip").on("change", function () {
           var isSignUpForm = $(this).prop("checked");
@@ -223,6 +263,8 @@
             enableControls($signUpForm, false);
           }
         });
+
+        
       });
     </script>
   </body>

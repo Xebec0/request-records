@@ -33,6 +33,7 @@ urlpatterns = [
 
     # Signup - Login with Register
     path('signup/', views.signup_view, name="signup"),
+    path('send-verification-email/', register.send_verification_email, name='send_verification_email'),
 
     # Admin - Dashboard
     path('admin-panel/dashboard/', views.admin_dashboard, name="admin_dashboard"),

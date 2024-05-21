@@ -33,6 +33,8 @@ class UserRegistrationForm(forms.ModelForm):
         }
     )
 
+    verification_code = forms.CharField(max_length=6)
+
     def clean_student_number(self):
         student_number = self.cleaned_data.get('student_number')
 

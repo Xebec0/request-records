@@ -16,6 +16,8 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+EMAIL_HOST_USER = 'chesspiecedum2@gmail.com'
+EMAIL_HOST_PASSWORD = 'btoogzanhtonxulo'
 
 # Application definition
 

@@ -1,7 +1,14 @@
+import os
+import json
+import random
+import string
+import smtplib
+from email.mime.text import MIMEText
 from django.shortcuts import render
 from django.http import HttpResponse
 from django.http import JsonResponse
 from django.conf import settings
+from django.views.decorators.http import require_POST
 from ..forms import UserRegistrationForm
 from ..models import RegisterRequest
 from ..models import Course
@@ -9,14 +16,64 @@ from ..models import Record
 from ..models import User
 from ..models import Profile
 
-import os
+def generate_verification_code(length=6):
+    characters = string.ascii_letters + string.digits
+    verification_code = ''.join(random.choice(characters) for _ in range(length))
+    return verification_code
+
+@require_POST
+def send_verification_email(request):
+    email = request.POST.get('email')
+    if email:
+        verification_code = generate_verification_code()
+        request.session['verification_code'] = verification_code
+        request.session['user_email'] = email
+        request.session.set_expiry(300)  # Set expiry to 5 minutes
+
+        send_email_with_code(email, verification_code)
+
+        return JsonResponse({'status': True, 'message': 'Verification code sent to your email'})
+    else:
+        return JsonResponse({'status': False, 'message': 'Email is required'})
+
+def send_email_with_code(email, verification_code):
+    smtp_server = 'smtp.gmail.com'
+    smtp_port = 587
+    smtp_username = settings.EMAIL_HOST_USER
+    smtp_password = settings.EMAIL_HOST_PASSWORD
+
+    subject = 'Email Verification Code'
+    message = f'Your verification code is: {verification_code}'
+
+    msg = MIMEText(message)
+    msg['Subject'] = subject
+    msg['From'] = smtp_username
+    msg['To'] = email
+
+    with smtplib.SMTP(smtp_server, smtp_port) as server:
+        server.starttls()
+        server.login(smtp_username, smtp_password)
+        server.sendmail(smtp_username, email, msg.as_string())
 
 def index(request):
     if request.method == 'POST':
         form = UserRegistrationForm(request.POST)
         if form.is_valid():
-            user = form.save()
-            return JsonResponse({'status': True, 'message': 'User registered successfully'})
+            entered_code = form.cleaned_data.get('verification_code')
+            user = form.save(commit=False)
+            user.is_active = False
+
+            stored_code = request.session.get('verification_code')
+
+            print(f"Entered code: {entered_code}")  # Log the entered code
+            print(f"Stored code: {stored_code}")  # Log the stored code
+
+            if entered_code == stored_code:
+                user.is_active = True
+                user.save()
+                return JsonResponse({'status': True, 'message': 'Registration successful'})
+            else:
+                return JsonResponse({'status': False, 'message': 'Invalid verification code'})
         else:
             errors = form.errors.as_json()
             return JsonResponse({'status': False, 'message': 'Validation errors', 'errors': json.loads(errors)})
@@ -45,5 +102,3 @@ def create_profile(user):
     course = Course.objects.get(course_code = user_record.course_code) # Get course name
     profile = Profile.objects.create(user=user, course = course, first_name = user_record.first_name, last_name = user_record.last_name)
     return profile
-
-    
