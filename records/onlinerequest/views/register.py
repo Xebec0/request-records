@@ -28,26 +28,35 @@ def send_verification_email(request):
         verification_code = generate_verification_code()
         request.session['verification_code'] = verification_code
         request.session['user_email'] = email
-        request.session.set_expiry(300)  # Set expiry to 5 minutes
+        expiry_time = 5  # 5 minutes
+        request.session.set_expiry(expiry_time * 60)
 
-        send_email_with_code(email, verification_code)
+        send_email_with_code(email, verification_code, expiry_time)
 
         return JsonResponse({'status': True, 'message': 'Verification code sent to your email'})
     else:
         return JsonResponse({'status': False, 'message': 'Email is required'})
 
-def send_email_with_code(email, verification_code):
+def send_email_with_code(email, verification_code, expiry_time):
     smtp_server = 'smtp.gmail.com'
     smtp_port = 587
     smtp_username = settings.EMAIL_HOST_USER
     smtp_password = settings.EMAIL_HOST_PASSWORD
 
     subject = 'Email Verification Code'
-    message = f'Your verification code is: {verification_code}'
+    message = f"""
+    <html>
+    <body>
+        <p>This code will expire in <strong style="font-size: 1.2em; color: #c00;">{expiry_time} minutes</strong> or when you leave the registration page.</p>
+        <p style="font-size: 1.1em; color: #333;">Your verification code is:</p>
+        <h1 style="text-align: center; font-size: 3em; color: #007bff; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);"> {verification_code} </h1>
+    </body>
+    </html>
+    """
 
-    msg = MIMEText(message)
+    msg = MIMEText(message, 'html')
     msg['Subject'] = subject
-    msg['From'] = smtp_username
+    msg['From'] = 'Academic Online Request System<{}>'.format(smtp_username)
     msg['To'] = email
 
     with smtplib.SMTP(smtp_server, smtp_port) as server:
@@ -69,14 +78,13 @@ def index(request):
             print(f"Stored code: {stored_code}")  # Log the stored code
 
             if entered_code == stored_code:
-                user.is_active = True
+                user.is_active = False
                 user.save()
                 return JsonResponse({'status': True, 'message': 'Registration successful'})
             else:
                 return JsonResponse({'status': False, 'message': 'Invalid verification code'})
         else:
-            errors = form.errors.as_json()
-            return JsonResponse({'status': False, 'message': 'Validation errors', 'errors': json.loads(errors)})
+            return JsonResponse({'status': False, 'message': 'Please fillup all form requirements'})
     else:
         form = UserRegistrationForm()
     return render(request, 'register.html', {'form': form})

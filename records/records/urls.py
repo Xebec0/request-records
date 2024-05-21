@@ -64,5 +64,9 @@ urlpatterns = [
     path('codetable/', codetable.index),
     path('admin-panel/codetable/', codetable.index),
 
+    # User Approval
     path('admin-panel/user-accounts/', user_approval_view.index),
+
+    # Logout
+    path('logout/', views.logout_view, name='logout'),
 ]
