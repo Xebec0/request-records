@@ -1,14 +1,6 @@
 from django.contrib import admin
 from django.urls import path
-from onlinerequest.views import views
-from onlinerequest.views import register
-from onlinerequest.views import login
-from onlinerequest.views import dummy
-from onlinerequest.views import request
-from onlinerequest.views import request_user
-from onlinerequest.views import record
-from onlinerequest.views import codetable
-from onlinerequest.views import user_approval_view
+from onlinerequest.views import views, register, login, dummy, request, request_user, record, codetable, user_approval_view, profile
 
 # Define URL paths here
 urlpatterns = [
@@ -63,10 +55,11 @@ urlpatterns = [
     # Code Table (This is where to update code tables)
     path('codetable/', codetable.index),
     path('admin-panel/codetable/', codetable.index),
-
     # User Approval
     path('admin-panel/user-accounts/', user_approval_view.index),
-
     # Logout
     path('logout/', views.logout_view, name='logout'),
+    path('admin-panel/user-accounts/', user_approval_view.index),
+    # Profile
+    path('profile/', profile.index)
 ]

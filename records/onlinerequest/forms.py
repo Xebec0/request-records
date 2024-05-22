@@ -1,7 +1,8 @@
 from django import forms
-from .models import User
-from .models import Record
+from .models import User, Record, Profile
 from django.contrib.auth.forms import ReadOnlyPasswordHashField
+from django.core.exceptions import ValidationError
+
 
 class UserRegistrationForm(forms.ModelForm):
     student_number = forms.CharField(
@@ -68,3 +69,26 @@ class UserChangeForm(forms.ModelForm):
 
     def clean_password(self):
         return self.initial["password"]
+
+class ProfileForm(forms.ModelForm):
+    contact_no = forms.IntegerField()
+
+    class Meta:
+        model = Profile
+        fields = '__all__'
+
+    def clean_contact_no(self):
+        contact_no = self.data.get('contact_no')
+
+        if contact_no:
+            # Convert contact_no to a string for slicing
+            contact_no_str = str(contact_no)
+            first_two_digits = contact_no_str[:2]
+
+            if first_two_digits != "09":
+                raise forms.ValidationError("Please enter a valid contact number starting with 09.")
+        
+        return str(contact_no)
+
+
+

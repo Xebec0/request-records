@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
+from django.core.exceptions import ValidationError
 
 # Records
 class Record(models.Model):
@@ -7,6 +8,10 @@ class Record(models.Model):
     first_name = models.CharField(max_length=64)
     last_name = models.CharField(max_length=64)
     course_code = models.CharField(max_length=5)
+    middle_name = models.CharField(max_length=64, default='De Guz Man')
+    contact_no = models.IntegerField(default='09667614313')
+    entry_year_from = models.IntegerField()
+    entry_year_to = models.IntegerField()
 
     def __str__(self):
         return self.user_number
@@ -60,6 +65,13 @@ class Profile(models.Model):
     course = models.ForeignKey(Course, on_delete=models.CASCADE)  # ForeignKey to Course (many students can enroll in one course)
     first_name = models.CharField(max_length=64)
     last_name = models.CharField(max_length=64)
+    middle_name = models.CharField(max_length=64, default='De Guz Man')
+    contact_no = models.IntegerField(default='09667614313')
+    entry_year_from = models.IntegerField(default='2018')
+    entry_year_to = models.IntegerField(default='2024')
+
+    def __str__(self):
+        return self.first_name
 
 class RegisterRequest(models.Model):
     user = models.OneToOneField(User, on_delete = models.CASCADE, related_name = "register_request")

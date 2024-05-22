@@ -104,9 +104,3 @@ def handle_uploaded_file(file):
             destination.write(chunk)
 
     return file_path
-
-def create_profile(user):
-    user_record = Record.objects.get(user_number = user.student_number) # Fetch record object
-    course = Course.objects.get(course_code = user_record.course_code) # Get course name
-    profile = Profile.objects.create(user=user, course = course, first_name = user_record.first_name, last_name = user_record.last_name)
-    return profile

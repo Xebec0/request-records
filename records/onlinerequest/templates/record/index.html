@@ -59,11 +59,11 @@
                                           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                         </div>
                                         <div class="modal-body">
-                                          <form id="recordForm" method="post">
+                                          <form id="recordForm" method="POST">
                                             {% csrf_token %}
                                             <div class="mb-3">
                                               <label for="userNumber" class="form-label">User Number</label>
-                                              <input type="text" class="form-control form-control-sm" id="userNumber" name="user_number" required>
+                                              <input type="number" class="form-control form-control-sm" id="userNumber" name="user_number" oninput="limitInputLength(event, 10)" required>
                                             </div>
                                             <div class="mb-3">
                                               <label for="firstName" class="form-label">First Name</label>
@@ -78,15 +78,31 @@
                                               <select class="form-select form-select-sm" id="courseCode" name="course" required>
                                                 <option value="" disabled selected>Select a course</option>
                                                 {% for course in courses %}
-                                                <option value="{{ course.code }}">{{ course.code }} - {{ course.name }}</option>
+                                                    <option value="{{ course.code }}">{{ course.code }} - {{ course.description }}</option>
                                                 {% endfor %}
                                               </select>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="middleName" class="form-label">Middle Name</label>
+                                                <input type="text" class="form-control form-control-sm" id="middleName" name="middle_name">
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="contactNumber" class="form-label">Contact Number</label>
+                                                <input type="number" class="form-control form-control-sm" id="contactNumber" name="contact_no" oninput="limitInputLength(event, 11)" required>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="entryYearTo" class="form-label">Entry Year To</label>
+                                                <input type="number" value="2024" class="form-control form-control-sm" id="entryYearTo" name="entry_year_to" required>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="entryYearFrom" class="form-label">Entry Year From</label>
+                                                <input type="number" value="2024" class="form-control form-control-sm" id="entryYearFrom" name="entry_year_from" required>
                                             </div>
                                           </form>
                                         </div>
                                         <div class="modal-footer">
                                           <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
-                                          <button type="submit" id="submitBtn" form="recordForm" class="btn btn-primary btn-sm">Save Record</button>
+                                          <button type="button" id="submitBtn" form="recordForm" class="btn btn-primary btn-sm">Save Record</button>
                                         </div>
                                       </div>
                                     </div>
@@ -112,18 +128,24 @@
 
         <script src="" async defer></script>
         <script>
+            function limitInputLength(event, maxLength) {
+                const input = event.target;
+                if (input.value.length > maxLength) {
+                    input.value = input.value.slice(0, maxLength);
+                }
+            }
+            
             $(document).ready(function() {
                 init()
 
                 function init(){
                     getUserRecords();
-                    initModalEvents();
                 }
 
                 function showToast(options){
                     let toast = Toastify({
                         text: options.message,
-                        duration: 2000,
+                        duration: 4000,
                         newWindow: true,
                         close: true,
                         gravity: "top",
@@ -137,11 +159,12 @@
                     toast.showToast();
                 }
 
-                $('form').on('submit', function(e) {
-                    e.preventDefault(); // Prevent the form from submitting normally
-
+                $('#submitBtn').click(function() {
                     // Get form data
-                    var formData = new FormData($('form')[0]);
+                    var formData = new FormData($('#recordForm')[0]);
+
+                    // CSRF Token
+                    var csrftoken = getCookie('csrftoken');
 
                     // Send AJAX POST request
                     $.ajax({
@@ -150,18 +173,39 @@
                         data: formData,
                         processData: false,
                         contentType: false,
+                        headers: {
+                            'X-CSRFToken': csrftoken
+                        },
                         success: function(response) {
-                            showToast({
-                                'message': response.message,
-                                'color': response.status ? '#008000' : '#FF0000'
-                            })
-
                             if (response.status){
+                                showToast({
+                                        'message': response.message,
+                                        'color': '#008000'
+                                });
+                                
                                 getUserRecords();
                                 resetInputFields();
+
+                                $('#recordModal').modal('hide');
+                            }else{
+                                console.log(response.errors)
+                                if (response.errors){
+                                    for (const [key, value] of Object.entries(response.errors)) {
+                                            showToast({
+                                                'message': value,
+                                                'color': response.status ? '#008000' : '#FF0000'
+                                            });
+                                    }
+                                }else{
+                                    showToast({
+                                        'message': response.message,
+                                        'color': '#FF0000'
+                                    });
+                                }
                             }
                         },
                         error: function(xhr, errmsg, err) {
+                            console.log("TEST")
                             console.log(errmsg);
                         }
                     });
@@ -202,16 +246,34 @@
                         responsive: true
                     });              
                 }
-
-                function initModalEvents() {
-                    $('#submitBtn').click(function() {
-                        $('#recordModal').modal('hide');
-                    });
-                }
                 
                 function resetInputFields() {
                     const inputFields = document.querySelectorAll('#recordForm input, #recordForm select');
-                    inputFields.forEach(field => field.value = '');
+                    inputFields.forEach(field => {
+                        if (field.id == "entryYearTo" || field.id == "entryYearFrom"){
+                            field.value = '2024';
+                        }else{
+                            field.value = ''
+                        }
+
+                    });
+                }
+
+                // Function to get CSRF cookie value
+                function getCookie(name) {
+                    var cookieValue = null;
+                    if (document.cookie && document.cookie !== '') {
+                        var cookies = document.cookie.split(';');
+                        for (var i = 0; i < cookies.length; i++) {
+                            var cookie = cookies[i].trim();
+                            // Does this cookie string begin with the name we want?
+                            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                                break;
+                            }
+                        }
+                    }
+                    return cookieValue;
                 }
             });
         </script>

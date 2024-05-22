@@ -135,3 +135,7 @@ AUTHENTICATION_BACKENDS = ['onlinerequest.backends.EmailBackend']
 
 # Middleware
 LOGIN_REDIRECT_URL=''
+
+REST_FRAMEWORK = {
+    "DATE_INPUT_FORMATS": ["%Y-%m-%d"],
+}
