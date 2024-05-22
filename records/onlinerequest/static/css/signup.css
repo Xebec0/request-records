@@ -297,6 +297,19 @@ input[type="file"] {
   text-align: center;
 }
 
+.back-button {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  font-size: 24px;
+  color: #ffffff;
+  text-decoration: none;
+}
+
+.back-button:hover {
+  color: #000;
+}
+
 @media (max-width: 730px) {
   .container .cover {
     display: none;
