@@ -20,13 +20,17 @@ def index(request):
         return HttpResponse("Profile not yet created. Please consult your administrator")
     
     elif request.method == "POST":
-        #  Data
-        data = json.loads(request.body)
-        user_profile.contact_no = data.get('contact_no')
-
-        data = model_to_dict(user_profile)
-
         if user_profile:
+            #  Data
+            data = json.loads(request.body)
+
+            # Edit profile fields
+            user_profile.contact_no = data.get('contact_no')
+
+            # Convert profile to dict
+            data = model_to_dict(user_profile)
+
+            # Get form instance
             profile_form = ProfileForm(data, instance = user_profile)
             
             if profile_form.is_valid():
