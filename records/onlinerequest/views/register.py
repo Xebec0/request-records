@@ -84,7 +84,8 @@ def index(request):
             else:
                 return JsonResponse({'status': False, 'message': 'Invalid verification code'})
         else:
-            return JsonResponse({'status': False, 'message': 'Please fillup all form requirements'})
+            last_error_message = list(form.errors.items())[0]
+            return JsonResponse({'status' : False,'message' : last_error_message[1]})
     else:
         form = UserRegistrationForm()
     return render(request, 'register.html', {'form': form})
