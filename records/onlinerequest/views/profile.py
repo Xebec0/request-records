@@ -3,6 +3,7 @@ from django.http import HttpResponse
 from django.http import JsonResponse
 from django.core.exceptions import ValidationError
 from django.shortcuts import render
+from django.forms.models import model_to_dict
 from ..models import Profile, User
 from ..serializers import RecordSerializer
 from ..forms import ProfileForm
@@ -21,18 +22,9 @@ def index(request):
     elif request.method == "POST":
         #  Data
         data = json.loads(request.body)
-        contact_no = data.get('contact_no')
+        user_profile.contact_no = data.get('contact_no')
 
-        data = {
-            'user': user_profile.user,
-            'course': user_profile.course,
-            'first_name': user_profile.first_name,
-            'last_name': user_profile.last_name,
-            'middle_name': user_profile.middle_name,
-            'contact_no': contact_no,
-            'entry_year_from': user_profile.entry_year_from,
-            'entry_year_to': user_profile.entry_year_to
-        }
+        data = model_to_dict(user_profile)
 
         if user_profile:
             profile_form = ProfileForm(data, instance = user_profile)
