@@ -1,8 +1,7 @@
 from django.shortcuts import render
 from django.http import HttpResponse
 from django.http import JsonResponse
-from ..models import Document
-from ..models import Requirement
+from ..models import Document, Requirement, Purpose
 
 def index(request):
     if request.method == "POST":
@@ -14,12 +13,15 @@ def index(request):
                 code = "REQ" + create_acronym(description)
                 requirement = Requirement(code = code, description = description)
                 requirement.save()
-                return JsonResponse({'status': True, 'message': str(requirement)})
             elif table_name == "Document":
                 code = "REQ" + create_acronym(description)
                 document = Document(code = code, description = description)
                 document.save()
-                return JsonResponse({'status': True, 'message': str(document)})
+            elif table_name == "Purpose":
+                purpose = Purpose(description = description, active = True)
+                purpose.save()
+
+            return JsonResponse({'status': True, 'message': "Codetable populated"})
         except Exception as e:
             return JsonResponse({'status': False, 'message': str(e)})
         

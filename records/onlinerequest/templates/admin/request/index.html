@@ -68,11 +68,15 @@
                                                         </select>
                                                     </div>
                                                     <div class="mb-3">
+                                                        <label for="files_required" class="form-label">Price (PHP)</label>
+                                                        <input type="number" name="price" id="txtPrice" onblur="txtPriceOnBlur(this)" required>
+                                                    </div>
+                                                    <div class="mb-3">
                                                         <label for="description" class="form-label">Description</label>
                                                         <textarea class="form-control" id="description" name="description" rows="3" placeholder="Description" required></textarea>
                                                     </div>
                                                     <div class="d-flex justify-content-end">
-                                                        <button type="submit" class="btn btn-primary ms-auto"">
+                                                        <button type="submit" class="btn btn-primary ms-auto">
                                                             Submit
                                                         </button>
                                                     </div>
@@ -120,6 +124,17 @@
         {% include 'footer.html' %}
 
         <script>
+            function txtPriceOnBlur(input){
+                let txtInput = input;
+                txtInput.value = formatNumberToTwoDecimalPlaces(txtInput.value);
+            }
+
+            function formatNumberToTwoDecimalPlaces(number) {
+                // Convert the number to a string with two decimal places
+                const formattedNumber = Number(number).toFixed(2);
+                return formattedNumber;
+            }
+
             $(document).ready(function() {
                 init() // onload
 
@@ -146,6 +161,8 @@
 
                 $('form').on('submit', function(e) {
                     e.preventDefault(); // Prevent the form from submitting normally
+                    
+                    let txtPrice = document.querySelector("#txtPrice");
 
                     // Get form data
                     var formData = new FormData($('form')[0]);
@@ -154,7 +171,7 @@
                     // Send AJAX POST request
                     $.ajax({
                         type: 'POST',
-                        url: '/request/', // Replace with your Django URL
+                        url: '/admin-panel/request/', // Replace with your Django URL
                         data: formData,
                         processData: false,
                         contentType: false,
@@ -219,8 +236,8 @@
                 function resetInputFields(){
                     let fileCount = document.querySelector("#requirements");
                     let description = document.querySelector("#description");
-                    
-                    fileCount.value = description.value = "";
+                    let price = document.querySelector("#txtPrice");
+                    fileCount.value = description.value = price.value = "";
                 }
 
                 function createRequestTable(data) {

@@ -1,14 +1,23 @@
-from onlinerequest.models import Document
-from onlinerequest.models import Request, Record
+from onlinerequest.models import Document, Request, Record, Purpose
 from rest_framework import serializers
+
+class PurposeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Purpose
+        fields = ['id', 'description', 'active']
 
 class RequestSerializer(serializers.ModelSerializer):
     document = serializers.CharField()
+    purpose = serializers.SerializerMethodField()
 
     class Meta:
         model = Request
-        fields = ['id', 'description', 'files_required', 'document']  # Adjust fields as needed
+        fields = ['id', 'description', 'files_required', 'document', 'purpose']
 
+    def get_purpose(self, obj):
+        purposes = Purpose.objects.filter(active=True)
+        purpose_serializer = PurposeSerializer(purposes, many=True)
+        return purpose_serializer.data
 
 class RecordSerializer(serializers.ModelSerializer):
     user_number = serializers.CharField(required=False, allow_blank=True)
@@ -68,3 +77,4 @@ class RecordSerializer(serializers.ModelSerializer):
     class Meta:
         model = Record
         fields = ['user_number', 'first_name', 'last_name', 'course_code', 'middle_name', 'contact_no', 'entry_year_from', 'entry_year_to']
+

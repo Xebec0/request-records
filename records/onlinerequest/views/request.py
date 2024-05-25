@@ -11,12 +11,14 @@ import os
 
 def index(request):
     if request.method == "POST":
+
         post_document = request.POST.get("documents")
         post_files_required = request.POST.get("requirements")
         post_description = request.POST.get("description")
+        post_price = request.POST.get("price")
 
         document = Document.objects.get(code = post_document)
-        created_request = Request.objects.create(document = document, files_required = post_files_required, description = post_description)
+        created_request = Request.objects.create(document=document, price=post_price, files_required=post_files_required, description=post_description)
         
         if created_request:
             return JsonResponse({"status": True, "message": "Request Created"})

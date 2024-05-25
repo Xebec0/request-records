@@ -99,6 +99,7 @@ class Request(models.Model):
     description = models.CharField(max_length=256)
     files_required = models.CharField(max_length=256)
     document = models.ForeignKey(Document, on_delete=models.CASCADE)
+    price = models.CharField(max_length=6, default=1.00)
 
     def __str__(self):
         return self.document.description
@@ -122,8 +123,14 @@ class User_Request(models.Model):
     status = models.CharField(max_length=64)
     uploads = models.CharField(max_length=999)
     requested = models.CharField(max_length=256, default="")
+    purpose = models.CharField(max_length=256, blank=True)
+    number_of_copies = models.IntegerField(default=1);
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def uploads_as_list(self):
         return self.uploads.split('')
+
+class Purpose(models.Model):
+    description = models.CharField(max_length=256)
+    active = models.BooleanField(default=True)

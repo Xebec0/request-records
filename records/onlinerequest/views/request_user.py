@@ -1,11 +1,11 @@
 from django.shortcuts import render
 from django.http import HttpResponse
 from django.http import JsonResponse
+from rest_framework.response import Response
 from django.conf import settings
-from ..models import Request
-from ..models import User_Request
-from ..models import Document
-from ..models import Requirement
+from ..models import Request, User_Request, Document, Requirement, Purpose
+from ..serializers import RequestSerializer
+
 from django.core import serializers
 import os
 
@@ -23,6 +23,7 @@ def create_request(request):
         user = user,
         request = request_form,
         status = status,
+        purpose = request.POST.get("purpose")
     )
 
     # Pre-save the object
@@ -38,7 +39,7 @@ def create_request(request):
     user_request.uploads = uploads.rstrip(',')
     user_request.save()
     
-    return JsonResponse({"success" : True})
+    return JsonResponse({"success" : True, "message": "Request submitted successfully."})
 
 def display_user_requests(request):
     user_requests = User_Request.objects.filter(user = request.user)
@@ -46,8 +47,8 @@ def display_user_requests(request):
 
 def get_request(request, id): 
     request = Request.objects.get(id = id)
-    request_json = serializers.serialize('json', [request])
-    return JsonResponse(request_json, safe=False)
+    request_serializer = RequestSerializer(request)
+    return JsonResponse(request_serializer.data, safe= False)
 
 def handle_uploaded_file(source, file):
     # Define the path where you want to save the file

@@ -5,8 +5,8 @@ from django.core.exceptions import ValidationError
 from django.shortcuts import render
 from django.forms.models import model_to_dict
 from ..models import Profile, User
-from ..serializers import RecordSerializer
 from ..forms import ProfileForm
+from ..utilities import *
 
 def index(request):
     # Get authneticated user
@@ -39,11 +39,4 @@ def index(request):
             else:
                 return JsonResponse({'errors': profile_form.errors}, status = 400)
         
-    return JsonResponse({'error': 'Only POST and GET requests are allowed'}, status=405)
-
-def get_if_exists(model, **kwargs):
-    try:
-        obj = model.objects.get(**kwargs)
-    except model.DoesNotExist:
-        obj = None
-    return obj
+    return JsonResponse({'error': 'Only POST and GET requests are allowed'}, status = 405)

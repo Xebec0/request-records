@@ -36,7 +36,6 @@ urlpatterns = [
     path('user/', views.user_dashboard),
 
     # Request - Admin
-    path('request/', request.index),
     path('admin-panel/request/', request.index),
     path('admin-panel/user-request/', request.display_user_requests),
     path('admin-panel/user-request/<int:id>/delete', request.delete_user_request),
@@ -45,12 +44,11 @@ urlpatterns = [
     path('request/<int:id>/delete/', request.delete_request),
 
     # Request - User
-    path('request/user/', request_user.index),
+    path('request/', request_user.index),
     path('request/<int:id>/', request_user.get_request),
     path('get-document-description/<str:doc_code>/', request_user.get_document_description),
     path('request/user/create/', request_user.create_request),
-    path('user/create-request/', request_user.index),
-    path('user/view-request/', request_user.display_user_requests),
+    path('request/user/', request_user.display_user_requests),
 
     # Code Table (This is where to update code tables)
     path('codetable/', codetable.index),

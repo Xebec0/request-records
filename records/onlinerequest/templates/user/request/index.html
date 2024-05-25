@@ -30,7 +30,7 @@
                                 </div>
                             </div>
                             <div class="card-body h-100 p-4">
-                                <div class="row">
+                                <div class="column">
                                     <div class="col-md-6 mb-3">
                                         <h5 class="mb-3">Select document to request:</h5>
                                         <div class="mb-3">
@@ -42,6 +42,7 @@
                                         </div>
                                         <button id="btnCreate" type="button" class="btn btn-primary">Create</button>
                                     </div>
+                                    <hr>
                                     <div class="col-md-6">
                                         <div id="container"></div>
                                     </div>
@@ -114,15 +115,15 @@
                 }
                 
                 function createRequestForm(response) {
-                    let data = JSON.parse(response)[0]['fields'];
-                    let requestID = JSON.parse(response)[0]['pk'];
+                    let data = response;
+                    let requestID = data.id;
 
                     const container = document.getElementById("container");
                     container.innerHTML = "";
 
                     // Fill up the form
                     const h2ForRequiredFiles = document.createElement("h5");
-                    h2ForRequiredFiles.innerHTML = "Fill up the form:";
+                    h2ForRequiredFiles.innerHTML = "Description:";
                     h2ForRequiredFiles.classList.add("mb-3");
                     container.appendChild(h2ForRequiredFiles);
 
@@ -132,6 +133,27 @@
                     descriptionTextarea.name = "description";
                     descriptionTextarea.textContent = data.description;
                     container.appendChild(descriptionTextarea);
+
+                    // Purpose
+                    const lblPurpose = document.createElement("h5");
+                    lblPurpose.innerHTML = "Purpose:";
+                    container.appendChild(lblPurpose);
+
+                    // Purpose dropdown
+                    const drpPurpose = document.createElement("select");
+                    drpPurpose.setAttribute("id", "drpPurpose")
+                    drpPurpose.classList.add("mb-3") // Add margin left 3
+                    drpPurpose.name = "purpose";
+
+                    const purposes = data.purpose;
+                    purposes.forEach((purpose) => {
+                        const optPurpose = document.createElement("option");
+                        optPurpose.value = purpose.description;
+                        optPurpose.textContent = purpose.description;
+                        drpPurpose.appendChild(optPurpose);
+                    })
+
+                    container.appendChild(drpPurpose);
 
                     // Create label
                     const h2 = document.createElement("h5");
@@ -190,7 +212,10 @@
                     files.forEach((file, index) => {
                         // Append each file to the FormData object
                         formData.append(`${file.id}`, file.files[0]);
+                        formData.append('purpose', document.querySelector("#drpPurpose").value);
                     });
+
+                    console.log(document.querySelector("#drpPurpose").value)
 
                     // Send AJAX POST request
                     $.ajax({
@@ -204,12 +229,12 @@
                         },
                         success: function(response) {
                             showToast({
-                                'message': 'Request submitted successfully!',
-                                'color': response.status ? '#008000' : '#FF0000'
+                                'message': response.message,
+                                'color': '#008000'
                             });
 
                             setTimeout(function () {
-                                window.location.href = '/user/view-request/';
+                                window.location.href = '/request/user/';
                             }, 1500);
                         },
                         error: function(xhr, errmsg, err) {

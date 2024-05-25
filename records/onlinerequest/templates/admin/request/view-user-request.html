@@ -40,6 +40,9 @@
                                         <h6 class="fw-bold">Status:
                                             <span id="requestStatus" class="fw-normal fs-6 mb-2">{{ user_request.status }}</span>
                                         </h6>
+                                        <h6 class="fw-bold">Purpose:
+                                            <span id="requestStatus" class="fw-normal fs-6 mb-2">{{ user_request.purpose}}</span>
+                                        </h6>
                                     </div>
                                 </div>
                                 <div class="row mt-2">
@@ -65,13 +68,12 @@
                                         </div>
                                         <div class="d-flex">
                                             <input type="text" class="form-control me-2" id="newStatus" placeholder="Enter new status">
-                                            <button class="btn btn-success" id="btnUpdateStatus" onclick="updateStatus('{{user_request.id}}')">Update Status</button>
+                                            <button class="btn btn-primary" id="btnUpdateStatus" onclick="updateStatus('{{user_request.id}}')">Update Status</button>
                                         </div>
                                     </div>
                                 </div>
                                 {% endif %}
                             </div>                       
-                            
                         </div>
                     </div>
                 </main>
@@ -169,7 +171,18 @@
 
                         if (response.status) {
                             let status = document.getElementById("requestStatus");
-                            status.textContent = response.request_status
+                            status.textContent = response.request_status;
+                            
+                            setTimeout(() => {
+                                showToast({
+                                    'message': 'Redirecting back to user requests...',
+                                    'duration': 2000,
+                                });
+                            }, 1000);
+
+                            setTimeout(() => {
+                                window.location.href = "/admin-panel/user-request/"
+                            }, 3000);
                         }
                     },
                     error: function(xhr, errmsg, err) {

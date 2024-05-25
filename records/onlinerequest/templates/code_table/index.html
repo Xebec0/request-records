@@ -57,6 +57,20 @@
                                         </div>
                                     </form>
                                 </div>
+
+                                <div class="mb-3">
+                                    <span class="fs-6">3. Purposes </span>
+                                    <form method="POST" id="formRequirements3" class="row g-3 align-items-center">
+                                        {% csrf_token %}
+                                        <div class="col-auto">
+                                            <input type="text" name="description" id="formRequirements3Description" class="form-control form-control-sm" required placeholder="Enter document type">
+                                        </div>
+                                        <input type="hidden" name="table_name" value="Purpose">
+                                        <div class="col-auto">
+                                            <button type="submit" class="btn btn-sm btn-primary">Add</button>
+                                        </div>
+                                    </form>
+                                </div>
                             </div>                            
                             
                         </div>
@@ -146,6 +160,34 @@
 
                             // Clear description
                             $("#formRequirements2Description").val("");                                                        // Clear description
+                        },
+                        error: function(xhr, errmsg, err) {
+                            console.log(errmsg);
+                        }
+                    });
+                });
+            
+                $('#formRequirements3').on('submit', function(e) {
+                    e.preventDefault(); // Prevent the form from submitting normally
+
+                    // Get form data
+                    var formData = new FormData($('#formRequirements3')[0]);
+
+                    // Send AJAX POST request
+                    $.ajax({
+                        type: 'POST',
+                        url: '/codetable/', // Replace with your Django URL
+                        data: formData,
+                        processData: false,
+                        contentType: false,
+                        success: function(response) {
+                            showToast({
+                                'message': response.message,
+                                'color': response.status ? '#008000' : '#FF0000'
+                            })
+
+                            // Clear description
+                            $("#formRequirements3Description").val("");                                                        // Clear description
                         },
                         error: function(xhr, errmsg, err) {
                             console.log(errmsg);

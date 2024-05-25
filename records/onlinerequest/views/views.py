@@ -15,6 +15,7 @@ def index(request):
             except Requirement.DoesNotExist:
                 requirement_descriptions.append(requirement_code)
         request_form.requirement_descriptions = requirement_descriptions
+
     return render(request, 'index.html', {'request_forms': request_forms})
 
 def signup_view(request):
