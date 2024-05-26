@@ -73,6 +73,11 @@
                     formData.append('payment', file.files[0]);
                 });
 
+                if (files[0].files.length === 0) {
+                    window.close();
+                    return;
+                }
+
                 // Send AJAX POST request
                 $.ajax({
                     type: 'POST',

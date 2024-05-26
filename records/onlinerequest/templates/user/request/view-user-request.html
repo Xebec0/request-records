@@ -19,7 +19,7 @@
         <div id="layoutSidenav_content">
             <main>
                 <div class="container-fluid px-4">
-                    <h1 class="mt-4">List of user requests</h1>
+                    <h1 class="mt-4">My requests</h1>
                     <ol class="breadcrumb mb-4">
                         <li class="breadcrumb-item active">List of user request status and information</li>
                     </ol>
@@ -54,16 +54,25 @@
                                                     In process
                                                 {% endif %}
                                             </td>                                            
-                                            <td>{{ user_request.payment_status }}</td>
+                                            <td>
+                                                {% if user_request.uploaded_payment %}
+                                                    {{ user_request.payment_status }}
+                                                {% else %}
+                                                    Pending payment
+                                                {% endif %}
+                                            </td>                                            
                                             <td>
                                                 {% if user_request.payment_status == "Paid" %}
                                                     <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#receiptModal{{ user_request.id }}">View Receipt</button>
+                                                {% elif user_request.payment_status == "Failed" %}
+                                                    <button class="btn btn-danger btn-sm" onclick="openPaymentTab('{{ user_request.id }}')">Resend payment</button>
+                                                {% elif not user_request.uploaded_payment %}
+                                                    <button class="btn btn-success btn-sm" onclick="openPaymentTab('{{ user_request.id }}')">Pay Now</button>
                                                 {% else %}
                                                     N/A
                                                 {% endif %}
-                                            </td>
+                                            </td>                                                                                     
                                         </tr>
-
                                         
                                         
                                         <!-- Modal -->
@@ -84,7 +93,7 @@
                                                         </div>
                                                         <div class="text-center mt-2" style="font-size: small; color: red; font-weight: 500;">
                                                             <p>Reminder: Please bring your school ID or a copy of your Certifcate of 
-                                                                Regisration with the order number to receive your requested document (for pickup only)</p>
+                                                                Regisration with the order number to receive your requested document</p>
                                                         </div>
                                                         </div>
                                                     <div class="modal-footer">
@@ -178,6 +187,31 @@
         $('#datatable').DataTable({
                 responsive: true
         });
+
+        function openPaymentTab(requestID) {
+        return openNewTab("/request/checkout/" + requestID, 800, 800);
+    }
+
+        function openNewTab(url, width, height) {
+            var leftPosition, topPosition;
+            leftPosition = (window.screen.width / 2) - ((width / 2) + 10);
+            topPosition = (window.screen.height / 2) - ((height / 2) + 50);
+
+            let openedWindow = window.open(url, "Window2",
+                "status=no,height=" + height + ",width=" + width + ",resizable=yes,left="
+                + leftPosition + ",top=" + topPosition + ",screenX=" + leftPosition + ",screenY="
+                + topPosition + ",toolbar=no,menubar=no,scrollbars=no,location=no,directories=no");
+
+            let intervalId = setInterval(function() {
+                if (openedWindow.closed) {
+                    clearInterval(intervalId);
+                    window.focus();
+                    window.location.reload(); // Reload the page after the payment window is closed
+                }
+            }, 500);
+
+            return true;
+        }
     </script>
 </body>
 </html>

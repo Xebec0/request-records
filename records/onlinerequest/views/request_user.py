@@ -105,3 +105,13 @@ def display_payment(request, id):
 
         return HttpResponse("Unauthorized access. Please contact your administrator.")
 
+
+def display_user_requests(request):
+    user_requests = User_Request.objects.filter(user=request.user)
+    for user_request in user_requests:
+        if not user_request.uploaded_payment:
+            user_request.payment_status = "Pending payment"
+            user_request.save()
+    return render(request, 'user/request/view-user-request.html', {'user_requests': user_requests})
+
+
