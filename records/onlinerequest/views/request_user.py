@@ -3,8 +3,9 @@ from django.http import HttpResponse
 from django.http import JsonResponse
 from rest_framework.response import Response
 from django.conf import settings
-from ..models import Request, User_Request, Document, Requirement, Purpose
+from ..models import Request, User_Request, Requirement, User
 from ..serializers import RequestSerializer
+from ..utilities import get_if_exists
 
 from django.core import serializers
 import os
@@ -16,7 +17,7 @@ def index(request):
 def create_request(request):
     request_form = Request.objects.get(id = request.POST.get('id'))
     user = request.user
-    status = "Waiting"
+    status = "Payment not yet settled"
     uploads = ""
 
     user_request = User_Request(
@@ -32,14 +33,14 @@ def create_request(request):
     # Upload required files
     for file_name in request.FILES:
         file = request.FILES.get(file_name)
-        file_path = handle_uploaded_file(str(user_request.id), file)
+        file_path = handle_uploaded_file(file, str(user_request.id))
         file_prefix = "<" + file_name + "&>"
         uploads += file_prefix + file_path + ","
 
     user_request.uploads = uploads.rstrip(',')
     user_request.save()
     
-    return JsonResponse({"success" : True, "message": "Request submitted successfully."})
+    return JsonResponse({"success" : True, "message": "Redirecting checkout...", 'id': user_request.id})
 
 def display_user_requests(request):
     user_requests = User_Request.objects.filter(user = request.user)
@@ -50,10 +51,13 @@ def get_request(request, id):
     request_serializer = RequestSerializer(request)
     return JsonResponse(request_serializer.data, safe= False)
 
-def handle_uploaded_file(source, file):
+def handle_uploaded_file(file, source, source2 = ""):
+
     # Define the path where you want to save the file
     static_dir = os.path.join(settings.MEDIA_ROOT, 'onlinerequest', 'static', 'user_request', str(source))
-    print(static_dir)
+
+    if source2:
+        static_dir = os.path.join(settings.MEDIA_ROOT, 'onlinerequest', 'static', 'user_request', str(source), str(source2))
 
     # Create the upload directory if it doesn't exist
     if not os.path.exists(static_dir):
@@ -73,4 +77,31 @@ def get_document_description(request, doc_code):
         return JsonResponse({'description': document.description})
     except Requirement.DoesNotExist:
         return JsonResponse({'description': 'Document not found'}, status=404)
+    
+
+def display_payment(request, id):
+    if request.method == "POST":
+        user_request = get_if_exists(User_Request, id = id)
+
+        if user_request:
+            # Upload required files
+            for file_name in request.FILES:
+                file = request.FILES.get(file_name)
+                file_path = handle_uploaded_file( file, str(user_request.id), 'uploaded_payment')
+
+                user_request.uploaded_payment = file_path
+                user_request.status = "Waiting"
+                user_request.save()
+            
+            return JsonResponse({"status": True, "message": "Submission successful. Closing the window now..."})
+
+        return JsonResponse({"status": False, "message": "Invalid payment detected. Please contact your administrator."})
+    elif request.method == "GET":
+        user = get_if_exists(User, id = request.user.id)
+        requested_document = get_if_exists(User_Request, id = id)
+
+        if user and requested_document:
+            return render(request, "payment.html", {"user": user, "requested_document": requested_document})
+
+        return HttpResponse("Unauthorized access. Please contact your administrator.")
 
