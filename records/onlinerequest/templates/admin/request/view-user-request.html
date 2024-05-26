@@ -43,6 +43,9 @@
                                         <h6 class="fw-bold">Purpose:
                                             <span id="requestStatus" class="fw-normal fs-6 mb-2">{{ user_request.purpose}}</span>
                                         </h6>
+                                        <h6 class="fw-bold">Price:
+                                            <span id="requestStatus" class="badge bg-primary">₱{{ user_request.request.price }}</span>
+                                        </h6>
                                     </div>
                                 </div>
                                 <div class="row mt-2">
@@ -56,6 +59,29 @@
                                                 <a href="{% static upload.path %}" download class="btn btn-primary btn-sm">Download</a>
                                             </li>
                                             {% endfor %}
+                                        </ul>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="row mt-3">
+                                    <div class="col-md-6">
+                                        <h6 class="fw-bold mb-3">Payment:</h6>
+                                        {% if user_request.uploaded_payment %}
+                                        <ul class="list-group">
+                                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                Set payment status:
+                                                <select class="form-select" name="payment_status" id="payment_status" aria-label="Default select example">
+                                                    <option value="Processing" selected>Processing</option>
+                                                    <option value="Paid">Paid</option>
+                                                    <option value="On Hold">On Hold</option>
+                                                    <option value="Failed">Failed</option>
+                                                    <option value="Refunded">Refunded</option>
+                                                </select>
+                                            </li>
+                                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                Gcash Payment
+                                                <a href="{% static user_request.uploaded_payment %}" download class="btn btn-primary btn-sm">Download</a>
+                                            </li>
                                         </ul>
                                         {% endif %}
                                     </div>
@@ -116,18 +142,19 @@
             function updateStatus(id) {
                 var csrftoken = getCookie('csrftoken');
                 let newStatus = document.getElementById("newStatus").value;
-                let formData = new FormData();
+                let paymentStatus = document.querySelector("#payment_status");
                 let fileInput = document.getElementById("requestedFile");
+                let formData = new FormData();
 
-                // Validate input
-                if (newStatus.trim() === "") {
-                    showToast({
-                        'message': 'Status cannot be blank',
-                        'color': '#FF0000',
-                        'duration': 4000,
-                    });
-                    return;
-                }
+                // // Validate input
+                // if (newStatus.trim() === "") {
+                //     showToast({
+                //         'message': 'Status cannot be blank',
+                //         'color': '#FF0000',
+                //         'duration': 4000,
+                //     });
+                //     return;
+                // }
 
                 if (/[^a-zA-Z0-9\s]/.test(newStatus)) {
                     showToast({
@@ -147,10 +174,13 @@
                             'color': '#FF0000',
                             'duration': 4000,
                         });
+                        return;
                     } else {
                         formData.append('requested_file', fileInput.files[0]);
                     }
                 }
+
+                formData.append("payment_status", paymentStatus.value)
 
                 // Send AJAX POST request
                 $.ajax({

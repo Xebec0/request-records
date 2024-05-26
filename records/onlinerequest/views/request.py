@@ -37,16 +37,15 @@ def display_user_request(request, id):
     if request.method == "POST":
         new_status = request.POST.get('new_status')
         requested_file = request.FILES.get('requested_file')
-
+        payment_status = request.POST.get("payment_status")
         # Update user_request
         user_request = User_Request.objects.get(id=id)
 
-        if new_status.lower() == "completed":
-            if requested_file is None:
-                return JsonResponse({'status': False, 'message': "Please upload a file before marking the request as 'Completed'"})
+        if requested_file is not None:
             file_path = handle_uploaded_file(id, requested_file)
             user_request.requested = file_path
 
+        user_request.payment_status = payment_status
         user_request.status = new_status
         user_request.save()
 
