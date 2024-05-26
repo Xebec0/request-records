@@ -306,6 +306,10 @@
 
                             window.focus();
                             document.body.classList.toggle('overlay');
+                            
+                            setTimeout(function() {
+                                window.location.href='/request/user/'
+                            }, 1000);
                         }
                     }, 500);
 

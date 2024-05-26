@@ -24,7 +24,7 @@ def create_request(request):
         user = user,
         request = request_form,
         status = status,
-        purpose = request.POST.get("purpose")
+        purpose = request.POST.get("purpose"),
     )
 
     # Pre-save the object
