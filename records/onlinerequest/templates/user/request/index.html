@@ -118,13 +118,21 @@
                     let data = response;
                     let requestID = data.id;
 
+                    // Debug
+                    console.log(data);
+
                     const container = document.getElementById("container");
                     container.innerHTML = "";
 
                     // Fill up the form
                     const h2ForRequiredFiles = document.createElement("h5");
-                    h2ForRequiredFiles.innerHTML = "Description:";
+                    h2ForRequiredFiles.innerHTML = data.document;
                     h2ForRequiredFiles.classList.add("mb-3");
+
+                    const price = document.createElement("span");
+                    price.textContent = "₱" + data.price;
+                    price.classList.add("mx-2", "badge", "bg-primary");
+                    h2ForRequiredFiles.appendChild(price);
                     container.appendChild(h2ForRequiredFiles);
 
                     // Create textarea for description
@@ -214,8 +222,6 @@
                         formData.append(`${file.id}`, file.files[0]);
                         formData.append('purpose', document.querySelector("#drpPurpose").value);
                     });
-
-                    console.log(document.querySelector("#drpPurpose").value)
 
                     // Send AJAX POST request
                     $.ajax({
