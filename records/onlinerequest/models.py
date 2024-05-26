@@ -125,6 +125,8 @@ class User_Request(models.Model):
     requested = models.CharField(max_length=256, default="")
     purpose = models.CharField(max_length=256, blank=True)
     number_of_copies = models.IntegerField(default=1);
+    uploaded_payment = models.CharField(max_length=999, blank=True)
+    payment_status = models.CharField(max_length=10, default="Processing", blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
