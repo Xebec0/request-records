@@ -71,11 +71,11 @@
                                             <li class="list-group-item d-flex justify-content-between align-items-center">
                                                 Set payment status:
                                                 <select class="form-select" name="payment_status" id="payment_status" aria-label="Default select example">
-                                                    <option value="Processing" selected>Processing</option>
-                                                    <option value="Paid">Paid</option>
-                                                    <option value="On Hold">On Hold</option>
-                                                    <option value="Failed">Failed</option>
-                                                    <option value="Refunded">Refunded</option>
+                                                    <option value="Processing" {% if user_request.payment_status == "Processing" %} selected {% endif %}>Processing</option>
+                                                    <option value="Paid" {% if user_request.payment_status == "Paid" %} selected {% endif %}>Paid</option>
+                                                    <option value="On Hold" {% if user_request.payment_status == "On Hold" %} selected {% endif %}>On Hold</option>
+                                                    <option value="Failed" {% if user_request.payment_status == "Failed" %} selected {% endif %}>Failed</option>
+                                                    <option value="Refunded" {% if user_request.payment_status == "Refunded" %} selected {% endif %}>Refunded</option>
                                                 </select>
                                             </li>
                                             <li class="list-group-item d-flex justify-content-between align-items-center">
@@ -146,15 +146,15 @@
                 let fileInput = document.getElementById("requestedFile");
                 let formData = new FormData();
 
-                // // Validate input
-                // if (newStatus.trim() === "") {
-                //     showToast({
-                //         'message': 'Status cannot be blank',
-                //         'color': '#FF0000',
-                //         'duration': 4000,
-                //     });
-                //     return;
-                // }
+                // Validate input
+                if (newStatus.trim() === "") {
+                    showToast({
+                        'message': 'Status cannot be blank',
+                        'color': '#FF0000',
+                        'duration': 4000,
+                    });
+                    return;
+                }
 
                 if (/[^a-zA-Z0-9\s]/.test(newStatus)) {
                     showToast({
