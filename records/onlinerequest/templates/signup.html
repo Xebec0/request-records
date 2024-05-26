@@ -325,19 +325,6 @@
             modal.style.display = "none";
           }
         }
-
-        // Handle form submission
-        $("form").on("submit", function(e) {
-          var termsCheckbox = document.getElementById("termsCheckbox");
-          if (!termsCheckbox.checked) {
-            e.preventDefault();
-            showToast({
-              message: "Please accept the terms and services to proceed.",
-              color: "#FF0000",
-            });
-          }
-        });
-
         
       });
     </script>

@@ -22,28 +22,52 @@ entry_year_to = models.DateField()
          {% include 'header.html' %}
      </head>
      <body class="sb-nav-fixed">
+
+        {% include 'user/user-topnav.html' %}
          <div id="layoutSidenav">
              
-             {% include 'admin/admin-topnav.html' %}
-             {% include 'admin/admin-sidenav.html' %}
+             
+             {% include 'user/user-sidenav.html' %}
  
              <div id="layoutSidenav_content">
-                <main>
-                    <input type="text" name="first_name" value="{{ profile.first_name }}" disabled>
-                    <br>
-                    <input type="text" name="middle_name" value="{{ profile.middle_name }}" disabled>
-                    <br>
-                    <input type="text" name="last_name" value="{{ profile.last_name }}" disabled>
-                    <br>
-                    <input type="text" name="course_code" value="{{ profile.course.code }}" disabled>
-                    <br>
-                    <input type="text" name="contact_no" value="0{{ profile.contact_no }}" oninput="limitInputLength(event, 10)">
-                    <br>
-                    <input type="text" name="entry_year_from" value="{{ profile.entry_year_from }}" disabled>
-                    <br>
-                    <input type="text" name="entry_year_to" value="{{ profile.entry_year_to }}" disabled>
-                    <br>
-                    <button id="btnSave" type="button">Save Profile</button>
+                <main class="card mt-3 mx-3 p-3 w-50">
+                <div class="mb-3">
+                    <label for="first_name" class="form-label">First Name</label>
+                    <input type="text" class="form-control" id="first_name" name="first_name"
+                        value="{{ profile.first_name }}" disabled>
+                </div>
+                <div class="mb-3">
+                    <label for="middle_name" class="form-label">Middle Name</label>
+                    <input type="text" class="form-control" id="middle_name" name="middle_name"
+                        value="{{ profile.middle_name }}" disabled>
+                </div>
+                <div class="mb-3">
+                    <label for="last_name" class="form-label">Last Name</label>
+                    <input type="text" class="form-control" id="last_name" name="last_name"
+                        value="{{ profile.last_name }}" disabled>
+                </div>
+                <div class="mb-3">
+                    <label for="course_code" class="form-label">Course Code</label>
+                    <input type="text" class="form-control" id="course_code" name="course_code"
+                        value="{{ profile.course.code }}" disabled>
+                </div>
+                <div class="mb-3">
+                    <label for="contact_no" class="form-label">Contact Number</label>
+                    <input type="text" class="form-control" id="contact_no" name="contact_no"
+                        value="0{{ profile.contact_no }}" oninput="limitInputLength(event, 10)">
+                </div>
+                <div class="mb-3">
+                    <label for="entry_year_from" class="form-label">Entry Year From</label>
+                    <input type="text" class="form-control" id="entry_year_from" name="entry_year_from"
+                        value="{{ profile.entry_year_from }}" disabled>
+                </div>
+                <div class="mb-3">
+                    <label for="entry_year_to" class="form-label">Entry Year To</label>
+                    <input type="text" class="form-control" id="entry_year_to" name="entry_year_to"
+                        value="{{ profile.entry_year_to }}" disabled>
+                </div>
+                <button id="btnSave" type="button" class="btn btn-primary">Save Profile</button>
+
                 </main>
                  <footer class="py-4 bg-light mt-auto">
                      <div class="container-fluid px-4">

@@ -35,7 +35,9 @@
                                 <thead>
                                     <th>Document</th>
                                     <th>Status</th>
-                                    <th>Requested File</th>
+                                    <th>Info</th>
+                                    <th>Payment Status</th>
+                                    <th>Receipt</th>
                                 </thead>
                                 <tbody>
                                 {% if user_requests %}
@@ -44,19 +46,99 @@
                                             <td>{{ user_request.request }}</td>
                                             <td>{{ user_request.status }}</td>
                                             <td>
-                                                {% if user_request.requested %}
+                                                {% if user_request.status == "For Pickup" or user_request.status == "for pickup" or user_request.status == "pickup" or user_request.status == "PICKUP" %}
+                                                    <button class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#infoModal{{ user_request.id }}">View Info</button>
+                                                {% elif user_request.requested %}
                                                     <a class="btn btn-primary btn-sm" href="{% static user_request.requested %}" download>Download</a>
                                                 {% else %}
                                                     In process
                                                 {% endif %}
+                                            </td>                                            
+                                            <td>{{ user_request.payment_status }}</td>
+                                            <td>
+                                                {% if user_request.payment_status == "Paid" %}
+                                                    <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#receiptModal{{ user_request.id }}">View Receipt</button>
+                                                {% else %}
+                                                    N/A
+                                                {% endif %}
                                             </td>
                                         </tr>
+
+                                        
+                                        
+                                        <!-- Modal -->
+                                        <div class="modal fade" id="infoModal{{ user_request.id }}" tabindex="-1" aria-labelledby="infoModalLabel{{ user_request.id }}" aria-hidden="true">
+                                            <div class="modal-dialog">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title" id="infoModalLabel{{ user_request.id }}">Request Information</h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <div class="row">
+                                                                <p><strong>Your request is now ready!</strong></p>
+                                                                <p>Please head to our registrar to pick-up the file you requested.
+                                                        </div>
+                                                        <div>
+                                                            <p class="my-0"><strong>Order Number:</strong> {{ user_request.id }}</p>                                                            <p class="my-0"><strong>Paid Amount:</strong> {{ user_request.request.price }}</p>
+                                                        </div>
+                                                        <div class="text-center mt-2" style="font-size: small; color: red; font-weight: 500;">
+                                                            <p>Reminder: Please bring your school ID or a copy of your Certifcate of 
+                                                                Regisration with the order number to receive your requested document (for pickup only)</p>
+                                                        </div>
+                                                        </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                            
+                                        <!-- Modal -->
+                                        <div class="modal fade" id="receiptModal{{ user_request.id }}" tabindex="-1" aria-labelledby="receiptModalLabel{{ user_request.id }}" aria-hidden="true">
+                                            <div class="modal-dialog">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title" id="receiptModalLabel{{ user_request.id }}">My Order Receipt</h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                    <div class="row">
+                                                        <div class="col-md-4">
+                                                            <img class="img-fluid"
+                                                                src="{% static 'images/received2.jpg' %}" alt="">
+                                                        </div>
+                                                        <div class="col-md-8">
+                                                            <p><strong>Your request has been received!</strong></p>
+                                                            <p>The registrar will be processing your requested document
+                                                                soon. Please expect a request status update within
+                                                                <strong>3 to 5 business days</strong></p>
+                                                        </div>
+                                                    </div>
+                                                    <hr>
+                                                    <div>
+                                                        <p class="my-0"><strong>Order Number:</strong> {{ user_request.id }}</p>
+                                                        <p class="my-0"><strong>Order Date:</strong> {{ user_request.created_at }}</p>
+                                                        <p class="my-0"><strong>Paid Amount:</strong> {{ user_request.request.price }}</p>
+                                                    </div>
+                                                    <div class="text-center mt-2" style="font-size: small; color: red; font-weight: 500;">
+                                                        <p>Reminder: Please bring your school ID or a copy of your Certifcate of 
+                                                            Regisration with the order number to receive your requested document (for pickup only)</p>
+                                                    </div>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
                                     {% endfor %}
                                 {% endif %}
                                 </tbody>
                             </table>
-
                             
+                                                     
                         </div>                            
                         
                     </div>
