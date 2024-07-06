@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.urls import path
-from onlinerequest.views import views, register, login, dummy, request, request_user, record, codetable, user_approval_view, profile
+from onlinerequest.views import views, register, login, dummy, request, request_user, record, codetable, user_approval_view, profile, reference_login
 
 # Define URL paths here
 urlpatterns = [
@@ -50,6 +50,11 @@ urlpatterns = [
     path('get-document-description/<str:doc_code>/', request_user.get_document_description),
     path('request/user/create/', request_user.create_request),
     path('request/user/', request_user.display_user_requests),
+
+
+    # New feature 07/06/24
+    # Rearrange in the future
+    path('reference-login/', reference_login.index),
 
     # Code Table (This is where to update code tables)
     path('codetable/', codetable.index),
