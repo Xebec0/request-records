@@ -42,6 +42,7 @@ class User(AbstractBaseUser):
       (3, 'secretary'),
       (4, 'supervisor'),
       (5, 'admin'),
+      (6, 'guest'),  # Added guest user type
     )
 
     student_number = models.CharField(max_length=64, unique=True)
@@ -58,6 +59,7 @@ class User(AbstractBaseUser):
 
     def get_user_type_display(self):
         return dict(self.USER_TYPE_CHOICES).get(self.user_type, 'Unknown')
+
 
 # Profile
 class Profile(models.Model):

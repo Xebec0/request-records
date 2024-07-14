@@ -67,10 +67,13 @@
                 </div>
                 <div class="text"><a href="#">Forgot password?</a></div>
                 <div class="button input-box">
-                  <input id="btnSignIn" type="submit" value="Sumbit" />
+                  <input id="btnSignIn" type="submit" value="Login" />
+                </div>  
+                <div class="button input-box">
+                  <input type="button" value="Guest/Alumni Login" onclick="redirectToReferenceLogin()">
                 </div>
                 <div class="text sign-up-text">
-                  Don't have an account? <label for="flip">Sigup now</label>
+                  Don't have an account? <label for="flip">Signup now</label>
                 </div>
               </div>
             </form>
@@ -138,7 +141,7 @@
                 </div>
 
                 <div class="button input-box">
-                  <input id="btnSignUp" type="submit" value="Sumbit" />
+                  <input id="btnSignUp" type="submit" value="Submit" />
                 </div>
                 <div class="text sign-up-text">
                   Already have an account? <label for="flip">Login now</label>
@@ -228,7 +231,7 @@
                   }, 2000);
                 } else {
                   setTimeout(() => {
-                    window.location.href = "/user/";
+                    window.location.href = "/user/dashboard/";
                   }, 2000);
                 }
 
@@ -327,6 +330,10 @@
         }
         
       });
+
+      function redirectToReferenceLogin() {
+        window.location.href = "/reference-login/";
+      }
     </script>
   </body>
 </html>

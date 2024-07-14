@@ -32,7 +32,7 @@ urlpatterns = [
     path('admin-panel/', views.admin_dashboard, name="admin_dashboard"),
 
     # User - Dashboard
-    path('user/dashboard/', views.user_dashboard),
+    path('user/dashboard/', views.user_dashboard, name='user_dashboard'),
     path('user/', views.user_dashboard),
 
     # Request - Admin
@@ -44,17 +44,17 @@ urlpatterns = [
     path('request/<int:id>/delete/', request.delete_request),
 
     # Request - User
-    path('request/', request_user.index),
+    path('request/', request_user.index, name='request_user'),
     path('request/<int:id>/', request_user.get_request),
     path('request/checkout/<int:id>', request_user.display_payment),
     path('get-document-description/<str:doc_code>/', request_user.get_document_description),
     path('request/user/create/', request_user.create_request),
     path('request/user/', request_user.display_user_requests),
 
-
     # New feature 07/06/24
     # Rearrange in the future
     path('reference-login/', reference_login.index),
+    path('reference-login/create-request/', reference_login.create_request, name='create_request'),
 
     # Code Table (This is where to update code tables)
     path('codetable/', codetable.index),
