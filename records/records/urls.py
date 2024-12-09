@@ -56,9 +56,14 @@ urlpatterns = [
     path('reference-login/', reference_login.index),
     path('reference-login/create-request/', reference_login.create_request, name='create_request'),
 
-    # Code Table (This is where to update code tables)
+    # Configuration (This is where to update code tables)
     path('codetable/', codetable.index),
     path('admin-panel/codetable/', codetable.index),
+    path('codetable/edit/', codetable.edit, name='codetable_edit'),
+    path('codetable/delete/', codetable.delete, name='codetable_delete'),
+    path('codetable/data/', codetable.get_table_data, name='get_table_data'),
+    path('codetable/check_duplicate/', codetable.check_duplicate, name='check_duplicate'),
+
     # User Approval
     path('admin-panel/user-accounts/', user_approval_view.index),
     # Logout
