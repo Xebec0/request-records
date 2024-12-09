@@ -51,3 +51,4 @@ htmlcov/
 coverage.xml
 *.cover
 
+*.pyc

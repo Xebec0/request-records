@@ -4,6 +4,8 @@ from django.http import JsonResponse
 from ..models import Document, Requirement, Purpose
 
 def index(request):
+    selected_table = request.GET.get('table_type', 'Requirement')
+    
     if request.method == "POST":
         table_name = request.POST.get("table_name")
         description = request.POST.get("description")
@@ -26,7 +28,20 @@ def index(request):
             return JsonResponse({'status': False, 'message': str(e)})
         
     else:
-        return render(request, 'code_table/index.html')
+        data = None
+        
+        if selected_table == 'Requirement':
+            data = Requirement.objects.all()
+        elif selected_table == 'Document':
+            data = Document.objects.all()
+        elif selected_table == 'Purpose':
+            data = Purpose.objects.all()
+            
+        context = {
+            'selected_table': selected_table,
+            'data': data
+        }
+        return render(request, 'code_table/index.html', context)
     
 def create_acronym(description):
     # Split the description into words
