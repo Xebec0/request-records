@@ -78,11 +78,6 @@ class User(AbstractBaseUser):
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['student_number']
 
-    def save(self, *args, **kwargs):
-        if self._state.adding or not self.password.startswith('sha256$'):
-            self.password = f"sha256${hashlib.sha256(self.password.encode()).hexdigest()}"
-        super().save(*args, **kwargs)
-
     def __str__(self):
         return self.student_number
 

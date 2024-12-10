@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>Code Tables</title>
+    <title>Configurations</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     {% include 'header.html' %}
 
@@ -12,8 +12,11 @@
             background-color: #e9ecef !important;
             cursor: not-allowed;
         }
+        button:disabled {
+            opacity: 0.65 !important;
+            cursor: not-allowed !important;
+        }
     </style>
-    
 </head>
 <body class="sb-nav-fixed">
     <div id="layoutSidenav">
@@ -34,7 +37,8 @@
                                     <option value="Requirement" {% if selected_table == 'Requirement' %}selected{% endif %}>Requirements</option>
                                     <option value="Document" {% if selected_table == 'Document' %}selected{% endif %}>Documents</option>
                                     <option value="Purpose" {% if selected_table == 'Purpose' %}selected{% endif %}>Purposes</option>
-                                </select>
+                                    <option value="Course" {% if selected_table == 'Course' %}selected{% endif %}>Courses</option>
+                                </select>                                
                             </div>
                         </div>
                         <div class="card-body">
@@ -84,12 +88,12 @@
                                                 {% if selected_table != 'Purpose' %}
                                                 <div class="mb-3">
                                                     <label class="form-label">Code</label>
-                                                    <input type="text" class="form-control" id="item_code" readonly maxlength="6">
+                                                    <input type="text" class="form-control" id="item_code" readonly maxlength="6" required>
                                                 </div>
                                                 {% endif %}
                                                 <div class="mb-3">
                                                     <label class="form-label">Description</label>
-                                                    <input type="text" class="form-control" id="item_description" readonly>
+                                                    <input type="text" class="form-control" id="item_description" readonly required>
                                                 </div>
                                                 {% if selected_table != 'Requirement' %}
                                                 <div class="mb-3">
@@ -106,7 +110,7 @@
                                                     <button type="button" class="btn btn-warning d-none" id="cancelBtn">Cancel</button>
                                                     <button type="button" class="btn btn-danger" id="deleteBtn" disabled>Delete</button>
                                                     <button type="button" class="btn btn-secondary" id="newBtn">New</button>
-                                                </div>                                                
+                                                </div>
                                             </form>
                                         </div>
                                     </div>
@@ -122,18 +126,15 @@
 
     <script>
         $(document).ready(function() {
-            // Initialize DataTable
             const dataTable = $('#datatable').DataTable({
                 responsive: true,
                 select: true
             });
 
-            // Table selector change handler
             $('#tableSelector').change(function() {
                 window.location.href = '/codetable/?table_type=' + $(this).val();
             });
 
-            // Row selection handler
             $('#datatable tbody').on('click', 'tr', function() {
                 const id = $(this).data('id');
                 const code = $(this).data('code');
@@ -146,14 +147,12 @@
                 $('#item_status').val(active ? 'true' : 'false');
                 
                 if(id) {
-                    $('#item_code').prop('readonly', false);
                     $('#editBtn').prop('disabled', false);
                     $('#deleteBtn').prop('disabled', false);
                 }
                 disableForm();
             });
 
-            // Button handlers
             $('#editBtn').click(function() {
                 enableForm();
                 $(this).addClass('d-none');
@@ -161,7 +160,11 @@
             });
 
             $('#saveBtn').click(function() {
-                saveItem();
+                if($('#item_id').val()) {
+                    saveItem();
+                } else {
+                    createItem();
+                }
             });
 
             $('#deleteBtn').click(function() {
@@ -180,14 +183,22 @@
             $('#cancelBtn').click(function() {
                 disableForm();
                 if($('#item_id').val()) {
-                    // If editing existing item, restore original values
                     const row = $('#datatable tbody tr[data-id="' + $('#item_id').val() + '"]');
                     $('#item_code').val(row.data('code'));
                     $('#item_description').val(row.data('description'));
                     $('#item_status').val(row.data('active') ? 'true' : 'false');
                 } else {
-                    // If adding new item, clear form
                     clearForm();
+                }
+            });
+
+            $('#item_code').on('input', function() {
+                if (this.value.length > 6) {
+                    this.value = this.value.slice(0, 6);
+                    showToast({
+                        'message': 'Code must not exceed 6 characters!',
+                        'color': '#FF0000'
+                    });
                 }
             });
         });
@@ -204,25 +215,15 @@
         }
 
         function enableForm() {
-            // Make all form inputs editable
             $('#itemForm input:not([type="hidden"])').prop('readonly', false);
             $('#itemForm select').prop('disabled', false);
-            
-            // Keep code readonly for new items
-            if(!$('#item_id').val()) {
-                $('#item_code').prop('readonly', true);
-            }
-
             $('#saveBtn, #cancelBtn').removeClass('d-none');
             $('#editBtn').addClass('d-none');
         }
 
         function disableForm() {
-            // Make all form inputs readonly
             $('#itemForm input:not([type="hidden"])').prop('readonly', true);
             $('#itemForm select').prop('disabled', true);
-            
-            // Hide save button, show edit button
             $('#saveBtn, #cancelBtn').addClass('d-none');
             $('#editBtn').removeClass('d-none');
         }
@@ -232,14 +233,56 @@
             $('#item_code').val('');
             $('#item_description').val('');
             $('#item_status').val('true');
-            $('#item_code').prop('readonly', true);
             $('#editBtn').prop('disabled', true);
             $('#deleteBtn').prop('disabled', true);
+        }
+
+        function createItem() {
+            const code = $('#item_code').val();
+            const description = $('#item_description').val();
+            
+            if(!code || !description) {
+                showToast({
+                    'message': 'Code and Description are required!',
+                    'color': '#FF0000'
+                });
+                return;
+            }
+            
+            $.ajax({
+                type: 'POST',
+                url: '/codetable/',
+                data: {
+                    'code': code,
+                    'description': description,
+                    'table_name': $('#tableSelector').val(),
+                    'csrfmiddlewaretoken': $('input[name=csrfmiddlewaretoken]').val()
+                },
+                success: function(response) {
+                    showToast({
+                        'message': response.message,
+                        'color': response.status ? '#008000' : '#FF0000'
+                    });
+                    if(response.status) {
+                        refreshTable();
+                        clearForm();
+                        disableForm();
+                    }
+                }
+            });
         }
 
         function saveItem() {
             const code = $('#item_code').val();
             const description = $('#item_description').val();
+            
+            if(!code || !description) {
+                showToast({
+                    'message': 'Code and Description are required!',
+                    'color': '#FF0000'
+                });
+                return;
+            }
             
             $.ajax({
                 type: 'GET',
@@ -262,7 +305,7 @@
                         type: 'POST',
                         url: '/codetable/edit/',
                         data: {
-                            'id': $('#item_id').val() || '',
+                            'id': $('#item_id').val(),
                             'code': code,
                             'description': description,
                             'active': $('#item_status').val() === 'true',

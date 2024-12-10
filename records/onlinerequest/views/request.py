@@ -51,28 +51,37 @@ def display_user_request(request, id):
 
         return JsonResponse({'status': True, 'message': 'Request status updated successfully.', 'request_status': user_request.status})
     else:
-        user_request = User_Request.objects.get(id=id)
+        try:
+            user_request = User_Request.objects.get(id=id)
+            uploads = []
+            
+            # Decrypt uploads data
+            decrypted_uploads = user_request.get_decrypted_uploads()
+            
+            if decrypted_uploads:
+                for user_request_upload in decrypted_uploads.split(','):
+                    if user_request_upload:
+                        upload = user_request_upload.replace("<", "").replace(">", "").split('&')
+                        try:
+                            uploads.append({
+                                'code': getCodeDescription(Requirement, upload[0]),
+                                'path': upload[1]
+                            })
+                        except Exception as e:
+                            print(f"Error processing upload {upload[0]}: {str(e)}")
+                            continue
 
-        uploads = []
-        for record in user_request.uploads.split(','):
-            if record:
-                test = record.replace(">", "").replace("<", "").split('&')
-                print(test[0] + "-" + test[1])
+            context = {
+                'user_request': user_request,
+                'uploads': uploads,
+            }
 
-        for user_request_upload in user_request.uploads.split(','):
-            if user_request_upload:
-                upload = user_request_upload.replace("<", "").replace(">", "").split('&')
-                uploads.append({
-                    'code': getCodeDescription(Requirement, upload[0]),
-                    'path': upload[1]
-                })
-
-        context = {
-            'user_request': user_request,
-            'uploads': uploads,
-        }
-
-    return render(request, 'admin/request/view-user-request.html', context)
+            return render(request, 'admin/request/view-user-request.html', context)
+            
+        except User_Request.DoesNotExist:
+            return JsonResponse({'status': False, 'message': 'User request not found'}, status=404)
+        except Exception as e:
+            return JsonResponse({'status': False, 'message': f'Error: {str(e)}'}, status=500)
 
 def getCodeDescription(model, key):
     model_instance = model.objects.get(code = key)

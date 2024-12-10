@@ -173,6 +173,21 @@
           </div>
         </div>
 
+        <!-- OTP Modal -->
+        <div id="otpModal" class="modal">
+          <div class="modal-content">
+            <div class="title">OTP Verification</div>
+            <div class="input-boxes">
+              <div class="input-box">
+                <i class="fas fa-key"></i>
+                <input type="text" id="otpInput" placeholder="Enter OTP code" required/>
+              </div>
+              <div class="button input-box">
+                <input type="button" id="verifyOtpBtn" value="Verify OTP"/>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -205,49 +220,40 @@
         }
 
         $("form").on("submit", function (e) {
-          e.preventDefault(); // Prevent the form from submitting normally
-
-          // Get form data
+          e.preventDefault();
           var formData = $(this).serialize();
           var $form = $(this);
           var isSignUpForm = $("#flip").prop("checked");
           var url = isSignUpForm ? '/register/' : '/login/';
 
-          // Send AJAX POST request
           $.ajax({
             type: "POST",
             url: url,
             data: formData,
             success: function (response) {
-              showToast({
-                message: response.message,
-                color: response.status ? "#008000" : "#FF0000",
-              });
-
-              if (response.status) {
-                if (isSignUpForm) {
-                  setTimeout(() => {
-                    window.location.href = "/signup/";
-                  }, 2000);
-                } else {
-                  setTimeout(() => {
-                    window.location.href = "/user/dashboard/";
-                  }, 2000);
-                }
-
-                enableControls($form, false);
+              if (!isSignUpForm && response.require_otp) {
+                showOtpModal();
+                showToast({
+                  message: response.message,
+                  color: "#008000",
+                });
               } else {
-                // Display validation errors
-                if (response.errors) {
-                  for (var field in response.errors) {
-                    if (response.errors.hasOwnProperty(field)) {
-                      var errorMessage = response.errors[field][0];
-                      showToast({
-                        message: errorMessage,
-                        color: "#FF0000",
-                      });
-                    }
+                showToast({
+                  message: response.message,
+                  color: response.status ? "#008000" : "#FF0000",
+                });
+
+                if (response.status) {
+                  if (isSignUpForm) {
+                    setTimeout(() => {
+                      window.location.href = "/signup/";
+                    }, 2000);
+                  } else {
+                    setTimeout(() => {
+                      window.location.href = "/user/dashboard/";
+                    }, 2000);
                   }
+                  enableControls($form, false);
                 }
               }
             },
@@ -257,6 +263,55 @@
           });
         });
 
+        // Add OTP verification handling
+        $("#verifyOtpBtn").on("click", function() {
+          var otp = $("#otpInput").val();
+          $.ajax({
+            type: "POST",
+            url: "/login/",
+            data: {
+              verify_otp: true,
+              otp: otp,
+              csrfmiddlewaretoken: $("input[name=csrfmiddlewaretoken]").val(),
+            },
+            success: function(response) {
+              showToast({
+                message: response.message,
+                color: response.status ? "#008000" : "#FF0000",
+              });
+              
+              if (response.status) {
+                setTimeout(() => {
+                  window.location.href = "/user/dashboard/";
+                }, 2000);
+              }
+            }
+          });
+        });
+
+        // Show modal with fade
+        function showOtpModal() {
+          $("#otpModal").css("display", "block");
+          setTimeout(() => {
+            $("#otpModal").addClass("show");
+          }, 10);
+        }
+
+        // Hide modal with fade
+        function hideOtpModal() {
+          $("#otpModal").removeClass("show");
+          setTimeout(() => {
+            $("#otpModal").css("display", "none");
+          }, 300);
+        }
+
+        // Close OTP modal when clicking outside
+        $(window).on("click", function(event) {
+          if (event.target == $("#otpModal")[0]) {
+            hideOtpModal();
+          }
+        });
+        
         function resetInputFields(form) {
           form.find("input[type='text'], input[type='password']").val("");
         }
