@@ -130,40 +130,35 @@ class User_Request(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user_requests')
     request = models.ForeignKey(Request, on_delete=models.CASCADE, related_name='user_requests')
     status = models.CharField(max_length=64)
-    uploads = models.TextField()  # Changed to TextField for encrypted data
+    uploads = models.TextField()  
     requested = models.CharField(max_length=256, default="")
     purpose = models.CharField(max_length=256, blank=True)
     number_of_copies = models.IntegerField(default=1)
-    uploaded_payment = models.TextField(blank=True)  # Changed to TextField for encrypted data
+    uploaded_payment = models.TextField(blank=True)
     payment_status = models.CharField(max_length=10, default="Processing", blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    def save(self, *args, **kwargs):
-        if self.uploads:
-            key = generate_key_from_user(self.user_id)
-            self.uploads = encrypt_data(self.uploads, key)
-        if self.uploaded_payment:
-            key = generate_key_from_user(self.user_id)
-            self.uploaded_payment = encrypt_data(self.uploaded_payment, key)
-        super().save(*args, **kwargs)
+    def set_uploads(self, uploads_list):
+        if not uploads_list:
+            self.uploads = ''
+            return
+        
+        key = generate_key_from_user(self.user.id)
+        encrypted_paths = [encrypt_data(path, key) for path in uploads_list]
+        self.uploads = ','.join(encrypted_paths)
 
-    def get_decrypted_uploads(self):
-        if self.uploads:
-            key = generate_key_from_user(self.user_id)
-            return decrypt_data(self.uploads, key)
-        return ''
-
-    def get_decrypted_payment(self):
-        if self.uploaded_payment:
-            key = generate_key_from_user(self.user_id)
-            return decrypt_data(self.uploaded_payment, key)
-        return ''
+    def get_uploads(self):
+        if not self.uploads:
+            return []
+        
+        key = generate_key_from_user(self.user.id)
+        encrypted_paths = self.uploads.split(',')
+        return [decrypt_data(path, key) for path in encrypted_paths]
 
     def uploads_as_list(self):
-        decrypted_uploads = self.get_decrypted_uploads()
-        return decrypted_uploads.split(',') if decrypted_uploads else []
-
+        return self.get_uploads()
+    
 class Purpose(models.Model):
     description = models.CharField(max_length=256)
     active = models.BooleanField(default=True)

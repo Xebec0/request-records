@@ -38,51 +38,54 @@ def display_user_request(request, id):
         new_status = request.POST.get('new_status')
         requested_file = request.FILES.get('requested_file')
         payment_status = request.POST.get("payment_status")
-        # Update user_request
+        
         user_request = User_Request.objects.get(id=id)
 
         if requested_file is not None:
-            file_path = handle_uploaded_file(id, requested_file)
-            user_request.requested = file_path
+            # This will now return encrypted path
+            encrypted_file_path = handle_uploaded_file(id, requested_file)
+            user_request.requested = encrypted_file_path
 
         user_request.payment_status = payment_status
         user_request.status = new_status
         user_request.save()
 
         return JsonResponse({'status': True, 'message': 'Request status updated successfully.', 'request_status': user_request.status})
-    else:
+    elif request.method == "GET":
         try:
             user_request = User_Request.objects.get(id=id)
             uploads = []
             
-            # Decrypt uploads data
-            decrypted_uploads = user_request.get_decrypted_uploads()
-            
-            if decrypted_uploads:
-                for user_request_upload in decrypted_uploads.split(','):
-                    if user_request_upload:
+            if user_request.uploads:
+                key = generate_key_from_user(id)
+                upload_items = user_request.uploads.split(',')
+                for user_request_upload in upload_items:
+                    if user_request_upload.strip():
                         upload = user_request_upload.replace("<", "").replace(">", "").split('&')
-                        try:
-                            uploads.append({
-                                'code': getCodeDescription(Requirement, upload[0]),
-                                'path': upload[1]
-                            })
-                        except Exception as e:
-                            print(f"Error processing upload {upload[0]}: {str(e)}")
-                            continue
+                        # First decrypt the encrypted hash
+                        decrypted_hash = decrypt_data(upload[1], key)
+                        
+                        # Reconstruct original file path
+                        base_path = os.path.join(settings.MEDIA_ROOT, 'onlinerequest', 'static', 'user_request', str(id), 'approved')
+                        # Find matching file by comparing hashes
+                        for filename in os.listdir(base_path):
+                            file_path = os.path.join(base_path, filename)
+                            current_hash = hashlib.sha256(file_path.encode()).hexdigest()
+                            if current_hash == decrypted_hash:
+                                uploads.append({
+                                    'code': getCodeDescription(Requirement, upload[0]),
+                                    'path': file_path
+                                })
+                                break
 
-            context = {
+            return render(request, 'admin/request/view-user-request.html', {
                 'user_request': user_request,
                 'uploads': uploads,
-            }
-
-            return render(request, 'admin/request/view-user-request.html', context)
-            
+            })
         except User_Request.DoesNotExist:
             return JsonResponse({'status': False, 'message': 'User request not found'}, status=404)
         except Exception as e:
-            return JsonResponse({'status': False, 'message': f'Error: {str(e)}'}, status=500)
-
+            return JsonResponse({'status': False, 'message': f'Error: {str(e)}'}, status=500)             
 def getCodeDescription(model, key):
     model_instance = model.objects.get(code = key)
     return model_instance.description
@@ -107,6 +110,9 @@ def get_requests(request):
     requests_json = RequestSerializer(requests, many=True).data  # Serialize the queryset
     return JsonResponse(requests_json, safe=False)
 
+import hashlib
+from ..models import generate_key_from_user, encrypt_data, decrypt_data
+
 def handle_uploaded_file(source, file):
     # Define the path where you want to save the file
     static_dir = os.path.join(settings.MEDIA_ROOT, 'onlinerequest', 'static', 'user_request', str(source), 'approved')
@@ -121,4 +127,11 @@ def handle_uploaded_file(source, file):
         for chunk in file.chunks():
             destination.write(chunk)
 
-    return file_path
+    # First hash the path
+    hashed_path = hashlib.sha256(file_path.encode()).hexdigest()
+    
+    # Then encrypt the hashed path
+    key = generate_key_from_user(source)
+    encrypted_path = encrypt_data(hashed_path, key)
+    
+    return encrypted_path
