@@ -113,7 +113,7 @@
                                         </div>
                                         <div class="mb-3">
                                             <label for="newStatus" class="form-label fw-bold">Status:</label>
-                                            <select class="form-select" id="newStatus">
+                                            <select class="form-select" id="newStatus" onchange="handleStatusChange(this.value)">
                                                 <option value="Approved - In Process">Approved - In Process</option>
                                                 <option value="For Pickup">For Pickup</option>
                                                 <option value="Completed">Completed</option>
@@ -169,6 +169,49 @@
 
                 toast.showToast();
             }
+
+            function handleStatusChange(status) {
+                const fileInput = document.getElementById("requestedFile");
+                const saveButton = document.querySelector(".btn-primary[onclick^='saveChanges']");
+                const allInputs = document.querySelectorAll("select, input, textarea");
+                
+                if (status === "For Pickup") {
+                    if (!fileInput.files.length) {
+                        showToast({
+                            'message': 'Please upload a file before setting status to For Pickup',
+                            'color': '#FF0000',
+                            'duration': 4000,
+                        });
+                        document.getElementById("newStatus").value = "Approved - In Process";
+                        return;
+                    }
+                }
+                
+                if (status === "Completed") {
+                    allInputs.forEach(input => {
+                        input.setAttribute("disabled", true);
+                    });
+                    saveButton.setAttribute("disabled", true);
+                    
+                    showToast({
+                        'message': 'Request is completed. No further changes allowed.',
+                        'color': '#008000',
+                        'duration': 4000,
+                    });
+                } else {
+                    allInputs.forEach(input => {
+                        input.removeAttribute("disabled");
+                    });
+                    saveButton.removeAttribute("disabled");
+                }
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+                const currentStatus = document.getElementById("requestStatus").textContent.trim();
+                if (currentStatus === "Completed") {
+                    handleStatusChange("Completed");
+                }
+            });
 
             function saveChanges(id) {
                 var csrftoken = getCookie('csrftoken');
