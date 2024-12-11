@@ -11,7 +11,6 @@ import os
 
 def index(request):
     if request.method == "POST":
-
         post_document = request.POST.get("documents")
         post_files_required = request.POST.get("requirements")
         post_description = request.POST.get("description")
@@ -51,11 +50,26 @@ def display_user_request(request, id):
         user_request.save()
 
         return JsonResponse({'status': True, 'message': 'Request status updated successfully.', 'request_status': user_request.status})
-    elif request.method == "GET":
+    
+    if request.method == "GET":
         try:
             user_request = User_Request.objects.get(id=id)
             uploads = []
+        
+            # Decrypt payment file path if exists
+            if user_request.uploaded_payment:
+                key = generate_key_from_user(id)
+                decrypted_payment_hash = decrypt_data(user_request.uploaded_payment, key)
+                payment_base_path = os.path.join(settings.MEDIA_ROOT, 'onlinerequest', 'static', 'user_request', str(id), 'uploaded_payment')
             
+                if os.path.exists(payment_base_path):
+                    for filename in os.listdir(payment_base_path):
+                        file_path = os.path.join(payment_base_path, filename)
+                        current_hash = hashlib.sha256(file_path.encode()).hexdigest()
+                        if current_hash == decrypted_payment_hash:
+                            user_request.uploaded_payment = file_path
+                            break
+        
             if user_request.uploads:
                 key = generate_key_from_user(id)
                 upload_items = user_request.uploads.split(',')
@@ -64,19 +78,21 @@ def display_user_request(request, id):
                         upload = user_request_upload.replace("<", "").replace(">", "").split('&')
                         # First decrypt the encrypted hash
                         decrypted_hash = decrypt_data(upload[1], key)
-                        
+                    
                         # Reconstruct original file path
-                        base_path = os.path.join(settings.MEDIA_ROOT, 'onlinerequest', 'static', 'user_request', str(id), 'approved')
-                        # Find matching file by comparing hashes
-                        for filename in os.listdir(base_path):
-                            file_path = os.path.join(base_path, filename)
-                            current_hash = hashlib.sha256(file_path.encode()).hexdigest()
-                            if current_hash == decrypted_hash:
-                                uploads.append({
-                                    'code': getCodeDescription(Requirement, upload[0]),
-                                    'path': file_path
-                                })
-                                break
+                        base_path = os.path.join(settings.MEDIA_ROOT, 'onlinerequest', 'static', 'user_request', str(id))
+                    
+                        # Check if base path exists
+                        if os.path.exists(base_path):
+                            for filename in os.listdir(base_path):
+                                file_path = os.path.join(base_path, filename)
+                                current_hash = hashlib.sha256(file_path.encode()).hexdigest()
+                                if current_hash == decrypted_hash:
+                                    uploads.append({
+                                        'code': getCodeDescription(Requirement, upload[0]),
+                                        'path': file_path
+                                    })
+                                    break
 
             return render(request, 'admin/request/view-user-request.html', {
                 'user_request': user_request,
@@ -85,7 +101,8 @@ def display_user_request(request, id):
         except User_Request.DoesNotExist:
             return JsonResponse({'status': False, 'message': 'User request not found'}, status=404)
         except Exception as e:
-            return JsonResponse({'status': False, 'message': f'Error: {str(e)}'}, status=500)             
+            return JsonResponse({'status': False, 'message': f'Error: {str(e)}'}, status=500)   
+                             
 def getCodeDescription(model, key):
     model_instance = model.objects.get(code = key)
     return model_instance.description
@@ -93,7 +110,6 @@ def getCodeDescription(model, key):
 def delete_user_request(request, id):
     user_request = User_Request.objects.get(id = id)
     user_request.delete()
-
     return JsonResponse({'status' : True, 'message': "Deleted succesfully."})
     
 def delete_request(request, id):

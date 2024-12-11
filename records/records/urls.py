@@ -50,9 +50,10 @@ urlpatterns = [
     path('get-document-description/<str:doc_code>/', request_user.get_document_description),
     path('request/user/create/', request_user.create_request),
     path('request/user/', request_user.display_user_requests),
+    path('verify-document/<str:document_id>/', request_user.verify_document, name='verify_document'),
+    path('request/generate-qr/<int:id>/', request_user.generate_qr, name='generate_qr'),
 
-    # New feature 07/06/24
-    # Rearrange in the future
+    # Guest - login/request
     path('reference-login/', reference_login.index),
     path('reference-login/create-request/', reference_login.create_request, name='create_request'),
 
@@ -72,3 +73,5 @@ urlpatterns = [
     # Profile
     path('profile/', profile.index)
 ]
+
+

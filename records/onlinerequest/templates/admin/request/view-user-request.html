@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html>
     <head>
         <meta charset="utf-8">
@@ -17,7 +16,6 @@
             
             {% include 'admin/admin-sidenav.html' %}
 
-
             <div id="layoutSidenav_content">
                 <main>
                     <div class="container-fluid px-4">
@@ -25,83 +23,117 @@
                         <ol class="breadcrumb mb-4">
                             <li class="breadcrumb-item active">User request status and information</li>
                         </ol>
-                        <div class="card mb-4">
-                            <div class="card-header">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <span class="fs-6"> <i class="fa fa-list-ul" aria-hidden="true"></i> Existing Forms</span>
+                        
+                        {% if user_request %}
+                        <div class="row">
+                            <!-- Left Card - User Info -->
+                            <div class="col-md-6">
+                                <div class="card mb-4">
+                                    <div class="card-header">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <span class="fs-6"> <i class="fa fa-info-circle" aria-hidden="true"></i> Request Information</span>
+                                        </div>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row border-bottom">
+                                            <div class="col-md-12">
+                                                <h6 class="fw-bold">User Number:
+                                                    <span class="fw-normal fs-6 mb-2">{{ user_request.user.student_number }}</span>
+                                                </h6>
+                                                <h6 class="fw-bold">Status:
+                                                    <span id="requestStatus" class="fw-normal fs-6 mb-2">{{ user_request.status }}</span>
+                                                </h6>
+                                                <h6 class="fw-bold">Purpose:
+                                                    <span id="requestStatus" class="fw-normal fs-6 mb-2">{{ user_request.purpose}}</span>
+                                                </h6>
+                                                <h6 class="fw-bold">Price:
+                                                    <span id="requestStatus" class="badge bg-primary">₱{{ user_request.request.price }}</span>
+                                                </h6>
+                                            </div>
+                                        </div>
+                                        <div class="row mt-2">
+                                            <div class="col-md-12">
+                                                <h6 class="fw-bold mb-3">Submitted requirements:</h6>
+                                                {% if uploads %}
+                                                <ul class="list-group">
+                                                    {% for upload in uploads %}
+                                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                        {{ upload.code }}
+                                                        <a href="{% static upload.path %}" download class="btn btn-primary btn-sm">Download</a>
+                                                    </li>
+                                                    {% endfor %}
+                                                </ul>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        <div class="row mt-3">
+                                            <div class="col-md-12">
+                                                <h6 class="fw-bold mb-3">Payment:</h6>
+                                                {% if user_request.uploaded_payment %}
+                                                <ul class="list-group">
+                                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                        Set payment status:
+                                                        <select class="form-select" name="payment_status" id="payment_status" aria-label="Default select example">
+                                                            <option value="Processing" {% if user_request.payment_status == "Processing" %} selected {% endif %}>Processing</option>
+                                                            <option value="Paid" {% if user_request.payment_status == "Paid" %} selected {% endif %}>Paid</option>
+                                                            <option value="On Hold" {% if user_request.payment_status == "On Hold" %} selected {% endif %}>On Hold</option>
+                                                            <option value="Failed" {% if user_request.payment_status == "Failed" %} selected {% endif %}>Failed</option>
+                                                            <option value="Refunded" {% if user_request.payment_status == "Refunded" %} selected {% endif %}>Refunded</option>
+                                                        </select>
+                                                    </li>
+                                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                        Gcash Payment
+                                                        <a href="{% static user_request.uploaded_payment %}" download class="btn btn-primary btn-sm">Download</a>
+                                                    </li>
+                                                </ul>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="card-body"> 
-                                {% if user_request %}
-                                <div class="row border-bottom">
-                                    <div class="col-md-6">
-                                        <h6 class="fw-bold">User Number:
-                                            <span class="fw-normal fs-6 mb-2">{{ user_request.user.student_number }}</span>
-                                        </h6>
-                                        <h6 class="fw-bold">Status:
-                                            <span id="requestStatus" class="fw-normal fs-6 mb-2">{{ user_request.status }}</span>
-                                        </h6>
-                                        <h6 class="fw-bold">Purpose:
-                                            <span id="requestStatus" class="fw-normal fs-6 mb-2">{{ user_request.purpose}}</span>
-                                        </h6>
-                                        <h6 class="fw-bold">Price:
-                                            <span id="requestStatus" class="badge bg-primary">₱{{ user_request.request.price }}</span>
-                                        </h6>
+
+                            <!-- Right Card - Form -->
+                            <div class="col-md-6">
+                                <div class="card mb-4">
+                                    <div class="card-header">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <span class="fs-6"> <i class="fa fa-edit" aria-hidden="true"></i> Update Request</span>
+                                        </div>
                                     </div>
-                                </div>
-                                <div class="row mt-2">
-                                    <div class="col-md-6">
-                                        <h6 class="fw-bold mb-3">Submitted requirements:</h6>
-                                        {% if uploads %}
-                                        <ul class="list-group">
-                                            {% for upload in uploads %}
-                                            <li class="list-group-item d-flex justify-content-between align-items-center">
-                                                {{ upload.code }}
-                                                <a href="{% static upload.path %}" download class="btn btn-primary btn-sm">Download</a>
-                                            </li>
-                                            {% endfor %}
-                                        </ul>
-                                        {% endif %}
-                                    </div>
-                                </div>
-                                <div class="row mt-3">
-                                    <div class="col-md-6">
-                                        <h6 class="fw-bold mb-3">Payment:</h6>
-                                        {% if user_request.uploaded_payment %}
-                                        <ul class="list-group">
-                                            <li class="list-group-item d-flex justify-content-between align-items-center">
-                                                Set payment status:
-                                                <select class="form-select" name="payment_status" id="payment_status" aria-label="Default select example">
-                                                    <option value="Processing" {% if user_request.payment_status == "Processing" %} selected {% endif %}>Processing</option>
-                                                    <option value="Paid" {% if user_request.payment_status == "Paid" %} selected {% endif %}>Paid</option>
-                                                    <option value="On Hold" {% if user_request.payment_status == "On Hold" %} selected {% endif %}>On Hold</option>
-                                                    <option value="Failed" {% if user_request.payment_status == "Failed" %} selected {% endif %}>Failed</option>
-                                                    <option value="Refunded" {% if user_request.payment_status == "Refunded" %} selected {% endif %}>Refunded</option>
-                                                </select>
-                                            </li>
-                                            <li class="list-group-item d-flex justify-content-between align-items-center">
-                                                Gcash Payment
-                                                <a href="{% static user_request.uploaded_payment %}" download class="btn btn-primary btn-sm">Download</a>
-                                            </li>
-                                        </ul>
-                                        {% endif %}
-                                    </div>
-                                </div>
-                                <div class="row mt-3">
-                                    <div class="col-md-6">
+                                    <div class="card-body">
                                         <div class="mb-3">
                                             <label for="requestedFile" class="form-label fw-bold">Upload requested file:</label>
-                                            <input type="file" class="form-control" id="requestedFile" name="file">
+                                            <div class="d-flex gap-2">
+                                                <input type="file" class="form-control" id="requestedFile" name="file">
+                                                {% if user_request.status == "Completed" and user_request.requested %}
+                                                    <a href="{% static user_request.requested %}" download class="btn btn-success">Download</a>
+                                                {% endif %}
+                                            </div>
                                         </div>
-                                        <div class="d-flex">
-                                            <input type="text" class="form-control me-2" id="newStatus" placeholder="Enter new status">
-                                            <button class="btn btn-primary" id="btnUpdateStatus" onclick="updateStatus('{{user_request.id}}')">Update Status</button>
+                                        <div class="mb-3">
+                                            <label for="newStatus" class="form-label fw-bold">Status:</label>
+                                            <select class="form-select" id="newStatus">
+                                                <option value="Approved - In Process">Approved - In Process</option>
+                                                <option value="For Pickup">For Pickup</option>
+                                                <option value="Completed">Completed</option>
+                                                <option value="Declined">Declined</option>
+                                            </select>
                                         </div>
+                                        <div class="mb-3">
+                                            <label for="processingTime" class="form-label fw-bold">Processing Time (days):</label>
+                                            <input type="number" class="form-control" id="processingTime" min="1" max="30" value="3">
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="remarks" class="form-label fw-bold">Remarks:</label>
+                                            <textarea class="form-control" id="remarks" rows="3" placeholder="Enter any additional remarks"></textarea>
+                                        </div>
+                                        <button class="btn btn-primary" onclick="saveChanges('{{user_request.id}}')">Save Changes</button>
                                     </div>
                                 </div>
-                                {% endif %}
-                            </div>                       
+                            </div>
                         </div>
+                        {% endif %}
                     </div>
                 </main>
                 <footer class="py-4 bg-light mt-auto">
@@ -117,11 +149,9 @@
                     </div>
                 </footer>
             </div>
-
         </div>
 
         {% include 'footer.html' %}     
-        <script src="" async defer></script>
         <script>
             function showToast(options){
                 let toast = Toastify({
@@ -140,50 +170,30 @@
                 toast.showToast();
             }
 
-            function updateStatus(id) {
+            function saveChanges(id) {
                 var csrftoken = getCookie('csrftoken');
-                let newStatus = document.getElementById("newStatus").value;
-                let paymentStatus = document.querySelector("#payment_status");
-                let fileInput = document.getElementById("requestedFile");
                 let formData = new FormData();
+                
+                formData.append('new_status', document.getElementById("newStatus").value);
+                formData.append('payment_status', document.querySelector("#payment_status").value);
+                formData.append('processing_time', document.getElementById("processingTime").value);
+                formData.append('remarks', document.getElementById("remarks").value);
 
-                // Validate input
-                if (newStatus.trim() === "") {
-                    showToast({
-                        'message': 'Status cannot be blank',
-                        'color': '#FF0000',
-                        'duration': 4000,
-                    });
-                    return;
+                if (document.getElementById("requestedFile").files.length > 0) {
+                    formData.append('requested_file', document.getElementById("requestedFile").files[0]);
                 }
 
-                if (/[^a-zA-Z0-9\s]/.test(newStatus)) {
-                    showToast({
-                        'message': 'Status cannot contain special characters',
-                        'color': '#FF0000',
-                        'duration': 4000,
-                    });
-                    return;
-                }
-
-                formData.append('new_status', newStatus);
-
-                if (newStatus.toLowerCase() === "completed") {
-                    if (fileInput.files.length === 0) {
+                if (document.getElementById("newStatus").value.toLowerCase() === "completed") {
+                    if (document.getElementById("requestedFile").files.length === 0) {
                         showToast({
                             'message': 'Please upload a file before marking the request as "Completed"',
                             'color': '#FF0000',
                             'duration': 4000,
                         });
                         return;
-                    } else {
-                        formData.append('requested_file', fileInput.files[0]);
                     }
                 }
 
-                formData.append("payment_status", paymentStatus.value)
-
-                // Send AJAX POST request
                 $.ajax({
                     type: 'POST',
                     url: '/admin-panel/user-request/' + id,
@@ -198,7 +208,7 @@
                             'message': response.message,
                             'color': response.status ? '#008000' : '#FF0000',
                             'duration': 4000,
-                        })
+                        });
 
                         if (response.status) {
                             let status = document.getElementById("requestStatus");
@@ -228,12 +238,11 @@
                     var cookies = document.cookie.split(';');
                     for (var i = 0; i < cookies.length; i++) {
                         var cookie = cookies[i].trim();
-                        // Does this cookie string begin with the name we want?
                         if (cookie.substring(0, name.length + 1) === (name + '=')) {
                             cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
                             break;
-                            }
                         }
+                    }
                 }
                 return cookieValue;
             }
