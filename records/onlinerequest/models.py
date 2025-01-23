@@ -162,3 +162,12 @@ class User_Request(models.Model):
 class Purpose(models.Model):
     description = models.CharField(max_length=256)
     active = models.BooleanField(default=True)
+
+class ReportTemplate(models.Model):
+    name = models.CharField(max_length=255)
+    template_file = models.FileField(upload_to='reports/templates/')
+    description = models.CharField(max_length=500)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.name

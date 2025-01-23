@@ -38,6 +38,7 @@
                                     <option value="Document" {% if selected_table == 'Document' %}selected{% endif %}>Documents</option>
                                     <option value="Purpose" {% if selected_table == 'Purpose' %}selected{% endif %}>Purposes</option>
                                     <option value="Course" {% if selected_table == 'Course' %}selected{% endif %}>Courses</option>
+                                    <option value="Report" {% if selected_table == 'Report' %}selected{% endif %}>Reports</option>
                                 </select>                                
                             </div>
                         </div>
@@ -116,6 +117,41 @@
                                     </div>
                                 </div>
                             </div>
+
+
+                            <!-- Add Modal -->
+                            <div class="modal fade" id="uploadModal" tabindex="-1">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title">Upload Report Template</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <form id="uploadForm" enctype="multipart/form-data">
+                                                {% csrf_token %}
+                                                <div class="mb-3">
+                                                    <label class="form-label">Name</label>
+                                                    <input type="text" class="form-control" id="template_name" required>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label class="form-label">Description</label>
+                                                    <input type="text" class="form-control" id="template_description" required>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label class="form-label">Template File</label>
+                                                    <input type="file" class="form-control" id="template_file" accept=".docx" required>
+                                                </div>
+                                            </form>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                            <button type="button" class="btn btn-primary" id="uploadSubmit">Upload</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
                         </div>
                     </div>
                 </div>
@@ -174,10 +210,46 @@
             });
 
             $('#newBtn').click(function() {
-                clearForm();
-                enableForm();
-                $('#saveBtn').removeClass('d-none');
-                $('#editBtn').addClass('d-none');
+                if($('#tableSelector').val() === 'Report') {
+                    $('#uploadModal').modal('show');
+                } else {
+                    clearForm();
+                    enableForm();
+                    $('#saveBtn').removeClass('d-none');
+                    $('#editBtn').addClass('d-none');
+                }
+            });
+
+            $('#uploadSubmit').click(function() {
+                const formData = new FormData();
+                formData.append('table_name', 'Report');
+                formData.append('name', $('#template_name').val());
+                formData.append('description', $('#template_description').val());
+                formData.append('template_file', $('#template_file')[0].files[0]);
+                formData.append('csrfmiddlewaretoken', $('input[name=csrfmiddlewaretoken]').val());
+
+                $.ajax({
+                    url: '/codetable/',
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function(response) {
+                        if(response.status) {
+                            $('#uploadModal').modal('hide');
+                            refreshTable();
+                            showToast({
+                                'message': response.message,
+                                'color': '#008000'
+                            });
+                        } else {
+                            showToast({
+                                'message': response.message,
+                                'color': '#FF0000'
+                            });
+                        }
+                    }
+                });
             });
 
             $('#cancelBtn').click(function() {
@@ -349,35 +421,53 @@
             });
         }
 
-        function refreshTable() {
-            $.ajax({
-                type: 'GET',
-                url: '/codetable/data/',
-                data: {
-                    'table_type': $('#tableSelector').val()
-                },
-                success: function(response) {
-                    const table = $('#datatable').DataTable();
-                    table.clear();
+// Update the refreshTable function
+function refreshTable() {
+    $.ajax({
+        type: 'GET',
+        url: '/codetable/data/',
+        data: {
+            'table_type': $('#tableSelector').val()
+        },
+        success: function(response) {
+            const table = $('#datatable').DataTable();
+            table.clear();
+            
+            if ($('#tableSelector').val() === 'Report') {
+                response.data.forEach(function(item) {
+                    const row = table.row.add([
+                        item.name,  // Instead of code
+                        item.description,
+                        'Active'  // Reports are always active
+                    ]).node();
                     
-                    response.data.forEach(function(item) {
-                        const row = table.row.add([
-                            item.code,
-                            item.description,
-                            item.active ? 'Active' : 'Inactive'
-                        ]).node();
-                        
-                        $(row).addClass('table-row')
-                            .data('id', item.id)
-                            .data('code', item.code)
-                            .data('description', item.description)
-                            .data('active', item.active);
-                    });
+                    $(row).addClass('table-row')
+                        .data('id', item.id)
+                        .data('code', item.name)  // Use name as code
+                        .data('description', item.description)
+                        .data('active', true);
+                });
+            } else {
+                response.data.forEach(function(item) {
+                    const row = table.row.add([
+                        item.code,
+                        item.description,
+                        item.active ? 'Active' : 'Inactive'
+                    ]).node();
                     
-                    table.draw();
-                }
-            });
+                    $(row).addClass('table-row')
+                        .data('id', item.id)
+                        .data('code', item.code)
+                        .data('description', item.description)
+                        .data('active', item.active);
+                });
+            }
+            
+            table.draw();
         }
+    });
+}
+
     </script>
 </body>
 </html>

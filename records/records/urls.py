@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.urls import path
-from onlinerequest.views import views, register, login, dummy, request, request_user, record, codetable, user_approval_view, profile, reference_login
+from onlinerequest.views import views, register, login, dummy, request, request_user, record, codetable, user_approval_view, profile, reference_login, reports
 
 # Define URL paths here
 urlpatterns = [
@@ -71,7 +71,12 @@ urlpatterns = [
     path('logout/', views.logout_view, name='logout'),
     path('admin-panel/user-accounts/', user_approval_view.index),
     # Profile
-    path('profile/', profile.index)
+    path('profile/', profile.index),
+
+    # Reports URLs
+    path('user/reports/', reports.index, name='reports'),
+    path('user/reports/generate/<int:template_id>/', reports.generate_pdf, name='generate_report_pdf'),
 ]
+
 
 

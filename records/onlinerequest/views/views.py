@@ -2,7 +2,7 @@ from django.shortcuts import render
 from django.http import HttpResponse
 from django.contrib.auth import logout
 from django.shortcuts import redirect
-from onlinerequest.models import Request, Requirement
+from onlinerequest.models import Request, Requirement, User_Request
 
 def index(request):
     request_forms = Request.objects.all()
@@ -30,3 +30,7 @@ def user_dashboard(request):
 def logout_view(request):
     logout(request)
     return redirect('/signup/')
+
+def user_reports(request):
+    user_records = User_Request.objects.filter(user=request.user).order_by('-created_at')
+    return render(request, 'user/reports.html', {'user_records': user_records})
