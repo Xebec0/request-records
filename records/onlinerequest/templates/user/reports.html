@@ -52,7 +52,7 @@
                                                     </select>
                                                     <a href="{% url 'generate_report_pdf' template.id %}" 
                                                     class="btn btn-primary btn-sm"
-                                                    onclick="return generatePdfWithPurpose(this, {{ template.id }})">
+                                                    onclick="return generatePdfWithPurpose(this, '{{ template.id }}')">
                                                         Generate PDF
                                                     </a>
                                                 </div>
@@ -68,15 +68,16 @@
                 <footer class="py-4 bg-light mt-auto">
                     <div class="container-fluid px-4">
                         <div class="d-flex align-items-center justify-content-between small">
-                            <div class="text-muted">Copyright &copy; Academic File Request System 2024</div>
+                            <div class="text-muted">Copyright © Academic File Request System 2024</div>
                             <div>
                                 <a href="#">Privacy Policy</a>
-                                &middot;
-                                <a href="#">Terms &amp; Conditions</a>
+                                ·
+                                <a href="#">Terms & Conditions</a>
                             </div>
                         </div>
                     </div>
                 </footer>
+            </div>
         </div>
         
         {% include 'footer.html' %}
@@ -111,5 +112,6 @@
                 return openPdfInPopup(url);
             }
         </script>
+    </body>
     </body>
 </html>

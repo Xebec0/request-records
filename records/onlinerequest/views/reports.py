@@ -3,6 +3,7 @@ from django.http import FileResponse, Http404
 from docx2pdf import convert
 from docx import Document
 import os
+import pythoncom
 from django.conf import settings
 from ..models import Profile, ReportTemplate, Purpose
 from datetime import datetime
@@ -13,6 +14,8 @@ def index(request):
     return render(request, 'user/reports.html', {'templates': templates, 'purposes': purposes})
 
 def generate_pdf(request, template_id):
+    pythoncom.CoInitialize()
+
     # Get template and user profile
     purpose_id = request.GET.get('purpose')
     if not purpose_id:

@@ -31,17 +31,17 @@ class RecordSerializer(serializers.ModelSerializer):
 
     def validate_user_number(self, value):
         if not value:
-            raise serializers.ValidationError("Please enter user number.")
+            raise serializers.ValidationError("Please enter student number.")
         
         if len(value) < 9:
-            raise serializers.ValidationError("Please enter 10-digit user number.")
+            raise serializers.ValidationError("Please enter 10-digit student number.")
         
         # Check if user-number is already taken
         if value:
             record = Record.objects.filter(user_number = value)
 
             if record:
-                raise serializers.ValidationError("User number already taken.")
+                raise serializers.ValidationError("Student already taken.")
 
         return value
     
