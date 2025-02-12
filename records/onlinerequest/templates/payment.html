@@ -65,6 +65,16 @@
                 let user_request_id = document.querySelector("#user_request")
                 const files = document.querySelectorAll('input[type="file"]');
 
+                if (files[0].files.length === 0) {
+                    window.close();
+                    return;
+                }
+                
+                // Check file size before proceeding
+                if (!validateFileSize(files[0].files[0])) {
+                    return;
+                }
+
                 // Create form data
                 var formData = new FormData();
 
@@ -143,6 +153,20 @@
 
                 toast.showToast();
             }
+
+            function validateFileSize(file) {
+                const MAX_FILE_SIZE = 25 * 1024 * 1024; // 25MB in bytes
+                
+                if (file && file.size > MAX_FILE_SIZE) {
+                    showToast({
+                        message: `Receipt file exceeds 25MB limit`,
+                        color: '#FF0000'
+                    });
+                    return false;
+                }
+                return true;
+            }
+
         </script>
         <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     </body>
