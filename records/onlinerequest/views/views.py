@@ -34,3 +34,60 @@ def logout_view(request):
 def user_reports(request):
     user_records = User_Request.objects.filter(user=request.user).order_by('-created_at')
     return render(request, 'user/reports.html', {'user_records': user_records})
+
+# Analytics
+from django.http import JsonResponse
+from django.db.models import Count
+from django.utils import timezone
+from datetime import timedelta
+from django.db.models.functions import ExtractDay, ExtractHour
+
+def request_analytics(request):
+    return render(request, 'admin/analytics.html')
+
+def get_request_stats(request):
+    filter_type = request.GET.get('filter', 'week')
+    
+    # Date filtering
+    now = timezone.now()
+    if filter_type == 'day':
+        start_date = now - timedelta(days=1)
+    elif filter_type == 'week':
+        start_date = now - timedelta(weeks=1)
+    else:  # month
+        start_date = now - timedelta(days=30)
+        
+    # Get requests within date range
+    requests = User_Request.objects.filter(created_at__gte=start_date)
+    
+    # Most requested documents
+    doc_stats = requests.values('request__document__description')\
+                       .annotate(count=Count('id'))\
+                       .order_by('-count')
+    
+    # Processing time stats
+    completed_requests = requests.filter(status='Completed')
+    processing_times = []
+    
+    for req in completed_requests:
+        time_diff = req.updated_at - req.created_at
+        days = time_diff.days
+        hours = time_diff.seconds // 3600
+        status = 'Completed'
+        
+        if time_diff > timedelta(days=3):
+            status = 'late'
+            
+        processing_times.append({
+            'request_id': req.id,
+            'days': days,
+            'hours': hours,
+            'status': status
+        })
+
+    return JsonResponse({
+        'total_requests': requests.count(),
+        'document_stats': list(doc_stats),
+        'processing_times': processing_times
+    })
+

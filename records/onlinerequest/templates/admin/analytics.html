@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>Request Analytics</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        {% include 'header.html' %}
+    </head>
+    <body class="sb-nav-fixed">
+        <div id="layoutSidenav">
+            {% include 'admin/admin-topnav.html' %}
+            {% include 'admin/admin-sidenav.html' %}
+
+            <div id="layoutSidenav_content">
+                <main>
+                    <div class="container-fluid px-4">
+                        <h1 class="mt-4">Request Analytics</h1>
+                        <ol class="breadcrumb mb-4">
+                            <li class="breadcrumb-item active">Request Statistics and Processing Times</li>
+                        </ol>
+
+                        <div class="row mb-4">
+                            <div class="col">
+                                <select id="timeFilter" class="form-select">
+                                    <option value="day">Last 24 Hours</option>
+                                    <option value="week" selected>Last Week</option>
+                                    <option value="month">Last Month</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h5>Most Requested Documents</h5>
+                                        <canvas id="documentChart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h5>Processing Times</h5>
+                                        <div id="processingTimes"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </main>
+
+                <footer class="py-4 bg-light mt-auto">
+                    <div class="container-fluid px-4">
+                        <div class="d-flex align-items-center justify-content-between small">
+                            <div class="text-muted">Copyright &copy; Academic File Request System 2024</div>
+                            <div>
+                                <a href="#">Privacy Policy</a>
+                                &middot;
+                                <a href="#">Terms &amp; Conditions</a>
+                            </div>
+                        </div>
+                    </div>
+                </footer>
+            </div>
+        </div>
+
+        {% include 'footer.html' %}
+
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script>
+            let documentChart;
+
+            function loadStats() {
+                fetch(`/api/request-stats/?filter=${$('#timeFilter').val()}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        updateDocumentChart(data.document_stats);
+                        updateProcessingTimes(data.processing_times);
+                    });
+            }
+
+            function updateDocumentChart(stats) {
+                const ctx = document.getElementById('documentChart');
+                
+                if (documentChart) {
+                    documentChart.destroy();
+                }
+                
+                documentChart = new Chart(ctx, {
+                    type: 'pie',
+                    data: {
+                        labels: stats.map(s => s.request__document__description),
+                        datasets: [{
+                            data: stats.map(s => s.count),
+                            backgroundColor: [
+                                '#FF6384',
+                                '#36A2EB',
+                                '#FFCE56',
+                                '#4BC0C0'
+                            ]
+                        }]
+                    }
+                });
+            }
+
+            function updateProcessingTimes(times) {
+                const container = document.getElementById('processingTimes');
+                container.innerHTML = times.map(t => `
+                    <div class="alert alert-${t.status === 'completed' ? 'success' : 'warning'}">
+                        Request #${t.request_id}: ${t.days} days, ${t.hours} hours
+                        <span class="badge bg-${t.status === 'completed' ? 'success' : 'warning'}">
+                            ${t.status}
+                        </span>
+                    </div>
+                `).join('');
+            }
+
+            $(document).ready(function() {
+                $('#timeFilter').change(loadStats);
+                loadStats();
+            });
+        </script>
+    </body>
+</html>

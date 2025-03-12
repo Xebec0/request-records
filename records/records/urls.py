@@ -76,6 +76,10 @@ urlpatterns = [
     # Reports URLs
     path('user/reports/', reports.index, name='reports'),
     path('user/reports/generate/<int:template_id>/', reports.generate_pdf, name='generate_report_pdf'),
+
+    #Analytics
+    path('admin-panel/analytics/', views.request_analytics, name='request_analytics'),
+    path('api/request-stats/', views.get_request_stats, name='request_stats'),
 ]
 
 
