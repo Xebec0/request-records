@@ -48,7 +48,14 @@
                                             <td>{{ user.email }}</td>
                                             <td>{{ user.get_user_type_display }}</td>
                                             <td>
-                                                <button class="btn btn-primary btn-sm" type="button" onclick="approveUser('{{ user.id }}')">Approve</button>
+                                                <button type="button" class="btn btn-success approve-btn" data-user-id="{{ user.id }}">
+                                                    <i class="fas fa-check"></i> <span>Approve</span>
+                                                    <i class="fas fa-spinner fa-spin" style="display: none;"></i>
+                                                </button>
+                                                <button type="button" class="btn btn-danger decline-btn" data-user-id="{{ user.id }}">
+                                                    <i class="fas fa-times"></i> <span>Decline</span>
+                                                    <i class="fas fa-spinner fa-spin" style="display: none;"></i>
+                                                </button>                                                
                                             </td>
                                         </tr>
                                         {% endfor %}
@@ -65,11 +72,11 @@
             <footer class="py-4 bg-light mt-auto">
                 <div class="container-fluid px-4">
                     <div class="d-flex align-items-center justify-content-between small">
-                        <div class="text-muted">Copyright &copy; Academic File Request System 2024</div>
+                        <div class="text-muted">Copyright © Academic File Request System 2024</div>
                         <div>
                             <a href="#">Privacy Policy</a>
-                            &middot;
-                            <a href="#">Terms &amp; Conditions</a>
+                            ·
+                            <a href="#">Terms & Conditions</a>
                         </div>
                     </div>
                 </div>
@@ -81,53 +88,92 @@
     {% include 'footer.html' %}
 
     <script>
-        function showToast(options){
-            let toast = Toastify({
-                text: options.message,
-                duration: 2000,
-                newWindow: true,
-                close: true,
-                gravity: "top",
-                position: "right",
-                stopOnFocus: true,
-                style: {
-                    background: options.color,
-                },
+        $(document).ready(function() {
+            // Existing approve button handler
+            $('.approve-btn').on('click', function() {
+                var userId = $(this).data('user-id');
+                var $button = $(this);
+                
+                // Show spinner, hide text, disable button
+                $button.find('.fa-spinner').show();
+                $button.prop('disabled', true);
+                
+                approveUser(userId, 'approve', $button);
             });
-
-            toast.showToast();
-        }        
-
-        function approveUser(userId){
-            var form = document.getElementById('approveForm');
-            var formData = new FormData(form);
-            formData.append('user_id', userId);
-
-            // Send AJAX POST request
-            $.ajax({
-                type: "POST",
-                data: formData,
-                url: '/admin-panel/user-accounts/',
-                processData: false,
-                contentType: false,
-                success: function (response) {
-                    showToast({
-                        message: response.message,
-                        color: response.status ? "#008000" : "#FF0000",
-                    });
-
-                    if (response.status) {
+            
+            // New decline button handler
+            $('.decline-btn').on('click', function() {
+                var userId = $(this).data('user-id');
+                var $button = $(this);
+                
+                if (confirm('Are you sure you want to decline this registration? This action cannot be undone.')) {
+                    // Show spinner, hide text, disable button
+                    $button.find('.fa-spinner').show();
+                    $button.prop('disabled', true);
+                    
+                    approveUser(userId, 'decline', $button);
+                }
+            });
+            
+            function approveUser(userId, action, $button) {
+                console.log('Approving user:', userId, 'Action:', action); // Debug log
+                
+                $.ajax({
+                    url: '/admin-panel/user-accounts/',
+                    type: 'POST',
+                    data: {
+                        user_id: userId,
+                        action: action,
+                        csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val()
+                    },
+                    success: function(response) {
+                        console.log('Response:', response); // Debug log
+                        
+                        // Hide spinner, re-enable button (though we'll reload the page)
+                        $button.find('.fa-spinner').hide();
+                        $button.prop('disabled', false);
+                        
+                        if (response.status) {
+                            showToast({
+                                message: response.message,
+                                color: '#008000'
+                            });
+                            setTimeout(function() {
+                                location.reload();
+                            }, 2000);
+                        } else {
+                            showToast({
+                                message: response.message,
+                                color: '#FF0000'
+                            });
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Error:', xhr.responseText); // Debug log
+                        
+                        // Hide spinner, re-enable button
+                        $button.find('.fa-spinner').hide();
+                        $button.prop('disabled', false);
+                        
+                        showToast({
+                            message: 'An error occurred: ' + error,
+                            color: '#FF0000'
+                        });
                     }
-                },
-                error: function (xhr, errmsg, err) {
-                    console.log(errmsg);
-                },
-            });
-
-            // Deleted associated row
-            let row = document.getElementById("tr" + userId);
-            row.innerHTML = "";
-        } 
+                });
+            }
+            
+            function showToast(options) {
+                Toastify({
+                    text: options.message,
+                    duration: 3000,
+                    gravity: "top",
+                    position: "right",
+                    backgroundColor: options.color,
+                    stopOnFocus: true
+                }).showToast();
+            }
+        });
 
         $('#datatable').DataTable({
                 responsive: true

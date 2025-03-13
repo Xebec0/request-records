@@ -68,88 +68,82 @@
                 <div class="text"><a href="#">Forgot password?</a></div>
                 <div class="button input-box">
                   <input id="btnSignIn" type="submit" value="Login" />
-                </div>  
-                <div class="button input-box">
-                  <input type="button" value="Guest/Alumni Login" onclick="redirectToReferenceLogin()">
                 </div>
+
+                <!-- GUEST LOGIN -->
+                <!-- <div class="button input-box">
+                  <input type="button" value="Guest/Alumni Login" onclick="redirectToReferenceLogin()">
+                </div> -->
+
                 <div class="text sign-up-text">
                   Don't have an account? <label for="flip">Signup now</label>
                 </div>
               </div>
             </form>
           </div>
+            <div class="signup-form">
+              <div class="title">Signup</div>
+              <form method="POST">
+                {% csrf_token %}
+                <div class="input-boxes">
+                  <div class="input-box">
+                    <i class="fas fa-user"></i>
+                    <input
+                      id="studentNumber"
+                      name="student_number"
+                      type="text"
+                      placeholder="Enter your student number"
+                    />
+                  </div>
+                  <div class="input-box">
+                    <i class="fas fa-envelope"></i>
+                    <input
+                      id="signupEmail"
+                      name="email"
+                      type="text"
+                      placeholder="Enter your email"
+                    />
+                  </div>
+                  <div class="input-box" id="verificationContainer" style="display: none;">
+                    <i class="fas fa-anchor"></i>
+                    <input
+                      id="verificationCode"
+                      name="verification_code"
+                      type="text"
+                      placeholder="Enter verification code"
+                    />
+                    <button type="button" id="sendVerificationBtn" style="margin-left: 10px;">
+                      <span>Get Code</span>
+                      <i id="verificationSpinner" class="fas fa-spinner fa-spin" style="display: none; margin-left: 5px;"></i>
+                    </button>
+                  </div>
+                
+                  <!-- Add a hidden password field with a placeholder value -->
+                  <input type="hidden" name="password" value="temporary_password">
+                
+                  <div class="input-box" style="display:none;">
+                    <i class="fas fa-user"></i>
+                    <input type="hidden" name="user_type" value="1">
+                  </div>
+                  <div class="button input-box terms">
+                    <input type="button" id="viewTermsBtn" value="View Terms and Services"></input>
+                  </div>
 
-          <div class="signup-form">
-            <div class="title">Signup</div>
-            <form method="POST">
-              {% csrf_token %}
-              <div class="input-boxes">
-                <div class="input-box">
-                  <i class="fas fa-user"></i>
-                  <input
-                    id="studentNumber"
-                    name="student_number"
-                    type="text"
-                    placeholder="Enter your student number"
-                  />
-                </div>
-                <div class="input-box">
-                  <i class="fas fa-envelope"></i>
-                  <input
-                    id="signupEmail"
-                    name="email"
-                    type="text"
-                    placeholder="Enter your email"
-                  />
-                </div>
-                <div class="input-box" id="verificationContainer" style="display: none;">
-                  <i class="fas fa-anchor"></i>
-                  <input
-                    id="verificationCode"
-                    name="verification_code"
-                    type="text"
-                    placeholder="Enter verification code"
-                  />
-                  <button type="button" id="sendVerificationBtn" style="margin-left: 10px;">Get Code</button>
-                </div>
-                <div class="input-box">
-                  <i class="fas fa-lock"></i>
-                  <input
-                    id="signupPassword"
-                    name="password"
-                    type="password"
-                    placeholder="Enter your password"
-                  />
-                </div>
+                  <div class="checkbox-container">
+                    <input type="checkbox" id="termsCheckbox" required>
+                    <label for="termsCheckbox">I agree to the terms and services</label>
+                  </div>
 
-                <div class="input-box">
-                  <i class="fas fa-user"></i>
-                    <select name="user_type">
-                      <option value="1" selected>I am a student</option>
-                      <option value="2">I am a faculty</option>
-                      <option value="3">I am an alumni</option>
-                    </select>
+                  <div class="button input-box">
+                    <input id="btnSignUp" type="submit" value="Submit" />
+                  </div>
+                  <div class="text sign-up-text">
+                    Already have an account? <label for="flip">Login now</label>
+                  </div>
                 </div>
-
-                <div class="button input-box terms">
-                  <input type="button" id="viewTermsBtn" value="View Terms and Services"></input>
-                </div>
-
-                <div class="checkbox-container">
-                  <input type="checkbox" id="termsCheckbox" required>
-                  <label for="termsCheckbox">I agree to the terms and services</label>
-                </div>
-
-                <div class="button input-box">
-                  <input id="btnSignUp" type="submit" value="Submit" />
-                </div>
-                <div class="text sign-up-text">
-                  Already have an account? <label for="flip">Login now</label>
-                </div>
-              </div>
-            </form>
+              </form>
+            </div>
           </div>
-        </div>
 
         <!-- Terms and Services Modal -->
         <div id="termsModal" class="modal">
@@ -186,6 +180,17 @@
                 <input type="button" id="verifyOtpBtn" value="Verify OTP"/>
               </div>
             </div>
+          </div>
+        </div>
+
+        <div id="successModal" class="modal">
+          <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2><i class="fas fa-check-circle" style="color: #28a745;"></i> Registration Successful</h2>
+            <p id="successMessage">Your registration has been submitted successfully!</p>
+            <div style="text-align: center; margin-top: 30px;">
+              <button id="successOkBtn">OK</button>
+            </div>            
           </div>
         </div>
       </div>
@@ -232,34 +237,71 @@
             data: formData,
             success: function (response) {
               if (!isSignUpForm && response.require_otp) {
+                // Login with OTP case
                 showOtpModal();
                 showToast({
                   message: response.message,
                   color: "#008000",
                 });
+              } else if (isSignUpForm && response.status) {
+                // Registration success case - show modal instead of toast
+                showSuccessModal(response.message);
+                enableControls($form, false);
               } else {
+                // All other cases - show toast
                 showToast({
                   message: response.message,
                   color: response.status ? "#008000" : "#FF0000",
                 });
 
-                if (response.status) {
-                  if (isSignUpForm) {
-                    setTimeout(() => {
-                      window.location.href = "/signup/";
-                    }, 2000);
-                  } else {
-                    setTimeout(() => {
-                      window.location.href = "/user/dashboard/";
-                    }, 2000);
-                  }
+                if (response.status && !isSignUpForm) {
+                  // Login success case
+                  setTimeout(() => {
+                    window.location.href = "/user/dashboard/";
+                  }, 2000);
                   enableControls($form, false);
                 }
               }
             },
             error: function (xhr, errmsg, err) {
               console.log(errmsg);
+              showToast({
+                message: "An error occurred. Please try again.",
+                color: "#FF0000",
+              });
             },
+          });
+        });
+
+        // Add the success modal function
+        function showSuccessModal(message) {
+          // Update the success message
+          $("#successMessage").text(message);
+  
+          // Show the modal
+          $("#successModal").css("display", "block");
+        }
+
+        // Make sure these click handlers are set up
+        $(document).ready(function() {
+          // Close modal when clicking the × button
+          $(".close").click(function() {
+            $("#successModal").css("display", "none");
+            window.location.href = "/signup/";
+          });
+
+          // Close modal when clicking the OK button
+          $("#successOkBtn").click(function() {
+            $("#successModal").css("display", "none");
+            window.location.href = "/signup/";
+          });
+
+          // Close modal when clicking outside of it
+          $(window).click(function(event) {
+            if (event.target == document.getElementById("successModal")) {
+              $("#successModal").css("display", "none");
+              window.location.href = "/signup/";
+            }
           });
         });
 
@@ -319,28 +361,47 @@
         function enableControls($form, isEnable) {
           $form.find("input").prop("disabled", !isEnable);
         }
-
-        $("#sendVerificationBtn").on("click", function () {
-          var email = $("#signupEmail").val();
-          $.ajax({
-            type: "POST",
-            url: "/send-verification-email/",
-            data: {
-              email: email,
-              csrfmiddlewaretoken: $("input[name=csrfmiddlewaretoken]").val(),
-            },
-            success: function (response) {
-              showToast({
-                message: response.message,
-                color: response.status ? "#008000" : "#FF0000",
-              });
-            },
-            error: function (xhr, errmsg, err) {
-              console.log(errmsg);
-            },
+          $("#sendVerificationBtn").on("click", function () {
+            var email = $("#signupEmail").val();
+          
+            // Show spinner and disable button
+            $("#verificationSpinner").show();
+            $(this).prop('disabled', true);
+            $(this).find('span').text('Sending...');
+          
+            $.ajax({
+              type: "POST",
+              url: "/send-verification-email/",
+              data: {
+                email: email,
+                csrfmiddlewaretoken: $("input[name=csrfmiddlewaretoken]").val(),
+              },
+              success: function (response) {
+                showToast({
+                  message: response.message,
+                  color: response.status ? "#008000" : "#FF0000",
+                });
+              
+                // Hide spinner and re-enable button
+                $("#verificationSpinner").hide();
+                $("#sendVerificationBtn").prop('disabled', false);
+                $("#sendVerificationBtn").find('span').text('Get Code');
+              },
+              error: function (xhr, errmsg, err) {
+                console.log(errmsg);
+              
+                // Also hide spinner and re-enable button in case of error
+                $("#verificationSpinner").hide();
+                $("#sendVerificationBtn").prop('disabled', false);
+                $("#sendVerificationBtn").find('span').text('Get Code');
+              
+                showToast({
+                  message: "Error sending verification code. Please try again.",
+                  color: "#FF0000",
+                });
+              }
+            });
           });
-        });
-
         // Handle form flip
         $("#flip").on("change", function () {
           var isSignUpForm = $(this).prop("checked");

@@ -63,7 +63,7 @@ class User(AbstractBaseUser):
     USER_TYPE_CHOICES = (
       (1, 'student'),
       (2, 'teacher'),
-      (3, 'secretary'),
+      (3, 'alumni'),
       (4, 'supervisor'),
       (5, 'admin'),
       (6, 'guest'),

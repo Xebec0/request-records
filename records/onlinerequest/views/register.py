@@ -37,22 +37,49 @@ def send_verification_email(request):
     else:
         return JsonResponse({'status': False, 'message': 'Email is required'})
 
-def send_email_with_code(email, verification_code, expiry_time):
+def send_email_with_code(email, verification_code, expiry_time, is_password=False):
     smtp_server = 'smtp.gmail.com'
     smtp_port = 587
     smtp_username = settings.EMAIL_HOST_USER
     smtp_password = settings.EMAIL_HOST_PASSWORD
 
-    subject = 'Email Verification Code'
-    message = f"""
-    <html>
-    <body>
-        <p>This code will expire in <strong style="font-size: 1.2em; color: #c00;">{expiry_time} minutes</strong> or when you leave the registration page.</p>
-        <p style="font-size: 1.1em; color: #333;">Your verification code is:</p>
-        <h1 style="text-align: center; font-size: 3em; color: #007bff; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);"> {verification_code} </h1>
-    </body>
-    </html>
-    """
+    subject = 'Email Verification Code' if not is_password else 'Account Approved'
+    
+    # Format the expiry time for verification codes only
+    expiry_display = ""
+    if not is_password:
+        if expiry_time < 60:  # Less than an hour
+            expiry_display = f"{expiry_time} minutes"
+        elif expiry_time < 1440:  # Less than a day (24 hours = 1440 minutes)
+            hours = expiry_time // 60
+            expiry_display = f"{hours} hours"
+        else:  # More than a day
+            from datetime import datetime, timedelta
+            expiry_date = datetime.now() + timedelta(minutes=expiry_time)
+            expiry_display = expiry_date.strftime("%B %d, %Y at %I:%M %p")
+    
+    if not is_password:
+        message = f"""
+        <html>
+        <body>
+            <p>This code will expire in <strong style="font-size: 1.2em; color: #c00;">{expiry_display}</strong> or when you leave the registration page.</p>
+            <p style="font-size: 1.1em; color: #333;">Your verification code is:</p>
+            <h1 style="text-align: center; font-size: 3em; color: #007bff; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);"> {verification_code} </h1>
+        </body>
+        </html>
+        """
+    else:
+        message = f"""
+        <html>
+        <body>
+            <h2>Account Approved!</h2>
+            <p>Your account has been approved. Here are your login credentials:</p>
+            <p><strong>Email:</strong> {email}</p>
+            <p><strong>Password:</strong> {verification_code}</p>
+            <p>Please login with this password.</p>
+        </body>
+        </html>
+        """
 
     msg = MIMEText(message, 'html')
     msg['Subject'] = subject
@@ -71,21 +98,39 @@ def index(request):
             entered_code = form.cleaned_data.get('verification_code')
             user = form.save(commit=False)
             user.is_active = False
+            
+            # Auto-detect user type based on student number
+            student_number = form.cleaned_data.get('student_number')
+            try:
+                record = Record.objects.get(user_number=student_number)
+                import datetime
+                current_year = datetime.datetime.now().year
+                
+                # If graduated (entry_year_to is in the past), mark as alumni
+                if record.entry_year_to < current_year:
+                    user.user_type = 3  # alumni
+                else:
+                    user.user_type = 1  # student
+            except Record.DoesNotExist:
+                # Default to student if record not found
+                user.user_type = 1
 
             stored_code = request.session.get('verification_code')
-
-            print(f"Entered code: {entered_code}")  # Log the entered code
-            print(f"Stored code: {stored_code}")  # Log the stored code
 
             if entered_code == stored_code:
                 user.is_active = False
                 user.save()
-                return JsonResponse({'status': True, 'message': 'Registration successful'})
+                return JsonResponse({
+                    'status': True, 
+                    'message': 'Registration successful! Your account is pending admin approval. Once approved, your login password will be sent to your email.'
+                })
             else:
                 return JsonResponse({'status': False, 'message': 'Invalid verification code'})
         else:
+            # Print form errors for debugging
+            print("Form errors:", form.errors)
             last_error_message = list(form.errors.items())[0]
-            return JsonResponse({'status' : False,'message' : last_error_message[1]})
+            return JsonResponse({'status': False, 'message': last_error_message[1]})
     else:
         form = UserRegistrationForm()
     return render(request, 'register.html', {'form': form})

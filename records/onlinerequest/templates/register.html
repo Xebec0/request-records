@@ -105,66 +105,99 @@
         </div>
     </div>
     <script>
-      // Ajax
-      $(document).ready(function() {
+  // Ajax
+  $(document).ready(function() {
 
-        function showToast(options){
-          let toast = Toastify({
-            text: options.message,
-            duration: 2000,
-            newWindow: true,
-            close: true,
-            gravity: "top",
-            position: "right",
-            stopOnFocus: true,
-            style: {
-                background: options.color,
-            },
-          });
+    function showToast(options){
+      let toast = Toastify({
+        text: options.message,
+        duration: 2000,
+        newWindow: true,
+        close: true,
+        gravity: "top",
+        position: "right",
+        stopOnFocus: true,
+        style: {
+            background: options.color,
+        },
+      });
 
-          toast.showToast();
-        }
+      toast.showToast();
+    }
 
-        $('form').on('submit', function(e) {
-            e.preventDefault(); // Prevent the form from submitting normally
+    // Function to show the success modal
+    function showSuccessModal(message) {
+      // Set the message
+      $("#successMessage").text(message);
+      
+      // Show the modal
+      $("#successModal").css("display", "block");
+    }
 
-            // Get form data
-            var formData = new FormData($('form')[0]);
-            formData.append("file", $("input[name=formFile]")[0].files[0]); // file
-
-            // Send AJAX POST request
-            $.ajax({
-                type: 'POST',
-                url: '/register/', // Replace with your Django URL
-                data: formData,
-                processData: false,
-                contentType: false,
-                success: function(response) {
-                  showToast({
-                    'message': response.message,
-                    'color': response.status ? '#008000' : '#FF0000'
-                  })
-
-                  if (response.status){
-                    resetInputFields();
-                  }
-                },
-                error: function(xhr, errmsg, err) {
-                  console.log(errmsg);
-                }
-            });
-        });
-
-        function resetInputFields(){
-            let studentNumber = document.querySelector("#studentNumber");
-            let email = document.querySelector("#email");
-            let password = document.querySelector("#password")
-
-            studentNumber.value = email.value = password.value = "";
-        }
+    // Close modal when clicking the × button
+    $(".close").click(function() {
+      $("#successModal").css("display", "none");
     });
 
-    </script>
+    // Close modal when clicking the OK button
+    $("#successOkBtn").click(function() {
+      $("#successModal").css("display", "none");
+      window.location.href = "/login/";  // Redirect to login page
+    });
+
+    // Close modal when clicking outside of it
+    $(window).click(function(event) {
+      if (event.target == document.getElementById("successModal")) {
+        $("#successModal").css("display", "none");
+      }
+    });
+
+    $('form').on('submit', function(e) {
+        e.preventDefault(); // Prevent the form from submitting normally
+
+        // Get form data
+        var formData = new FormData($('form')[0]);
+        formData.append("file", $("input[name=formFile]")[0].files[0]); // file
+
+        // Send AJAX POST request
+        $.ajax({
+            type: 'POST',
+            url: '/register/', // Replace with your Django URL
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function(response) {
+              if (response.status) {
+                // Show success modal instead of toast
+                showSuccessModal(response.message);
+                resetInputFields();
+              } else {
+                // Show error toast for failures
+                showToast({
+                  'message': response.message,
+                  'color': '#FF0000'
+                });
+              }
+            },
+            error: function(xhr, errmsg, err) {
+              console.log(errmsg);
+              showToast({
+                'message': 'An error occurred during registration.',
+                'color': '#FF0000'
+              });
+            }
+        });
+    });
+
+    function resetInputFields(){
+        let studentNumber = document.querySelector("#studentNumber");
+        let email = document.querySelector("#email");
+        let password = document.querySelector("#password")
+
+        studentNumber.value = email.value = password.value = "";
+    }
+  });
+</script>
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 </body>
 </html>

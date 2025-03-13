@@ -37,4 +37,29 @@ def get_user_data(request):
     users = Record.objects.all()
     users_json = serializers.serialize('json',users)
     return JsonResponse(users_json, safe=False)
-        
+
+def delete_record(request, id):
+    if request.method == "POST":
+        try:
+            record = Record.objects.get(id=id)
+            record_number = record.user_number
+            record.delete()
+            return JsonResponse({
+                'status': True, 
+                'message': f'Record {record_number} has been deleted successfully.'
+            })
+        except Record.DoesNotExist:
+            return JsonResponse({
+                'status': False, 
+                'message': 'Record not found.'
+            })
+        except Exception as e:
+            return JsonResponse({
+                'status': False, 
+                'message': f'An error occurred: {str(e)}'
+            })
+    else:
+        return JsonResponse({
+            'status': False, 
+            'message': 'Invalid request method.'
+        })
