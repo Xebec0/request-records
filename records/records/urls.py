@@ -68,6 +68,7 @@ urlpatterns = [
     # User Approval
     path('admin-panel/user-accounts/', user_approval_view.index),
     path('admin-panel/user-accounts/reset-password/', user_approval_view.reset_user_password, name='reset_user_password'),
+
     # Logout
     path('logout/', views.logout_view, name='logout'),
     path('admin-panel/user-accounts/', user_approval_view.index),
