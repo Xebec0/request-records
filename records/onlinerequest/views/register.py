@@ -31,23 +31,30 @@ def send_verification_email(request):
         expiry_time = 5  # 5 minutes
         request.session.set_expiry(expiry_time * 60)
 
-        send_email_with_code(email, verification_code, expiry_time)
+        send_email_with_code(email, verification_code, expiry_time, message_type='otp')
 
         return JsonResponse({'status': True, 'message': 'Verification code sent to your email'})
     else:
         return JsonResponse({'status': False, 'message': 'Email is required'})
 
-def send_email_with_code(email, verification_code, expiry_time, is_password=False):
+def send_email_with_code(email, verification_code, expiry_time, message_type='otp'):
+    """
+    Send an email with a code/password depending on the message_type.
+    
+    Parameters:
+    - email: recipient email address
+    - verification_code: the code or password to send
+    - expiry_time: time in minutes until expiry (0 for no expiry)
+    - message_type: 'otp', 'approval', or 'reset'
+    """
     smtp_server = 'smtp.gmail.com'
     smtp_port = 587
     smtp_username = settings.EMAIL_HOST_USER
     smtp_password = settings.EMAIL_HOST_PASSWORD
 
-    subject = 'Email Verification Code' if not is_password else 'Account Approved'
-    
-    # Format the expiry time for verification codes only
+    # Format the expiry time display for OTP messages
     expiry_display = ""
-    if not is_password:
+    if expiry_time > 0:
         if expiry_time < 60:  # Less than an hour
             expiry_display = f"{expiry_time} minutes"
         elif expiry_time < 1440:  # Less than a day (24 hours = 1440 minutes)
@@ -58,7 +65,18 @@ def send_email_with_code(email, verification_code, expiry_time, is_password=Fals
             expiry_date = datetime.now() + timedelta(minutes=expiry_time)
             expiry_display = expiry_date.strftime("%B %d, %Y at %I:%M %p")
     
-    if not is_password:
+    # Set subject based on message type
+    if message_type == 'otp':
+        subject = 'Email Verification Code'
+    elif message_type == 'approval':
+        subject = 'Account Approved'
+    elif message_type == 'reset':
+        subject = 'Password Reset'
+    else:
+        subject = 'Academic Online Request System'
+    
+    # Build message based on type
+    if message_type == 'otp':
         message = f"""
         <html>
         <body>
@@ -68,7 +86,7 @@ def send_email_with_code(email, verification_code, expiry_time, is_password=Fals
         </body>
         </html>
         """
-    else:
+    elif message_type == 'approval':
         message = f"""
         <html>
         <body>
@@ -77,6 +95,18 @@ def send_email_with_code(email, verification_code, expiry_time, is_password=Fals
             <p><strong>Email:</strong> {email}</p>
             <p><strong>Password:</strong> {verification_code}</p>
             <p>Please login with this password.</p>
+        </body>
+        </html>
+        """
+    elif message_type == 'reset':
+        message = f"""
+        <html>
+        <body>
+            <h2>Password Reset</h2>
+            <p>Your password has been reset by an administrator. Here are your new login credentials:</p>
+            <p><strong>Email:</strong> {email}</p>
+            <p><strong>Password:</strong> {verification_code}</p>
+            <p>Please login with this new password.</p>
         </body>
         </html>
         """

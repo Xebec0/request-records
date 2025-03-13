@@ -29,7 +29,7 @@
                                 <div class="d-flex justify-content-between">
                                     <span class="fs-6"> <i class="fa fa-list" aria-hidden="true"></i> List of users</span>
                                     <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#recordModal">
-                                        <i class="fas fa-plus me-2"></i>Add Record
+                                        <i class="fas fa-plus me-2"></i>Add Student Record
                                     </button>
                                 </div>
                             </div>
@@ -56,7 +56,7 @@
                                     <div class="modal-dialog">
                                       <div class="modal-content">
                                         <div class="modal-header">
-                                          <h5 class="modal-title" id="recordModalLabel">Add Record</h5>
+                                          <h5 class="modal-title" id="recordModalLabel">Add Student Record</h5>
                                           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                         </div>
                                         <div class="modal-body">
@@ -71,6 +71,10 @@
                                               <input type="text" class="form-control form-control-sm" id="firstName" name="fname" required>
                                             </div>
                                             <div class="mb-3">
+                                                <label for="middleName" class="form-label">Middle Name</label>
+                                                <input type="text" class="form-control form-control-sm" id="middleName" name="middle_name" required>
+                                            </div>
+                                            <div class="mb-3">
                                               <label for="lastName" class="form-label">Last Name</label>
                                               <input type="text" class="form-control form-control-sm" id="lastName" name="lname" required>
                                             </div>
@@ -83,10 +87,7 @@
                                                 {% endfor %}
                                               </select>
                                             </div>
-                                            <div class="mb-3">
-                                                <label for="middleName" class="form-label">Middle Name</label>
-                                                <input type="text" class="form-control form-control-sm" id="middleName" name="middle_name">
-                                            </div>
+
                                             <div class="mb-3">
                                                 <label for="contactNumber" class="form-label">Contact Number</label>
                                                 <input type="number" class="form-control form-control-sm" id="contactNumber" name="contact_no" oninput="limitInputLength(event, 11)" required>
