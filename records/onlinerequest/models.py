@@ -60,30 +60,30 @@ class Code(models.Model):
     table_name = models.CharField(max_length=64)
 
 class User(AbstractBaseUser):
-    USER_TYPE_CHOICES = (
-      (1, 'student'),
-      (2, 'teacher'),
-      (3, 'alumni'),
-      (4, 'supervisor'),
-      (5, 'admin'),
-      (6, 'guest'),
-    )
+      USER_TYPE_CHOICES = (
+        (0, 'unspecified'),  # Add unspecified as 0
+        (1, 'student'),
+        (2, 'teacher'),
+        (3, 'alumni'),
+        (4, 'supervisor'),
+        (5, 'admin'),
+        (6, 'guest'),
+      )
 
-    student_number = models.CharField(max_length=64, unique=True)
-    email = models.EmailField(max_length=254, unique=True)
-    password = models.CharField(max_length=256)  # Increased length for hash
-    is_active = models.BooleanField(default=False)
-    user_type = models.PositiveSmallIntegerField(choices = USER_TYPE_CHOICES, default = 1)
+      student_number = models.CharField(max_length=64, unique=True)
+      email = models.EmailField(max_length=254, unique=True)
+      password = models.CharField(max_length=256)
+      is_active = models.BooleanField(default=False)
+      user_type = models.PositiveSmallIntegerField(choices = USER_TYPE_CHOICES, default = 0)  # Default to unspecified
 
-    USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['student_number']
+      USERNAME_FIELD = 'email'
+      REQUIRED_FIELDS = ['student_number']
 
-    def __str__(self):
-        return self.student_number
+      def __str__(self):
+          return self.student_number
 
-    def get_user_type_display(self):
-        return dict(self.USER_TYPE_CHOICES).get(self.user_type, 'Unknown')
-
+      def get_user_type_display(self):
+          return dict(self.USER_TYPE_CHOICES).get(self.user_type, 'Unknown')
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     course = models.ForeignKey(Course, on_delete=models.CASCADE)

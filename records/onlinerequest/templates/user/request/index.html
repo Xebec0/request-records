@@ -32,15 +32,22 @@
         {% include 'user/user-topnav.html' %}
 
         <div id="layoutSidenav">
+            {% if user.is_authenticated %}
             {% include 'user/user-sidenav.html' %}
+            {% endif %}
 
-            <div id="layoutSidenav_content">
+            <div id="layoutSidenav_content" {% if not user.is_authenticated %}style="margin-left: 0;"{% endif %}>
                 <main>
                     <div class="container-fluid px-4">
                         <h1 class="mt-4">Create Request</h1>
                         <ol class="breadcrumb mb-4">
                             <li class="breadcrumb-item active">Choose documents to request, upload required files</li>
                         </ol>
+                        
+                        {% if not user.is_authenticated %}
+                        {% include 'profile_form.html' %}
+                        {% endif %}
+                        
                         <div class="card mb-4">
                             <div class="card-header">
                                 <div class="d-flex justify-content-between align-items-center">
@@ -66,18 +73,21 @@
                                     </div>
                                 </div>
                             </div>                          
-                            
+
                         </div>
                     </div>
                 </main>
                 <footer class="py-4 bg-light mt-auto">
                     <div class="container-fluid px-4">
                         <div class="d-flex align-items-center justify-content-between small">
-                            <div class="text-muted">Copyright &copy; Academic File Request System 2024</div>
+
+                            <div class="text-muted">Copyright © Academic File Request System 2024</div>
                             <div>
                                 <a href="#">Privacy Policy</a>
-                                &middot;
-                                <a href="#">Terms &amp; Conditions</a>
+
+
+                                ·
+                                <a href="#">Terms & Conditions</a>
                             </div>
                         </div>
                     </div>
@@ -98,22 +108,22 @@
                     position: "right",
                     stopOnFocus: true,
                     style: {
-                        background: options.color,
+                        background: options.color || "#007bff",
                     },
                 });
-
+        
                 toast.showToast();
             }
-
+        
             $(document).ready(function() {
                 // Events
                 $('#btnCreate').click(function() {
                     let selectedRequest = document.querySelector("#request")
-
+        
                     showToast({message: "Creating request form please wait..."})
                     getRequest(selectedRequest.value, createRequestForm);
                 });
-
+        
                 // Web services
                 function getRequest(id, successCallBack, errorCallBack){
                     $.ajax({
@@ -131,43 +141,43 @@
                 function createRequestForm(response) {
                     let data = response;
                     let requestID = data.id;
-
+        
                     // Debug
                     console.log(data);
-
+        
                     const container = document.getElementById("container");
                     container.innerHTML = "";
-
+        
                     // Fill up the form
                     const h2ForRequiredFiles = document.createElement("h5");
                     h2ForRequiredFiles.innerHTML = data.document;
                     h2ForRequiredFiles.classList.add("mb-3");
-
+        
                     const price = document.createElement("span");
                     price.textContent = "₱" + data.price;
                     price.classList.add("mx-2", "badge", "bg-primary");
                     h2ForRequiredFiles.appendChild(price);
                     container.appendChild(h2ForRequiredFiles);
-
+        
                     // Create textarea for description
                     const descriptionTextarea = document.createElement("p");
                     descriptionTextarea.id = "description";
                     descriptionTextarea.name = "description";
                     descriptionTextarea.textContent = data.description;
                     container.appendChild(descriptionTextarea);
-
+        
                     // Purpose
                     const lblPurpose = document.createElement("h5");
                     lblPurpose.innerHTML = "Purpose:";
                     container.appendChild(lblPurpose);
-
+        
                     // Purpose dropdown
                     const drpPurpose = document.createElement("select");
                     drpPurpose.classList.add("form-select"); 
                     drpPurpose.setAttribute("id", "drpPurpose")
                     drpPurpose.classList.add("mb-3") // Add margin left 3
                     drpPurpose.name = "purpose";
-
+        
                     const purposes = data.purpose;
                     purposes.forEach((purpose) => {
                         const optPurpose = document.createElement("option");
@@ -175,39 +185,39 @@
                         optPurpose.textContent = purpose.description;
                         drpPurpose.appendChild(optPurpose);
                     })
-
+        
                     container.appendChild(drpPurpose);
-
+        
                     // Create label
                     const h2 = document.createElement("h5");
                     h2.innerHTML = "Required Files:";
                     container.appendChild(h2);
-
+        
                     // Create upload input for files_required
                     const requiredFiles = (data.files_required).split(',');
                     requiredFiles.forEach((requiredFile) => {
                         let fileInputContainer = document.createElement("div");
                         fileInputContainer.classList.add("mb-3");
-
+        
                         let fileLabel = document.createElement("label");
                         fileLabel.setAttribute("for", requiredFile);
-
+        
                         // Fetch document description for the required file code
                         getDocumentDescription(requiredFile, function(description) {
                             fileLabel.textContent = description;
                         });
-
+        
                         let fileInput = document.createElement("input");
                         fileInput.setAttribute("type", "file");
                         fileInput.setAttribute("id", requiredFile);
                         fileInput.classList.add("form-control");
                         fileInput.required = true;
-
+        
                         fileInputContainer.appendChild(fileLabel);
                         fileInputContainer.appendChild(fileInput);
                         container.appendChild(fileInputContainer);
                     });
-
+        
                     // Create submit button
                     const btnSubmitRequest = document.createElement("button");
                     btnSubmitRequest.id = "btnSubmitRequest";
@@ -219,105 +229,122 @@
                     btnSubmitRequest.classList.add("btn", "btn-primary"); // Add Bootstrap classes
                     container.appendChild(btnSubmitRequest);
                 }
-
-                function submitRequest(id, request){
-                    const files = document.querySelectorAll('input[type="file"]');
-
-                    if (!validateForm()) {
-                        showToast({ message: 'Form submission failed due to missing required files.', color: '#FF0000' });
-                        return; // Do not proceed with form submission
-                    }
-
-                    if (!validateFileSize(files)) {
-                        return;
-                    }
-
-                    var csrftoken = getCookie('csrftoken');
-
-                    // Create form data
-                    var formData = new FormData();
-
-                    formData.append("id", id);
-                    files.forEach((file, index) => {
-                        // Append each file to the FormData object
-                        formData.append(`${file.id}`, file.files[0]);
-                    });
-
-                    // Additional appends
-                    formData.append('purpose', document.querySelector("#drpPurpose").value);
-
-                    // Send AJAX POST request
-                    $.ajax({
-                        type: 'POST',
-                        url: '/request/user/create/', // Replace with your Django URL
-                        data: formData,
-                        processData: false,
-                        contentType: false,
-                        headers: {
-                            'X-CSRFToken': csrftoken
-                        },
-                        success: function(response) {
-                            showToast({
-                                'message': response.message,
-                                'duration': 3000
-                            })
-
-                            setTimeout(function() {
-                                let isNewTabOpened =  openPaymentTab(formData, response.id);
-
-                                if (isNewTabOpened){
-                                    // Disable page
-                                    document.body.classList.toggle('overlay');
-                                }
-                            }, 4000);
-                        },
-                        error: function(xhr, errmsg, err) {
-                            console.log(errmsg);
-                        }
-                    });
-                }
             });
-
+        
+            function submitRequest(id, request){
+                const files = document.querySelectorAll('input[type="file"]');
+        
+                if (!validateForm()) {
+                    showToast({ message: 'Form submission failed due to missing required files.', color: '#FF0000' });
+                    return; // Do not proceed with form submission
+                }
+        
+                if (!validateFileSize(files)) {
+                    return;
+                }
+        
+                var csrftoken = getCookie('csrftoken');
+        
+                // Create form data
+                var formData = new FormData();
+        
+                formData.append("id", id);
+                files.forEach((file, index) => {
+                    // Append each file to the FormData object
+                    formData.append(`${file.id}`, file.files[0]);
+                });
+        
+                // Additional appends
+                formData.append('purpose', document.querySelector("#drpPurpose").value);
+                
+                // Add profile data if user is not authenticated
+                if (document.getElementById('profile-form')) {
+                    const profileForm = document.getElementById('profile-form');
+                    // Append profile data to formData
+                    formData.append('profile_data', JSON.stringify({
+                        first_name: profileForm.querySelector('#first-name').value,
+                        last_name: profileForm.querySelector('#last-name').value,
+                        middle_name: profileForm.querySelector('#middle-name').value,
+                        user_type: profileForm.querySelector('#user-type').value,
+                        address: profileForm.querySelector('#address').value,
+                        contact_no: profileForm.querySelector('#contact-no').value,
+                        course: profileForm.querySelector('#course').value,
+                        entry_year_from: profileForm.querySelector('#entry-year-from').value,
+                        entry_year_to: profileForm.querySelector('#entry-year-to').value,
+                        year_graduated: profileForm.querySelector('#year-graduated').value
+                    }));
+                }
+        
+                // Send AJAX POST request
+                $.ajax({
+                    type: 'POST',
+                    url: '/request/user/create/', // Replace with your Django URL
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    headers: {
+                        'X-CSRFToken': csrftoken
+                    },
+                    success: function(response) {
+                        showToast({
+                            'message': response.message,
+                            'duration': 3000
+                        })
+        
+                        setTimeout(function() {
+                            let isNewTabOpened = openPaymentTab(formData, response.id);
+        
+                            if (isNewTabOpened){
+                                // Disable page
+                                document.body.classList.toggle('overlay');
+                            }
+                        }, 4000);
+                    },
+                    error: function(xhr, errmsg, err) {
+                        console.log(errmsg);
+                    }
+                });
+            }
+        
             function openPaymentTab(formData, requestID){
                 sessionStorage.clear();
                 sessionStorage.setItem("data", formData);
                 return openNewTab("/request/checkout/" + requestID, 800, 800);
             }
-
+        
             function openNewTab(url, width, height){
                 // Debug
                 console.log("New tab opened: " + url);
-
                 var leftPosition, topPosition;
-                    //Allow for borders.
-                    leftPosition = (window.screen.width / 2) - ((width / 2) + 10);
-
-                    //Allow for title and status bars.
-                    topPosition = (window.screen.height / 2) - ((height / 2) + 50);
-
-                    //Open the window.
-                    let openedWindow = window.open(url, "Window2",
-                    "status=no,height=" + height + ",width=" + width + ",resizable=yes,left="
-                    + leftPosition + ",top=" + topPosition + ",screenX=" + leftPosition + ",screenY="
-                    + topPosition + ",toolbar=no,menubar=no,scrollbars=no,location=no,directories=no");
-                
-                    let intervalId = setInterval(function() {
-                        if (openedWindow.closed) {
-                            clearInterval(intervalId); // Clear the interval
-                            console.log("Back to the main page"); // Debug
-
-                            window.focus();
-                            document.body.classList.toggle('overlay');
-                            
-                            setTimeout(function() {
-                                window.location.href='/request/user/'
-                            }, 1000);
-                        }
-                    }, 500);
-
+                //Allow for borders.
+                leftPosition = (window.screen.width / 2) - ((width / 2) + 10);
+        
+                //Allow for title and status bars.
+                topPosition = (window.screen.height / 2) - ((height / 2) + 50);
+        
+                //Open the window.
+                let openedWindow = window.open(url, "Window2",
+                "status=no,height=" + height + ",width=" + width + ",resizable=yes,left="
+                + leftPosition + ",top=" + topPosition + ",screenX=" + leftPosition + ",screenY="
+                + topPosition + ",toolbar=no,menubar=no,scrollbars=no,location=no,directories=no");
+            
+                let intervalId = setInterval(function() {
+                    if (openedWindow.closed) {
+                        clearInterval(intervalId); // Clear the interval
+                        console.log("Back to the main page"); // Debug
+        
+                        window.focus();
+                        document.body.classList.toggle('overlay');
+                        
+                        setTimeout(function() {
+                            window.location.href='/request/user/'
+                        }, 1000);
+                    }
+                }, 500);
+        
                 return true;
             }
-
+        
             function getDocumentDescription(docCode, callback) {
                 $.ajax({
                     type: 'GET',
@@ -330,7 +357,7 @@
                     }
                 });
             }
-
+        
             // Function to get CSRF cookie value
             function getCookie(name) {
                 var cookieValue = null;
@@ -351,16 +378,29 @@
             function validateForm() {
                 const fileInputs = document.querySelectorAll('input[type="file"][required]');
                 let isValid = true;
-
+        
                 fileInputs.forEach(input => {
                     if (!input.value) {
-                    isValid = false;
+                        isValid = false;
                     }
                 });
-
+        
+                // Also validate profile form if it exists
+                if (document.getElementById('profile-form')) {
+                    const requiredFields = document.getElementById('profile-form').querySelectorAll('[required]');
+                    requiredFields.forEach(field => {
+                        if (!field.value) {
+                            isValid = false;
+                            field.classList.add('is-invalid');
+                        } else {
+                            field.classList.remove('is-invalid');
+                        }
+                    });
+                }
+        
                 return isValid;
             }
-
+        
             function validateFileSize(files) {
                 const MAX_FILE_SIZE = 25 * 1024 * 1024; // 25MB in bytes
                 let isValid = true;
@@ -377,7 +417,7 @@
                 
                 return isValid;
             }
-
         </script>
+        
     </body>
 </html>

@@ -15,37 +15,54 @@ def index(request):
     return render(request, 'user/request/index.html', {'all_requests': all_requests})
 
 def create_request(request):
-    try:
-        request_form = Request.objects.get(id=request.POST.get('id'))
-        user = request.user
-        status = "Payment not yet settled"
-        uploads = ""
+    if request.method == 'POST':
+        try:
+            request_form = Request.objects.get(id=request.POST.get('id'))
+            user = request.user
+            status = "Payment not yet settled"
+            uploads = ""
 
-        user_request = User_Request(
-            user=user,
-            request=request_form,
-            status=status,
-            purpose=request.POST.get("purpose"),
-        )
+            user_request = User_Request(
+                user=user,
+                request=request_form,
+                status=status,
+                purpose=request.POST.get("purpose"),
+            )
 
-        # Pre-save the object to get an ID
-        user_request.save()
+            # Pre-save the object to get an ID
+            user_request.save()
 
-        # Upload and encrypt required files
-        for file_name in request.FILES:
-            file = request.FILES.get(file_name)
-            encrypted_path = handle_uploaded_file(file, str(user_request.id))
-            file_prefix = "<" + file_name + "&>"
-            uploads += file_prefix + encrypted_path + ","
+            # Upload and encrypt required files
+            for file_name in request.FILES:
+                file = request.FILES.get(file_name)
+                encrypted_path = handle_uploaded_file(file, str(user_request.id))
+                file_prefix = "<" + file_name + "&>"
+                uploads += file_prefix + encrypted_path + ","
 
-        user_request.uploads = uploads.rstrip(',')
-        user_request.save()
-        
-        return JsonResponse({"success": True, "message": "Redirecting checkout...", 'id': user_request.id})
-    except Request.DoesNotExist:
-        return JsonResponse({"success": False, "message": "Request not found"}, status=404)
-    except Exception as e:
-        return JsonResponse({"success": False, "message": str(e)}, status=500)
+            user_request.uploads = uploads.rstrip(',')
+            user_request.save()
+            
+            # Process profile data if it's included
+            if 'profile_data' in request.POST:
+                profile_data = json.loads(request.POST.get('profile_data'))
+                
+                # If the user is authenticated, update their user type
+                if request.user.is_authenticated:
+                    user = request.user
+                    user.user_type = int(profile_data.get('user_type', 1))
+                    user.save()
+                    
+                    # You might also want to create/update the user's profile
+                    # based on the other profile data
+                
+                # Include profile data in your request model
+                user_request.profile_data = json.dumps(profile_data)
+                user_request.save()
+            
+            return JsonResponse({'status': True, 'message': 'Successfully created request!', 'id': user_request.id})
+        except Exception as e:
+            return JsonResponse({'status': False, 'message': str(e)})
+    return JsonResponse({'status': False, 'message': 'Invalid request method'})
 
 def get_request(request, id): 
     try:

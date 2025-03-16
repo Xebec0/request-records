@@ -14,6 +14,7 @@ urlpatterns = [
     path('record/list/', record.get_user_data),
     path('record/delete/<int:id>/', record.delete_record, name='delete_record'),
     path('admin-panel/user-records/', record.index),
+    
     # Register
     path('register/', register.index),
 

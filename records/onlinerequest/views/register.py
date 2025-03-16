@@ -16,6 +16,8 @@ from ..models import Record
 from ..models import User
 from ..models import Profile
 
+ENABLE_OTP_VERIFICATION = False
+
 def generate_verification_code(length=6):
     characters = string.ascii_letters + string.digits
     verification_code = ''.join(random.choice(characters) for _ in range(length))
@@ -121,46 +123,48 @@ def send_email_with_code(email, verification_code, expiry_time, message_type='ot
         server.login(smtp_username, smtp_password)
         server.sendmail(smtp_username, email, msg.as_string())
 
+from django.shortcuts import render, redirect
+
 def index(request):
     if request.method == 'POST':
         form = UserRegistrationForm(request.POST)
         if form.is_valid():
-            entered_code = form.cleaned_data.get('verification_code')
             user = form.save(commit=False)
-            user.is_active = False
             
-            # Auto-detect user type based on student number
-            student_number = form.cleaned_data.get('student_number')
-            try:
-                record = Record.objects.get(user_number=student_number)
-                import datetime
-                current_year = datetime.datetime.now().year
-                
-                # If graduated (entry_year_to is in the past), mark as alumni
-                if record.entry_year_to < current_year:
-                    user.user_type = 3  # alumni
-                else:
-                    user.user_type = 1  # student
-            except Record.DoesNotExist:
-                # Default to student if record not found
-                user.user_type = 1
+            # Set is_active to True - no need for approval
+            user.is_active = True
+            
+            # Set user_type to unspecified (0)
+            user.user_type = 0  # Unspecified
+            
+            # Skip verification code check if OTP is disabled
+            if ENABLE_OTP_VERIFICATION:
+                entered_code = form.cleaned_data.get('verification_code')
+                stored_code = request.session.get('verification_code')
 
-            stored_code = request.session.get('verification_code')
-
-            if entered_code == stored_code:
-                user.is_active = False
-                user.save()
+                if entered_code != stored_code:
+                    return JsonResponse({'status': False, 'message': 'Invalid verification code'})
+            
+            # Save the user
+            user.save()
+            
+            # Return success message and redirect to /request/
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                # If AJAX request, return JSON
                 return JsonResponse({
                     'status': True, 
-                    'message': 'Registration successful! Your account is pending admin approval. Once approved, your login password will be sent to your email.'
+                    'message': 'Registration successful! You can now log in.',
+                    'redirect': '/request/'  # Change redirect URL to /request/
                 })
             else:
-                return JsonResponse({'status': False, 'message': 'Invalid verification code'})
+                # For non-AJAX requests, redirect directly
+                return redirect('/request/')
         else:
             # Print form errors for debugging
             print("Form errors:", form.errors)
-            last_error_message = list(form.errors.items())[0]
-            return JsonResponse({'status': False, 'message': last_error_message[1]})
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                last_error_message = list(form.errors.items())[0]
+                return JsonResponse({'status': False, 'message': last_error_message[1]})
     else:
         form = UserRegistrationForm()
     return render(request, 'register.html', {'form': form})

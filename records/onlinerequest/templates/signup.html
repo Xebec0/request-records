@@ -117,10 +117,15 @@
                       <i id="verificationSpinner" class="fas fa-spinner fa-spin" style="display: none; margin-left: 5px;"></i>
                     </button>
                   </div>
-                
-                  <!-- Add a hidden password field with a placeholder value -->
-                  <input type="hidden" name="password" value="temporary_password">
-                
+                <div class="input-box">
+                  <i class="fas fa-lock"></i>
+                  <input
+                    id="signupPassword"
+                    name="password"
+                    type="password"
+                    placeholder="Enter your password"
+                  />
+                </div>
                   <div class="input-box" style="display:none;">
                     <i class="fas fa-user"></i>
                     <input type="hidden" name="user_type" value="1">
@@ -236,30 +241,26 @@
             url: url,
             data: formData,
             success: function (response) {
-              if (!isSignUpForm && response.require_otp) {
-                showOtpModal();
-                showToast({
-                  message: response.message,
-                  color: "#008000",
-                });
-              } else {
-                showToast({
-                  message: response.message,
-                  color: response.status ? "#008000" : "#FF0000",
-                });
+              showToast({
+                message: response.message,
+                color: response.status ? "#008000" : "#FF0000",
+              });
 
-                if (response.status) {
-                  if (isSignUpForm) {
-                    setTimeout(() => {
-                      window.location.href = "/signup/";
-                    }, 2000);
-                  } else {
-                    setTimeout(() => {
-                      window.location.href = "/user/dashboard/";
-                    }, 2000);
-                  }
-                  enableControls($form, false);
-                }
+              if (response.status && isSignUpForm) {
+                // Redirect to /request/ page after successful registration
+                setTimeout(() => {
+                  window.location.href = response.redirect || "/request/";
+                }, 2000);
+              } else if (!isSignUpForm && response.require_otp) {
+                showOtpModal();
+              } else if (response.status && !isSignUpForm) {
+                setTimeout(() => {
+                  window.location.href = "/user/dashboard/";
+                }, 2000);
+              }
+
+              if (response.status) {
+                enableControls($form, false);
               }
             },
             error: function (xhr, errmsg, err) {
