@@ -1,4 +1,4 @@
-from onlinerequest.models import Record, Request, Profile
+from onlinerequest.models import Record, Request, Profile, Course
 
 def user_record(request):
     if request.user.is_authenticated:
@@ -22,4 +22,16 @@ def user_profile(request):
         except Profile.DoesNotExist:
             return {'user_profile': None}
     return {'user_profile': None}
-    return {'request_forms': request_forms}
+
+def user_requests(request):
+    """Make the user's requests available to all templates if authenticated"""
+    if request.user.is_authenticated:
+        from onlinerequest.models import User_Request
+        user_requests = User_Request.objects.filter(user=request.user)
+        return {'user_requests_global': user_requests}
+    return {'user_requests_global': []}
+
+def courses(request):
+    """Make all courses available to templates"""
+    all_courses = Course.objects.all()
+    return {'all_courses': all_courses}

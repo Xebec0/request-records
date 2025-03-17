@@ -145,20 +145,27 @@ def index(request):
                 if entered_code != stored_code:
                     return JsonResponse({'status': False, 'message': 'Invalid verification code'})
             
+            # Get the raw password before it's hashed
+            raw_password = form.cleaned_data.get('password')
+            
             # Save the user
             user.save()
+            
+            # Store user email and password in session for reference in unauthenticated requests
+            request.session['temp_user_email'] = user.email
+            request.session['temp_user_password'] = raw_password
             
             # Return success message and redirect to /request/
             if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
                 # If AJAX request, return JSON
                 return JsonResponse({
                     'status': True, 
-                    'message': 'Registration successful! You can now log in.',
-                    'redirect': '/request/'  # Change redirect URL to /request/
+                    'message': 'Registration successful! You can now create a request.',
+                    'redirect': '/request/'  # Redirect URL to /request/
                 })
             else:
                 # For non-AJAX requests, redirect directly
-                return redirect('/request/')
+                return redirect('/request/')        
         else:
             # Print form errors for debugging
             print("Form errors:", form.errors)
@@ -167,7 +174,7 @@ def index(request):
                 return JsonResponse({'status': False, 'message': last_error_message[1]})
     else:
         form = UserRegistrationForm()
-    return render(request, 'register.html', {'form': form})
+    return render(request, 'register.html', {'form': form})    
     
 def handle_uploaded_file(file):
     # Define the path where you want to save the file

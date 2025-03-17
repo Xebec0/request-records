@@ -59,7 +59,9 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 'onlinerequest.context_processors.user_record',
                 'onlinerequest.context_processors.request_forms',
-                'onlinerequest.context_processors.user_profile',  # Add this line
+                'onlinerequest.context_processors.user_profile',
+                'onlinerequest.context_processors.courses',
+                'onlinerequest.context_processors.user_requests',
             ],
         },
     },

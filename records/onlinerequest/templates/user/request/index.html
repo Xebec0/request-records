@@ -7,8 +7,9 @@
         <meta name="description" content="">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         
+        {% load static %}
         {% include 'header.html' %}
-
+        
         <style>
             .overlay {
                 overflow: hidden;
@@ -22,70 +23,107 @@
                 left: 0;
                 width: 100%;
                 height: 100%;
-                background-color: rgba(0, 0, 0, 0.5); /* Adjust opacity as needed */
+                background-color: rgba(0, 0, 0, 0.5);
                 z-index: 1000;
+            }
+            
+            .form-view {
+                display: none;
+            }
+            
+            .form-view.active {
+                display: block;
             }
         </style>
     </head>
     <body class="sb-nav-fixed">
 
+        {% if user.is_authenticated %}
         {% include 'user/user-topnav.html' %}
-
+        
         <div id="layoutSidenav">
-            {% if user.is_authenticated %}
+
             {% include 'user/user-sidenav.html' %}
             {% endif %}
 
-            <div id="layoutSidenav_content" {% if not user.is_authenticated %}style="margin-left: 0;"{% endif %}>
+            <div id="layoutSidenav_content" {% if not user.is_authenticated %}style="margin-left: 0 !important;"{% endif %}>
                 <main>
                     <div class="container-fluid px-4">
+                        {% if user.is_authenticated %}
                         <h1 class="mt-4">Create Request</h1>
                         <ol class="breadcrumb mb-4">
                             <li class="breadcrumb-item active">Choose documents to request, upload required files</li>
                         </ol>
-                        
-                        {% if not user.is_authenticated %}
-                        {% include 'profile_form.html' %}
+                        {% else %}
+                        <h1 class="mt-4">Create initial request</h1>
                         {% endif %}
                         
-                        <div class="card mb-4">
-                            <div class="card-header">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <span class="fs-6"> <i class="fa fa-plus" aria-hidden="true"></i> Create Requests</span>
+                        <!-- Step 1: Profile Form (only for non-authenticated users) -->
+                        <div id="profile-view" class="form-view active">
+                            {% if not user.is_authenticated and request.session.temp_user_email %}
+                            <div class="alert alert-info pb-0">
+                                <p>You are creating a request as an unathenticated user with email: {{ request.session.temp_user_email }}</p>
+                            </div>
+                            {% endif %}
+
+                            {% if not user.is_authenticated %}
+                            {% include 'profile_form.html' %}
+                            <div class="text-end mt-3">
+                                <button id="btnNext" class="btn btn-primary">Next</button>
+                            </div>
+                            {% else %}
+                            <script>
+                                // If user is authenticated, automatically show the request form
+                                document.addEventListener('DOMContentLoaded', function() {
+                                    document.getElementById('request-view').classList.add('active');
+                                    document.getElementById('profile-view').classList.remove('active');
+                                });
+                            </script>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Step 2: Request Form -->
+                        <div id="request-view" class="form-view {% if user.is_authenticated %}active{% endif %}">
+                            <div class="card mb-4">
+                                <div class="card-header">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span class="fs-6"> <i class="fa fa-plus" aria-hidden="true"></i> Create Requests</span>
+                                    </div>
+                                </div>
+                                <div class="card-body h-100 p-4">
+                                    <div class="column">
+                                        <div class="col-md-6 mb-3">
+                                            <h5 class="mb-3">Select document to request:</h5>
+                                            <div class="mb-3">
+                                                <select name="request" id="request" class="form-select">
+                                                    {% for request_obj in all_requests %}
+                                                    <option value="{{ request_obj.id }}">{{ request_obj.document }}</option>
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+                                            <div class="d-flex">
+                                                {% if not user.is_authenticated %}
+                                                <button id="btnBack" class="btn btn-secondary me-2">Back</button>
+                                                {% endif %}
+                                                <button id="btnCreate" type="button" class="btn btn-primary">Create</button>
+                                            </div>
+                                        </div>
+                                        <hr>
+                                        <div class="col-md-6">
+                                            <div id="container"></div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="card-body h-100 p-4">
-                                <div class="column">
-                                    <div class="col-md-6 mb-3">
-                                        <h5 class="mb-3">Select document to request:</h5>
-                                        <div class="mb-3">
-                                            <select name="request" id="request" class="form-select">
-                                                {% for request_obj in all_requests %}
-                                                <option value="{{ request_obj.id }}">{{ request_obj.document }}</option>
-                                                {% endfor %}
-                                            </select>
-                                        </div>
-                                        <button id="btnCreate" type="button" class="btn btn-primary">Create</button>
-                                    </div>
-                                    <hr>
-                                    <div class="col-md-6">
-                                        <div id="container"></div>
-                                    </div>
-                                </div>
-                            </div>                          
-
                         </div>
                     </div>
                 </main>
                 <footer class="py-4 bg-light mt-auto">
                     <div class="container-fluid px-4">
                         <div class="d-flex align-items-center justify-content-between small">
-
                             <div class="text-muted">Copyright © Academic File Request System 2024</div>
                             <div>
                                 <a href="#">Privacy Policy</a>
-
-
                                 ·
                                 <a href="#">Terms & Conditions</a>
                             </div>
@@ -96,298 +134,52 @@
         </div>
 
         {% include 'footer.html' %}
-
+        
+        <!-- Include the external JavaScript file -->
+        <script src="{% static 'js/request_user.js' %}"></script>
+        
+        <!-- Form navigation script -->
         <script>
-            function showToast(options) {
-                let toast = Toastify({
-                    text: options.message,
-                    duration: 2000,
-                    newWindow: true,
-                    close: true,
-                    gravity: "top",
-                    position: "right",
-                    stopOnFocus: true,
-                    style: {
-                        background: options.color || "#007bff",
-                    },
-                });
-        
-                toast.showToast();
-            }
-        
-            $(document).ready(function() {
-                // Events
-                $('#btnCreate').click(function() {
-                    let selectedRequest = document.querySelector("#request")
-        
-                    showToast({message: "Creating request form please wait..."})
-                    getRequest(selectedRequest.value, createRequestForm);
-                });
-        
-                // Web services
-                function getRequest(id, successCallBack, errorCallBack){
-                    $.ajax({
-                        type: 'GET',
-                        url: '/request/' + id + '/',
-                        success: function(response) {
-                            successCallBack(response);
-                        },
-                        error: function(xhr, errmsg, err) {
-                            console.log(errmsg);
+            document.addEventListener('DOMContentLoaded', function() {
+                // Get form view elements
+                const profileView = document.getElementById('profile-view');
+                const requestView = document.getElementById('request-view');
+                
+                // Next button functionality
+                const btnNext = document.getElementById('btnNext');
+                if (btnNext) {
+                    btnNext.addEventListener('click', function() {
+                        // Validate profile form before proceeding
+                        if (validateProfileForm()) {
+                            profileView.classList.remove('active');
+                            requestView.classList.add('active');
+                        } else {
+                            showToast({ 
+                                message: 'Please fill in all required fields', 
+                                color: '#FF0000' 
+                            });
                         }
                     });
                 }
                 
-                function createRequestForm(response) {
-                    let data = response;
-                    let requestID = data.id;
-        
-                    // Debug
-                    console.log(data);
-        
-                    const container = document.getElementById("container");
-                    container.innerHTML = "";
-        
-                    // Fill up the form
-                    const h2ForRequiredFiles = document.createElement("h5");
-                    h2ForRequiredFiles.innerHTML = data.document;
-                    h2ForRequiredFiles.classList.add("mb-3");
-        
-                    const price = document.createElement("span");
-                    price.textContent = "₱" + data.price;
-                    price.classList.add("mx-2", "badge", "bg-primary");
-                    h2ForRequiredFiles.appendChild(price);
-                    container.appendChild(h2ForRequiredFiles);
-        
-                    // Create textarea for description
-                    const descriptionTextarea = document.createElement("p");
-                    descriptionTextarea.id = "description";
-                    descriptionTextarea.name = "description";
-                    descriptionTextarea.textContent = data.description;
-                    container.appendChild(descriptionTextarea);
-        
-                    // Purpose
-                    const lblPurpose = document.createElement("h5");
-                    lblPurpose.innerHTML = "Purpose:";
-                    container.appendChild(lblPurpose);
-        
-                    // Purpose dropdown
-                    const drpPurpose = document.createElement("select");
-                    drpPurpose.classList.add("form-select"); 
-                    drpPurpose.setAttribute("id", "drpPurpose")
-                    drpPurpose.classList.add("mb-3") // Add margin left 3
-                    drpPurpose.name = "purpose";
-        
-                    const purposes = data.purpose;
-                    purposes.forEach((purpose) => {
-                        const optPurpose = document.createElement("option");
-                        optPurpose.value = purpose.description;
-                        optPurpose.textContent = purpose.description;
-                        drpPurpose.appendChild(optPurpose);
-                    })
-        
-                    container.appendChild(drpPurpose);
-        
-                    // Create label
-                    const h2 = document.createElement("h5");
-                    h2.innerHTML = "Required Files:";
-                    container.appendChild(h2);
-        
-                    // Create upload input for files_required
-                    const requiredFiles = (data.files_required).split(',');
-                    requiredFiles.forEach((requiredFile) => {
-                        let fileInputContainer = document.createElement("div");
-                        fileInputContainer.classList.add("mb-3");
-        
-                        let fileLabel = document.createElement("label");
-                        fileLabel.setAttribute("for", requiredFile);
-        
-                        // Fetch document description for the required file code
-                        getDocumentDescription(requiredFile, function(description) {
-                            fileLabel.textContent = description;
-                        });
-        
-                        let fileInput = document.createElement("input");
-                        fileInput.setAttribute("type", "file");
-                        fileInput.setAttribute("id", requiredFile);
-                        fileInput.classList.add("form-control");
-                        fileInput.required = true;
-        
-                        fileInputContainer.appendChild(fileLabel);
-                        fileInputContainer.appendChild(fileInput);
-                        container.appendChild(fileInputContainer);
+                // Back button functionality
+                const btnBack = document.getElementById('btnBack');
+                if (btnBack) {
+                    btnBack.addEventListener('click', function() {
+                        requestView.classList.remove('active');
+                        profileView.classList.add('active');
                     });
-        
-                    // Create submit button
-                    const btnSubmitRequest = document.createElement("button");
-                    btnSubmitRequest.id = "btnSubmitRequest";
-                    btnSubmitRequest.textContent = "Submit Request";
-                    btnSubmitRequest.addEventListener("click", () => {
-                        submitRequest(requestID, data);
-                    })
-                    btnSubmitRequest.type = "button";
-                    btnSubmitRequest.classList.add("btn", "btn-primary"); // Add Bootstrap classes
-                    container.appendChild(btnSubmitRequest);
                 }
-            });
-        
-            function submitRequest(id, request){
-                const files = document.querySelectorAll('input[type="file"]');
-        
-                if (!validateForm()) {
-                    showToast({ message: 'Form submission failed due to missing required files.', color: '#FF0000' });
-                    return; // Do not proceed with form submission
-                }
-        
-                if (!validateFileSize(files)) {
-                    return;
-                }
-        
-                var csrftoken = getCookie('csrftoken');
-        
-                // Create form data
-                var formData = new FormData();
-        
-                formData.append("id", id);
-                files.forEach((file, index) => {
-                    // Append each file to the FormData object
-                    formData.append(`${file.id}`, file.files[0]);
-                });
-        
-                // Additional appends
-                formData.append('purpose', document.querySelector("#drpPurpose").value);
                 
-                // Add profile data if user is not authenticated
-                if (document.getElementById('profile-form')) {
-                    const profileForm = document.getElementById('profile-form');
-                    // Append profile data to formData
-                    formData.append('profile_data', JSON.stringify({
-                        first_name: profileForm.querySelector('#first-name').value,
-                        last_name: profileForm.querySelector('#last-name').value,
-                        middle_name: profileForm.querySelector('#middle-name').value,
-                        user_type: profileForm.querySelector('#user-type').value,
-                        address: profileForm.querySelector('#address').value,
-                        contact_no: profileForm.querySelector('#contact-no').value,
-                        course: profileForm.querySelector('#course').value,
-                        entry_year_from: profileForm.querySelector('#entry-year-from').value,
-                        entry_year_to: profileForm.querySelector('#entry-year-to').value,
-                        year_graduated: profileForm.querySelector('#year-graduated').value
-                    }));
-                }
-        
-                // Send AJAX POST request
-                $.ajax({
-                    type: 'POST',
-                    url: '/request/user/create/', // Replace with your Django URL
-                    data: formData,
-                    processData: false,
-                    contentType: false,
-                    headers: {
-                        'X-CSRFToken': csrftoken
-                    },
-                    success: function(response) {
-                        showToast({
-                            'message': response.message,
-                            'duration': 3000
-                        })
-        
-                        setTimeout(function() {
-                            let isNewTabOpened = openPaymentTab(formData, response.id);
-        
-                            if (isNewTabOpened){
-                                // Disable page
-                                document.body.classList.toggle('overlay');
-                            }
-                        }, 4000);
-                    },
-                    error: function(xhr, errmsg, err) {
-                        console.log(errmsg);
+                // Profile form validation
+                function validateProfileForm() {
+                    if (!document.getElementById('profile-form')) {
+                        return true; // No profile form to validate (authenticated user)
                     }
-                });
-            }
-        
-            function openPaymentTab(formData, requestID){
-                sessionStorage.clear();
-                sessionStorage.setItem("data", formData);
-                return openNewTab("/request/checkout/" + requestID, 800, 800);
-            }
-        
-            function openNewTab(url, width, height){
-                // Debug
-                console.log("New tab opened: " + url);
-                var leftPosition, topPosition;
-                //Allow for borders.
-                leftPosition = (window.screen.width / 2) - ((width / 2) + 10);
-        
-                //Allow for title and status bars.
-                topPosition = (window.screen.height / 2) - ((height / 2) + 50);
-        
-                //Open the window.
-                let openedWindow = window.open(url, "Window2",
-                "status=no,height=" + height + ",width=" + width + ",resizable=yes,left="
-                + leftPosition + ",top=" + topPosition + ",screenX=" + leftPosition + ",screenY="
-                + topPosition + ",toolbar=no,menubar=no,scrollbars=no,location=no,directories=no");
-            
-                let intervalId = setInterval(function() {
-                    if (openedWindow.closed) {
-                        clearInterval(intervalId); // Clear the interval
-                        console.log("Back to the main page"); // Debug
-        
-                        window.focus();
-                        document.body.classList.toggle('overlay');
-                        
-                        setTimeout(function() {
-                            window.location.href='/request/user/'
-                        }, 1000);
-                    }
-                }, 500);
-        
-                return true;
-            }
-        
-            function getDocumentDescription(docCode, callback) {
-                $.ajax({
-                    type: 'GET',
-                    url: '/get-document-description/' + docCode + '/',
-                    success: function(response) {
-                        callback(response.description);
-                    },
-                    error: function(xhr, errmsg, err) {
-                        console.log(errmsg);
-                    }
-                });
-            }
-        
-            // Function to get CSRF cookie value
-            function getCookie(name) {
-                var cookieValue = null;
-                    if (document.cookie && document.cookie !== '') {
-                        var cookies = document.cookie.split(';');
-                        for (var i = 0; i < cookies.length; i++) {
-                            var cookie = cookies[i].trim();
-                            // Does this cookie string begin with the name we want?
-                            if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                                break;
-                            }
-                        }
-                    }
-                return cookieValue;
-            }
-            
-            function validateForm() {
-                const fileInputs = document.querySelectorAll('input[type="file"][required]');
-                let isValid = true;
-        
-                fileInputs.forEach(input => {
-                    if (!input.value) {
-                        isValid = false;
-                    }
-                });
-        
-                // Also validate profile form if it exists
-                if (document.getElementById('profile-form')) {
+                    
                     const requiredFields = document.getElementById('profile-form').querySelectorAll('[required]');
+                    let isValid = true;
+                    
                     requiredFields.forEach(field => {
                         if (!field.value) {
                             isValid = false;
@@ -396,28 +188,10 @@
                             field.classList.remove('is-invalid');
                         }
                     });
+                    
+                    return isValid;
                 }
-        
-                return isValid;
-            }
-        
-            function validateFileSize(files) {
-                const MAX_FILE_SIZE = 25 * 1024 * 1024; // 25MB in bytes
-                let isValid = true;
-                
-                files.forEach(file => {
-                    if (file.files[0] && file.files[0].size > MAX_FILE_SIZE) {
-                        showToast({
-                            message: `File ${file.files[0].name} exceeds 25MB limit`,
-                            color: '#FF0000'
-                        });
-                        isValid = false;
-                    }
-                });
-                
-                return isValid;
-            }
+            });
         </script>
-        
     </body>
 </html>

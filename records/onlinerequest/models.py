@@ -171,3 +171,17 @@ class ReportTemplate(models.Model):
 
     def __str__(self):
         return self.name
+
+class TempRecord(models.Model):
+    user_request = models.OneToOneField(User_Request, on_delete=models.CASCADE, related_name='temp_record')
+    user_number = models.CharField(max_length=10, blank=True, null=True)
+    first_name = models.CharField(max_length=64)
+    last_name = models.CharField(max_length=64)
+    course_code = models.CharField(max_length=5)
+    middle_name = models.CharField(max_length=64, blank=True, null=True)
+    contact_no = models.CharField(max_length=20)  # Changed to CharField to handle various formats
+    entry_year_from = models.IntegerField()
+    entry_year_to = models.IntegerField()
+    
+    def __str__(self):
+        return f"Temp Record for {self.first_name} {self.last_name}"

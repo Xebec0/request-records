@@ -6,31 +6,99 @@ from django.conf import settings
 from ..models import Request, User_Request, Requirement, User
 from ..serializers import RequestSerializer
 from ..utilities import get_if_exists
-
+import json
 from django.core import serializers
 import os
 
 def index(request):
-    all_requests = Request.objects.all()
-    return render(request, 'user/request/index.html', {'all_requests': all_requests})
+      all_requests = Request.objects.all()
+      return render(request, 'user/request/index.html', {'all_requests': all_requests})
+
+from django.contrib.auth import login, authenticate
 
 def create_request(request):
     if request.method == 'POST':
         try:
             request_form = Request.objects.get(id=request.POST.get('id'))
-            user = request.user
             status = "Payment not yet settled"
             uploads = ""
 
+            # Check if user is authenticated
+            if request.user.is_authenticated:
+                # Use the authenticated user
+                user = request.user
+            else:
+                # For anonymous users, try to find user by email from session
+                user_email = request.session.get('temp_user_email')
+                user_password = request.session.get('temp_user_password')
+            
+                if not user_email:
+                    return JsonResponse({'status': False, 'message': 'Profile information is required for unauthenticated users. Please register first.'})
+            
+                try:
+                    # First try to get the user
+                    user = User.objects.get(email=user_email)
+                    
+                    # Then authenticate with stored credentials
+                    if user_password:
+                        authenticated_user = authenticate(request, username=user_email, password=user_password)
+                        if authenticated_user:
+                            login(request, authenticated_user)
+                            user = authenticated_user
+                            print(f"User authenticated: {request.user.is_authenticated}")
+                        else:
+                            # Fallback to the old method if authentication fails
+                            user.backend = 'django.contrib.auth.backends.ModelBackend'
+                            login(request, user)
+                            print(f"User authenticated (fallback): {request.user.is_authenticated}")
+                    else:
+                        # Fallback if no password in session
+                        user.backend = 'django.contrib.auth.backends.ModelBackend'
+                        login(request, user)
+                        print(f"User authenticated (no password): {request.user.is_authenticated}")
+                
+                except User.DoesNotExist:
+                    return JsonResponse({'status': False, 'message': 'User not found. Please register or login first.'})
+        
+            # Create user request
             user_request = User_Request(
                 user=user,
                 request=request_form,
                 status=status,
                 purpose=request.POST.get("purpose"),
+                number_of_copies=int(request.POST.get("number_of_copies", 1))
             )
+        
+            # Update user type immediately if provided
+            if 'user_type' in request.POST and user:
+                user.user_type = int(request.POST.get('user_type'))
+                user.save()
+        
+            # Store temp_user_info if available
+            if 'temp_user_info' in request.POST:
+                temp_user_info = json.loads(request.POST.get('temp_user_info'))
+                user_request.temp_user_info = temp_user_info
 
             # Pre-save the object to get an ID
             user_request.save()
+
+            # Create TempRecord if temp_user_info is available
+            if hasattr(user_request, 'temp_user_info') and user_request.temp_user_info:
+                from ..models import TempRecord
+            
+                # Create TempRecord entry
+                temp_record = TempRecord(
+                    user_request=user_request,
+                    user_number=user.student_number,
+                    first_name=temp_user_info.get('first_name', ''),
+                    last_name=temp_user_info.get('last_name', ''),
+                    middle_name=temp_user_info.get('middle_name', ''),
+                    contact_no=temp_user_info.get('contact_no', ''),
+                    course_code=temp_user_info.get('course', ''),
+                    entry_year_from=int(temp_user_info.get('entry_year_from', 0)),
+                    entry_year_to=int(temp_user_info.get('entry_year_to', 0))
+                )
+                temp_record.save()
 
             # Upload and encrypt required files
             for file_name in request.FILES:
@@ -41,24 +109,7 @@ def create_request(request):
 
             user_request.uploads = uploads.rstrip(',')
             user_request.save()
-            
-            # Process profile data if it's included
-            if 'profile_data' in request.POST:
-                profile_data = json.loads(request.POST.get('profile_data'))
-                
-                # If the user is authenticated, update their user type
-                if request.user.is_authenticated:
-                    user = request.user
-                    user.user_type = int(profile_data.get('user_type', 1))
-                    user.save()
-                    
-                    # You might also want to create/update the user's profile
-                    # based on the other profile data
-                
-                # Include profile data in your request model
-                user_request.profile_data = json.dumps(profile_data)
-                user_request.save()
-            
+        
             return JsonResponse({'status': True, 'message': 'Successfully created request!', 'id': user_request.id})
         except Exception as e:
             return JsonResponse({'status': False, 'message': str(e)})
@@ -110,6 +161,8 @@ def get_document_description(request, doc_code):
     except Requirement.DoesNotExist:
         return JsonResponse({'description': 'Document not found'}, status=404)
 
+from django.contrib.auth import login
+
 def display_payment(request, id):
     if request.method == "POST":
         user_request = get_if_exists(User_Request, id=id)
@@ -124,27 +177,71 @@ def display_payment(request, id):
                     user_request.status = "Waiting"
                     user_request.save()
                 
-                return JsonResponse({"status": True, "message": "Submission successful. Closing the window now..."})
+                # If user is not authenticated, log them in
+                if not request.user.is_authenticated:
+                    # Get the user from the request
+                    user = user_request.user
+                    
+                    # Authenticate the user (without password check since we already verified ownership)
+                    user.backend = 'django.contrib.auth.backends.ModelBackend'
+                    login(request, user)
+                
+                return JsonResponse({
+                    "status": True, 
+                    "message": "Payment successful! Redirecting to your requests...",
+                    "redirect": "/request/user/"
+                })
             except Exception as e:
                 return JsonResponse({"status": False, "message": f"Error processing payment: {str(e)}"})
 
         return JsonResponse({"status": False, "message": "Invalid payment detected. Please contact your administrator."})
     elif request.method == "GET":
-        user = get_if_exists(User, id=request.user.id)
+        # Get the user request first
         requested_document = get_if_exists(User_Request, id=id)
+        
+        if not requested_document:
+            return HttpResponse("Request not found. Please contact your administrator.")
+            
+        # Check if user is authenticated
+        if request.user.is_authenticated:
+            user = request.user
+            # Verify this user owns the request
+            if requested_document.user.id != user.id:
+                return HttpResponse("Unauthorized access. This request belongs to another user.")
+        else:
+            # For unauthenticated users, check if they have a temp_user_email
+            user_email = request.session.get('temp_user_email')
+            if not user_email:
+                return HttpResponse("Session expired. Please return to the main page and try again.")
+                
+            try:
+                user = User.objects.get(email=user_email)
+                # Verify this user owns the request
+                if requested_document.user.id != user.id:
+                    return HttpResponse("Unauthorized access. This request belongs to another user.")
+            except User.DoesNotExist:
+                return HttpResponse("User not found. Please register or login first.")
 
-        if user and requested_document:
-            return render(request, "payment.html", {"user": user, "requested_document": requested_document})
-
-        return HttpResponse("Unauthorized access. Please contact your administrator.")
+        # If we get here, the user is authorized to view this payment page
+        return render(request, "payment.html", {"user": user, "requested_document": requested_document})
 
 def display_user_requests(request):
     try:
+        # Check if user is authenticated before querying
+        if not request.user.is_authenticated:
+            # Redirect to login page or show a message
+            return render(request, 'user/request/view-user-request.html', {
+                'user_requests': [],
+                'message': 'Please log in to view your requests'
+            })
+        
+        # Now we know we have an authenticated user with a valid ID
         user_requests = User_Request.objects.filter(user=request.user)
+        
         for user_request in user_requests:
             # Decrypt requested file path if exists
             if user_request.requested:
-                key = generate_key_from_user(user_request.id)
+                key = generate_key_from_user(str(user_request.id))
                 decrypted_hash = decrypt_data(user_request.requested, key)
                 base_path = os.path.join(settings.MEDIA_ROOT, 'onlinerequest', 'static', 'user_request', str(user_request.id), 'approved')
                 
@@ -163,6 +260,10 @@ def display_user_requests(request):
 
         return render(request, 'user/request/view-user-request.html', {'user_requests': user_requests})
     except Exception as e:
+        # Add more detailed error information
+        import traceback
+        error_details = traceback.format_exc()
+        print(error_details)  # Log the full traceback
         return HttpResponse(f"Error displaying user requests: {str(e)}")
 
 import qrcode
