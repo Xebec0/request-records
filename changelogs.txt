@@ -1,0 +1,20 @@
+3/18/2025
+
+Admin credentials: superuser/superuser
+
+1. Anyone can now register an account with any student number + number
+2. Upon registration, document request should be next.
+3. User should be automatically logged in.
+
+3. On admin side → List of users
+  - if user is registered, admin can check the profile of the user and approve the details.
+4. To generate reports, please upload a template through Configuration → reports
+  - fields should have {{ first_name }} on format.
+  - currently, only .docx are supported.
+5. To print reports go to Admin → Reports, fillup the form the generate report.
+6. Admin → Analytics should now display summary reports, can filter and print reports.
+7. Please study lookup tables, this is needed to craete forms dynamically on Admin → Create Request forms
+ - Document is literally the document to be requested.
+ - Requirements are requirements for the document.
+    - can be multiple (ctrl + click to select)
+ - We can add purposes and courses here.
