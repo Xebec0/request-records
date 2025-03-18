@@ -42,36 +42,61 @@ def display_user_request(request, id):
         date_release = request.POST.get("dateRelease")
         remarks = request.POST.get("remarks")
         
-        user_request = User_Request.objects.get(id=id)
+        try:
+            user_request = User_Request.objects.get(id=id)
+            
+            # Verify payment exists before proceeding with status changes
+            if not user_request.uploaded_payment:
+                return JsonResponse({
+                    'status': False, 
+                    'message': 'Error: Cannot update request without payment verification.'
+                })
 
-        if requested_file is not None:
-            # This will now return encrypted path
-            encrypted_file_path = handle_uploaded_file(id, requested_file)
-            user_request.requested = encrypted_file_path
+            if requested_file is not None:
+                # This will now return encrypted path
+                encrypted_file_path = handle_uploaded_file(id, requested_file)
+                user_request.requested = encrypted_file_path
 
-        user_request.payment_status = payment_status
-        user_request.status = new_status
-        user_request.remarks = remarks
-        
-        # Handle schedule and release date
-        if pickup_schedule:
-            from django.utils.dateparse import parse_datetime
-            user_request.schedule = parse_datetime(pickup_schedule)
-        
-        if date_release:
-            from django.utils.dateparse import parse_datetime
-            user_request.date_release = parse_datetime(date_release)
+            # Only update payment_status if it was provided
+            if payment_status is not None:
+                user_request.payment_status = payment_status
+                
+            user_request.status = new_status
+            user_request.remarks = remarks
+            
+            # Handle schedule and release date
+            if pickup_schedule:
+                from django.utils.dateparse import parse_datetime
+                user_request.schedule = parse_datetime(pickup_schedule)
+            
+            if date_release:
+                from django.utils.dateparse import parse_datetime
+                user_request.date_release = parse_datetime(date_release)
 
-        if processing_time:
-            user_request.processing_time = processing_time
-        elif processing_time:
-            # Set a dynamic attribute for the calculate_date_release method
-            user_request.processing_time = processing_time
-            user_request.date_release = user_request.calculate_date_release()
-        
-        user_request.save()
+            if processing_time:
+                user_request.processing_time = processing_time
+            elif processing_time:
+                # Set a dynamic attribute for the calculate_date_release method
+                user_request.processing_time = processing_time
+                user_request.date_release = user_request.calculate_date_release()
+            
+            user_request.save()
 
-        return JsonResponse({'status': True, 'message': 'Request status updated successfully.', 'request_status': user_request.status})    
+            return JsonResponse({
+                'status': True, 
+                'message': 'Request status updated successfully.', 
+                'request_status': user_request.status
+            })
+        except User_Request.DoesNotExist:
+            return JsonResponse({
+                'status': False, 
+                'message': 'Request not found.'
+            })
+        except Exception as e:
+            return JsonResponse({
+                'status': False, 
+                'message': f'Error updating request: {str(e)}'
+            })
     if request.method == "GET":
         try:
             user_request = User_Request.objects.get(id=id)
