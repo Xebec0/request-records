@@ -6,8 +6,8 @@ def user_record(request):
             user_record = Record.objects.get(user_number=request.user.student_number)
             return {'user_record': user_record}
         except Record.DoesNotExist:
-            return {}
-    return {}
+            return {'user_record': None}
+    return {'user_record': None}
 
 def request_forms(request):
     request_forms = Request.objects.all()

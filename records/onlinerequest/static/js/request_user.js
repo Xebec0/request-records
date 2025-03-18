@@ -88,25 +88,25 @@ $(document).ready(function() {
 
         container.appendChild(drpPurpose);
     
-        // Number of copies
-        const lblCopies = document.createElement("h5");
-        lblCopies.innerHTML = "Number of Copies:";
-        container.appendChild(lblCopies);
+        // // Number of copies
+        // const lblCopies = document.createElement("h5");
+        // lblCopies.innerHTML = "Number of Copies:";
+        // container.appendChild(lblCopies);
     
-        // Create number input for copies
-        const copiesContainer = document.createElement("div");
-        copiesContainer.classList.add("mb-3");
+        // // Create number input for copies
+        // const copiesContainer = document.createElement("div");
+        // copiesContainer.classList.add("mb-3");
     
-        const copiesInput = document.createElement("input");
-        copiesInput.setAttribute("type", "number");
-        copiesInput.setAttribute("id", "numCopies");
-        copiesInput.setAttribute("min", "1");
-        copiesInput.setAttribute("max", "10");
-        copiesInput.setAttribute("value", "1");
-        copiesInput.classList.add("form-control");
+        // const copiesInput = document.createElement("input");
+        // copiesInput.setAttribute("type", "number");
+        // copiesInput.setAttribute("id", "numCopies");
+        // copiesInput.setAttribute("min", "1");
+        // copiesInput.setAttribute("max", "10");
+        // copiesInput.setAttribute("value", "1");
+        // copiesInput.classList.add("form-control");
     
-        copiesContainer.appendChild(copiesInput);
-        container.appendChild(copiesContainer);
+        // copiesContainer.appendChild(copiesInput);
+        // container.appendChild(copiesContainer);
 
         // Create label
         const h2 = document.createElement("h5");
@@ -176,7 +176,7 @@ function submitRequest(id, request){
 
     // Additional appends
     formData.append('purpose', document.querySelector("#drpPurpose").value);
-    formData.append('number_of_copies', document.querySelector("#numCopies").value);
+    // formData.append('number_of_copies', document.querySelector("#numCopies").value);
     
     // Create temp_user_info object if profile form exists
     if (document.getElementById('profile-form')) {

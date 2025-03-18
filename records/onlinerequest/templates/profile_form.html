@@ -8,15 +8,18 @@
         <div class="row">
             <div class="col-md-12">
                 <form id="profile-form">
-                    <div class="mb-3">
-                        <label for="user-type" class="form-label">User Type:</label>
-                        <select id="user-type" name="user_type" class="form-select" required>
-                            <option value="1">Student</option>
-                            <option value="2">Teacher</option>
-                            <option value="3">Alumni</option>
-                            <option value="6">Guest</option>
-                        </select>
-                    </div>
+                <!-- Replace the existing user type selection with this code -->
+                <div class="form-group mb-3">
+                    <label for="userType">User Type</label>
+                    <select class="form-select" id="userType" name="user_type" required>
+                        <option value="" selected disabled>Select your user type</option>
+                        <option value="1">Student</option>
+                        <option value="2">Faculty</option>
+                        <option value="3">Alumni</option>
+                        <option value="7">Authorized Person</option>
+                    </select>
+                </div>
+
                     <div class="row mb-3">
                         <div class="col">
                             <label for="last-name" class="form-label">Last Name:</label>

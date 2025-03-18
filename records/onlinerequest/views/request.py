@@ -37,6 +37,10 @@ def display_user_request(request, id):
         new_status = request.POST.get('new_status')
         requested_file = request.FILES.get('requested_file')
         payment_status = request.POST.get("payment_status")
+        processing_time = request.POST.get("processing_time")
+        pickup_schedule = request.POST.get("pickupSchedule")
+        date_release = request.POST.get("dateRelease")
+        remarks = request.POST.get("remarks")
         
         user_request = User_Request.objects.get(id=id)
 
@@ -47,10 +51,27 @@ def display_user_request(request, id):
 
         user_request.payment_status = payment_status
         user_request.status = new_status
+        user_request.remarks = remarks
+        
+        # Handle schedule and release date
+        if pickup_schedule:
+            from django.utils.dateparse import parse_datetime
+            user_request.schedule = parse_datetime(pickup_schedule)
+        
+        if date_release:
+            from django.utils.dateparse import parse_datetime
+            user_request.date_release = parse_datetime(date_release)
+
+        if processing_time:
+            user_request.processing_time = processing_time
+        elif processing_time:
+            # Set a dynamic attribute for the calculate_date_release method
+            user_request.processing_time = processing_time
+            user_request.date_release = user_request.calculate_date_release()
+        
         user_request.save()
 
-        return JsonResponse({'status': True, 'message': 'Request status updated successfully.', 'request_status': user_request.status})
-    
+        return JsonResponse({'status': True, 'message': 'Request status updated successfully.', 'request_status': user_request.status})    
     if request.method == "GET":
         try:
             user_request = User_Request.objects.get(id=id)
@@ -104,8 +125,11 @@ def display_user_request(request, id):
             return JsonResponse({'status': False, 'message': f'Error: {str(e)}'}, status=500)   
                              
 def getCodeDescription(model, key):
-    model_instance = model.objects.get(code = key)
-    return model_instance.description
+    try:
+        model_instance = model.objects.get(code=key)
+        return model_instance.description
+    except model.DoesNotExist:
+        return f"Unknown requirement ({key})"
 
 def delete_user_request(request, id):
     user_request = User_Request.objects.get(id = id)

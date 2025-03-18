@@ -91,14 +91,21 @@ def get_request_stats(request):
         'processing_times': processing_times
     })
 
-# Add the new API endpoint for detailed request data
+# Add to your existing imports at the top
+from django.db.models import F
+from django.utils.timesince import timesince
+
+# Add this optimized version of the get_request_details endpoint
 def get_request_details(request):
-    # Get all user requests
+    # Get all user requests with optimized querying
     user_requests = User_Request.objects.select_related(
         'user', 'request', 'request__document'
     ).prefetch_related(
         'user__profile'
     ).order_by('-created_at')
+    
+    # Limit to 1000 most recent requests to avoid performance issues
+    user_requests = user_requests[:1000]
     
     # Prepare data for DataTable
     data = []
@@ -108,25 +115,25 @@ def get_request_details(request):
         date_completed = ""
         
         if req.status == "Completed":
-            # Use updated_at as completion date for completed requests
             date_completed = req.updated_at.strftime('%b %d, %Y')
             
-            # Calculate processing time
-            time_diff = req.updated_at - req.created_at
-            days = time_diff.days
-            hours = time_diff.seconds // 3600
-            processing_time = f"{days} days, {hours} hours"
+            # Calculate processing time more efficiently
+            processing_time = timesince(req.created_at, req.updated_at)
         
         # Get profile information if available
         try:
-            profile = Profile.objects.get(user=req.user)
-            name = f"{profile.first_name} {profile.middle_name} {profile.last_name}"
+            profile = req.user.profile
+            name = f"{profile.first_name} {profile.middle_name} {profile.last_name}".strip()
             contact = profile.contact_no
-        except Profile.DoesNotExist:
+        except (Profile.DoesNotExist, AttributeError):
             name = req.user.student_number
             contact = "N/A"
         
-        # Add request to data
+        # Format schedule and date_release
+        schedule = req.schedule.strftime('%b %d, %Y %I:%M %p') if req.schedule else "N/A"
+        date_released = req.date_release.strftime('%b %d, %Y') if req.date_release else "N/A"
+        
+        # Add request to data with optimized structure
         data.append({
             'reference_number': f"REQ-{req.id:06d}",
             'date_requested': req.created_at.strftime('%b %d, %Y'),
@@ -134,12 +141,12 @@ def get_request_details(request):
             'requested_by': name,
             'contact_details': contact,
             'email': req.user.email,
-            'service_type': req.request.document.description,
-            'purpose': req.purpose,
+            'service_type': req.request.document.description if req.request and req.request.document else "N/A",
+            'purpose': req.purpose or "N/A",
             'status': req.status,
-            'schedule': "N/A",  # This field isn't available in the current model
+            'schedule': schedule,
             'date_completed': date_completed,
-            'date_released': "N/A",  # This field isn't available in the current model
+            'date_released': date_released,
             'processing_time': processing_time
         })
     

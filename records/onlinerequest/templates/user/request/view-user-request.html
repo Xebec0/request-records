@@ -47,14 +47,17 @@
                                             <td>{{ user_request.status }}</td>
                                             <td>
                                                 {% if user_request.status == "For Pickup" or user_request.status == "for pickup" or user_request.status == "pickup" or user_request.status == "PICKUP" %}
-                                                    <button class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#infoModal{{ user_request.id }}">View Info</button>
-                                                {% elif user_request.requested %}
+                                                    <button class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#infoModal{{ user_request.id }}">For Pickup - View Info</button>
+                                                {% elif user_request.status == "Completed" and user_request.requested %}
                                                     <a class="btn btn-primary btn-sm" href="{% static user_request.requested %}" download>Download</a>
                                                     <button class="btn btn-secondary btn-sm" onclick="generateQR('{{ user_request.id }}')">Generate QR</button>
+                                                {% elif user_request.status == "Completed" %}
+                                                    <button class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#infoModal{{ user_request.id }}">Completed - View Info</button>
                                                 {% else %}
                                                     In process
                                                 {% endif %}
-                                            </td>                                            
+                                            </td>
+                                                                                                                          
                                             <td>
                                                 {% if user_request.uploaded_payment %}
                                                     {{ user_request.payment_status }}
@@ -86,23 +89,36 @@
                                                     </div>
                                                     <div class="modal-body">
                                                         <div class="row">
-                                                                <p><strong>Your request is now ready!</strong></p>
-                                                                <p>Please head to our registrar to pick-up the file you requested.
+                                                            {% if user_request.status == "For Pickup" or user_request.status == "for pickup" or user_request.status == "pickup" or user_request.status == "PICKUP" %}
+                                                                <p><strong>Your request is now ready for pickup!</strong></p>
+                                                                <p>Please head to our registrar to pick-up the file you requested.</p>
+                                                            {% elif user_request.status == "Completed" and not user_request.requested %}
+                                                                <p><strong>Your request has been completed!</strong></p>
+                                                                <p>The document has been released on the date shown below.</p>
+                                                            {% endif %}
                                                         </div>
                                                         <div>
-                                                            <p class="my-0"><strong>Order Number:</strong> {{ user_request.id }}</p>                                                            <p class="my-0"><strong>Paid Amount:</strong> {{ user_request.request.price }}</p>
+                                                            <p class="my-0"><strong>Order Number:</strong> {{ user_request.id }}</p>
+                                                            <p class="my-0"><strong>Paid Amount:</strong> {{ user_request.request.price }}</p>
+                                                            {% if user_request.schedule %}
+                                                            <p class="my-0"><strong>Pickup Schedule:</strong> {{ user_request.schedule|date:"F d, Y h:i A" }}</p>
+                                                            {% endif %}
+                                                            {% if user_request.date_release %}
+                                                            <p class="my-0"><strong>Release Date:</strong> {{ user_request.date_release|date:"F d, Y" }}</p>
+                                                            {% endif %}
                                                         </div>
                                                         <div class="text-center mt-2" style="font-size: small; color: red; font-weight: 500;">
-                                                            <p>Reminder: Please bring your school ID or a copy of your Certifcate of 
-                                                                Regisration with the order number to receive your requested document</p>
+                                                            <p>Reminder: Please bring your school ID or a copy of your Certificate of 
+                                                                Registration with the order number to receive your requested document</p>
                                                         </div>
-                                                        </div>
+                                                    </div>
                                                     <div class="modal-footer">
                                                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
+
                                         
                             
                                         <!-- Modal -->

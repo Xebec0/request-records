@@ -102,7 +102,7 @@ urlpatterns = [
     #Analytics
     path('admin-panel/analytics/', views.request_analytics, name='request_analytics'),
     path('api/request-stats/', views.get_request_stats, name='request_stats'),
-    path('api/request-details/', views.get_request_details, name='api_request_details'),
+    path('api/request-details/', views.get_request_details, name='request_details'),
 
     path('admin-panel/user-accounts/profile/<int:user_id>/', record.get_user_profile, name='user_profile'),
     path('admin-panel/user-accounts/save-profile/', record.save_user_profile, name='save_user_profile'),

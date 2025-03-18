@@ -113,21 +113,20 @@
     </head>
 
     <body class="sb-nav-fixed">
+          {% include 'user/user-topnav.html' %}
 
-        {% include 'user/user-topnav.html' %}
-
-        <div id="layoutSidenav">
+          <div id="layoutSidenav">
             
-            {% include 'user/user-sidenav.html' %}
+              {% include 'user/user-sidenav.html' %}
 
-            <div id="layoutSidenav_content">
-                <main>
-                    <!-- Dashboard Header -->
-                    <div class="dashboard-header">
-                        <div class="container-fluid px-4">
-                            <h1 class="dashboard-title">Welcome to Your Dashboard</h1>
-                            <p class="dashboard-subtitle">View your account information and status</p>
-                        </div>
+              <div id="layoutSidenav_content">
+                  <main>
+                      <!-- Dashboard Header -->
+                      <div class="dashboard-header">
+                          <div class="container-fluid px-4">
+                              <h1 class="dashboard-title">Welcome to Your Dashboard</h1>
+                              <p class="dashboard-subtitle">View your account information and status</p>
+                          </div>
                     </div>
                     
                     <div class="container-fluid px-4">
@@ -162,16 +161,16 @@
                                             <div class="col-md-6">
                                                 <div class="info-section mb-3">
                                                     <h5 class="info-title"><i class="fas fa-address-card me-2"></i>Personal Information</h5>
-                                                    {% if user_profile %}
-                                                        <p class="mb-2"><strong>Name:</strong> {{ user_profile.first_name }} {{ user_profile.middle_name }} {{ user_profile.last_name }}</p>
-                                                        <p class="mb-2"><strong>Course:</strong> {{ user_profile.course.description }}</p>
-                                                        <p class="mb-2"><strong>Contact:</strong> {{ user_profile.contact_no }}</p>
-                                                        <p class="mb-2"><strong>Year:</strong> {{ user_profile.entry_year_from }} - {{ user_profile.entry_year_to }}</p>
+                                                    {% if user_record %}
+                                                        <p class="mb-2"><strong>Name:</strong> {{ user_record.first_name }} {{ user_record.middle_name }} {{ user_record.last_name }}</p>
+                                                        <p class="mb-2"><strong>Course Code:</strong> {{ user_record.course_code }}</p>
+                                                        <p class="mb-2"><strong>Contact:</strong> {{ user_record.contact_no }}</p>
+                                                        <p class="mb-2"><strong>Year:</strong> {{ user_record.entry_year_from }} - {{ user_record.entry_year_to }}</p>
                                                     {% else %}
                                                         <p class="text-muted"><i class="fas fa-info-circle me-2"></i>Profile information will be available after account approval.</p>
                                                     {% endif %}
                                                 </div>
-                                            </div>
+                                            </div>                                            
                                         </div>
                                         
                                         {% if not request.user.is_active %}

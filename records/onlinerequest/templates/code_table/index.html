@@ -61,16 +61,37 @@
                                                 </thead>
                                                 <tbody>
                                                     {% for item in data %}
-                                                    <tr class="table-row" data-id="{{ item.id }}" data-code="{{ item.code }}" data-description="{{ item.description }}" {% if selected_table != 'Requirement' %}data-active="{{ item.active }}"{% endif %}>
+                                                    <tr class="table-row" data-id="{{ item.id }}" 
+                                                        {% if selected_table == 'Report' %}
+                                                        data-code="{{ item.name }}"
+                                                        {% else %}
+                                                        data-code="{{ item.code }}"
+                                                        {% endif %}
+                                                        data-description="{{ item.description }}" 
+                                                        {% if selected_table != 'Requirement' %}data-active="{{ item.active }}"{% endif %}>
+                                                        
                                                         {% if selected_table != 'Purpose' %}
-                                                        <td>{{ item.code }}</td>
+                                                        <td>
+                                                            {% if selected_table == 'Report' %}
+                                                            {{ item.name }}
+                                                            {% else %}
+                                                            {{ item.code }}
+                                                            {% endif %}
+                                                        </td>
                                                         {% endif %}
                                                         <td>{{ item.description }}</td>
                                                         {% if selected_table != 'Requirement' %}
-                                                        <td>{{ item.active|yesno:"Active,Inactive" }}</td>
+                                                        <td>
+                                                            {% if selected_table == 'Report' %}
+                                                            Active
+                                                            {% else %}
+                                                            {{ item.active|yesno:"Active,Inactive" }}
+                                                            {% endif %}
+                                                        </td>
                                                         {% endif %}
                                                     </tr>
                                                     {% endfor %}
+                                                    
                                                 </tbody>
                                             </table>
                                         </div>
@@ -221,9 +242,11 @@
             });
 
             $('#uploadSubmit').click(function() {
+                const templateName = $('#template_name').val();
                 const formData = new FormData();
                 formData.append('table_name', 'Report');
-                formData.append('name', $('#template_name').val());
+                formData.append('name', templateName);
+                formData.append('code', templateName);
                 formData.append('description', $('#template_description').val());
                 formData.append('template_file', $('#template_file')[0].files[0]);
                 formData.append('csrfmiddlewaretoken', $('input[name=csrfmiddlewaretoken]').val());
@@ -252,6 +275,29 @@
                 });
             });
 
+            $('#datatable tbody').on('click', 'tr', function() {
+                const id = $(this).data('id');
+                const code = $(this).data('code');
+                const description = $(this).data('description');
+                const active = $(this).data('active');
+                
+                $('#item_id').val(id);
+                
+                if ($('#tableSelector').val() === 'Report') {
+                    $('#item_code').val(code);
+                } else {
+                    $('#item_code').val(code);
+                }
+                
+                $('#item_description').val(description);
+                $('#item_status').val(active ? 'true' : 'false');
+                
+                if(id) {
+                    $('#editBtn').prop('disabled', false);
+                    $('#deleteBtn').prop('disabled', false);
+                }
+                disableForm();
+            });
             $('#cancelBtn').click(function() {
                 disableForm();
                 if($('#item_id').val()) {
@@ -310,17 +356,58 @@
         }
 
         function createItem() {
-            const code = $('#item_code').val();
+            const tableType = $('#tableSelector').val();
             const description = $('#item_description').val();
+            const code = $('#item_code').val();
             
-            if(!code || !description) {
-                showToast({
-                    'message': 'Code and Description are required!',
-                    'color': '#FF0000'
+            // Skip code validation for Purpose
+            if (tableType === 'Purpose') {
+                if (!description) {
+                    showToast({
+                        'message': 'Description is required!',
+                        'color': '#FF0000'
+                    });
+                    return;
+                }
+                
+                // No need to check for code duplicates for Purpose
+                submitCreateItem(code, description);
+            } else {
+                // For other tables, validate code and description
+                if (!code || !description) {
+                    showToast({
+                        'message': 'Code and Description are required!',
+                        'color': '#FF0000'
+                    });
+                    return;
+                }
+                
+                // Check for duplicate code before creating
+                $.ajax({
+                    type: 'GET',
+                    url: '/codetable/check_duplicate/',
+                    data: {
+                        'code': code,
+                        'table_name': tableType
+                    },
+                    success: function(response) {
+                        if (response.exists) {
+                            showToast({
+                                'message': 'Code already exists!',
+                                'color': '#FF0000'
+                            });
+                            return;
+                        }
+                        
+                        // If code is unique, proceed with create
+                        submitCreateItem(code, description);
+                    }
                 });
-                return;
             }
-            
+        }
+
+        // Helper function to submit the create request
+        function submitCreateItem(code, description) {
             $.ajax({
                 type: 'POST',
                 url: '/codetable/',
@@ -343,60 +430,125 @@
                 }
             });
         }
-
+        
         function saveItem() {
-            const code = $('#item_code').val();
+            const tableType = $('#tableSelector').val();
             const description = $('#item_description').val();
+            const code = $('#item_code').val();
             
-            if(!code || !description) {
-                showToast({
-                    'message': 'Code and Description are required!',
-                    'color': '#FF0000'
-                });
-                return;
+            // For Purpose, only description is required
+            if (tableType === 'Purpose') {
+                if (!description) {
+                    showToast({
+                        'message': 'Description is required!',
+                        'color': '#FF0000'
+                    });
+                    return;
+                }
+            } else {
+                // For other tables, both code and description are required
+                if (!code || !description) {
+                    showToast({
+                        'message': 'Code and Description are required!',
+                        'color': '#FF0000'
+                    });
+                    return;
+                }
             }
             
-            $.ajax({
-                type: 'GET',
-                url: '/codetable/check_duplicate/',
-                data: {
-                    'code': code,
-                    'id': $('#item_id').val() || '',
-                    'table_name': $('#tableSelector').val()
-                },
-                success: function(response) {
-                    if(response.exists) {
+            // For Purpose, skip the code duplication check
+            if (tableType === 'Purpose') {
+                $.ajax({
+                    type: 'POST',
+                    url: '/codetable/edit/',
+                    data: {
+                        'id': $('#item_id').val(),
+                        'description': description,
+                        'active': $('#item_status').val() === 'true',
+                        'table_name': tableType,
+                        'csrfmiddlewaretoken': $('input[name=csrfmiddlewaretoken]').val()
+                    },
+                    success: function(response) {
                         showToast({
-                            'message': 'Code already exists!',
-                            'color': '#FF0000'
+                            'message': response.message,
+                            'color': response.status ? '#008000' : '#FF0000'
                         });
-                        return;
-                    }
-                    
-                    $.ajax({
-                        type: 'POST',
-                        url: '/codetable/edit/',
-                        data: {
-                            'id': $('#item_id').val(),
-                            'code': code,
-                            'description': description,
-                            'active': $('#item_status').val() === 'true',
-                            'table_name': $('#tableSelector').val(),
-                            'csrfmiddlewaretoken': $('input[name=csrfmiddlewaretoken]').val()
-                        },
-                        success: function(response) {
-                            showToast({
-                                'message': response.message,
-                                'color': response.status ? '#008000' : '#FF0000'
-                            });
-                            if(response.status) {
-                                refreshTable();
-                                disableForm();
-                            }
+                        if(response.status) {
+                            refreshTable();
+                            disableForm();
                         }
-                    });
-                }
-            });
+                    }
+                });
+            } else if (tableType === 'Report') {
+                // For Reports, send the code value as both code and name
+                const codeValue = $('#item_code').val();
+                $.ajax({
+                    type: 'POST',
+                    url: '/codetable/edit/',
+                    data: {
+                        'id': $('#item_id').val(),
+                        'code': codeValue,
+                        'name': codeValue, // Add this line
+                        'description': description,
+                        'active': true, // Reports are always active
+                        'table_name': tableType,
+                        'csrfmiddlewaretoken': $('input[name=csrfmiddlewaretoken]').val()
+                    },
+                    success: function(response) {
+                        showToast({
+                            'message': response.message,
+                            'color': response.status ? '#008000' : '#FF0000'
+                        });
+                        if(response.status) {
+                            refreshTable();
+                            disableForm();
+                        }
+                    }
+                });
+            } else {
+                // For other tables, do the code duplication check
+                $.ajax({
+                    type: 'GET',
+                    url: '/codetable/check_duplicate/',
+                    data: {
+                        'code': code,
+                        'id': $('#item_id').val() || '',
+                        'table_name': tableType
+                    },
+                    success: function(response) {
+                        if(response.exists) {
+                            showToast({
+                                'message': 'Code already exists!',
+                                'color': '#FF0000'
+                            });
+                            return;
+                        }
+                        
+                        $.ajax({
+                            type: 'POST',
+                            url: '/codetable/edit/',
+                            data: {
+                                'id': $('#item_id').val(),
+                                'code': code,
+                                'description': description,
+                                'active': $('#item_status').val() === 'true',
+                                'table_name': tableType,
+                                'csrfmiddlewaretoken': $('input[name=csrfmiddlewaretoken]').val()
+                            },
+                            success: function(response) {
+                                showToast({
+                                    'message': response.message,
+                                    'color': response.status ? '#008000' : '#FF0000'
+                                });
+                                if(response.status) {
+                                    refreshTable();
+                                    disableForm();
+                                }
+                            }
+                        });
+                    }
+                });
+            }
         }
 
         function deleteItem() {
@@ -433,7 +585,9 @@ function refreshTable() {
             const table = $('#datatable').DataTable();
             table.clear();
             
-            if ($('#tableSelector').val() === 'Report') {
+            const tableType = $('#tableSelector').val();
+            
+            if (tableType === 'Report') {
                 response.data.forEach(function(item) {
                     const row = table.row.add([
                         item.name,  // Instead of code
@@ -447,7 +601,34 @@ function refreshTable() {
                         .data('description', item.description)
                         .data('active', true);
                 });
+            } else if (tableType === 'Purpose') {
+                // Special handling for Purpose (no code column)
+                response.data.forEach(function(item) {
+                    const row = table.row.add([
+                        item.description,
+                        item.active ? 'Active' : 'Inactive'
+                    ]).node();
+                    
+                    $(row).addClass('table-row')
+                        .data('id', item.id)
+                        .data('description', item.description)
+                        .data('active', item.active);
+                });
+            } else if (tableType === 'Requirement') {
+                // Requirement has code and description, but no active status
+                response.data.forEach(function(item) {
+                    const row = table.row.add([
+                        item.code,
+                        item.description
+                    ]).node();
+                    
+                    $(row).addClass('table-row')
+                        .data('id', item.id)
+                        .data('code', item.code)
+                        .data('description', item.description);
+                });
             } else {
+                // Document and Course have all three columns
                 response.data.forEach(function(item) {
                     const row = table.row.add([
                         item.code,

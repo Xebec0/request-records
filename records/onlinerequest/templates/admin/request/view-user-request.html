@@ -49,6 +49,19 @@
                                                 <h6 class="fw-bold">Price:
                                                     <span id="requestStatus" class="badge bg-primary">₱{{ user_request.request.price }}</span>
                                                 </h6>
+                                                <h6 class="fw-bold">Number of Copies:
+                                                    <span class="fw-normal fs-6 mb-2">{{ user_request.number_of_copies }}</span>
+                                                </h6>
+                                            </div>
+                                        </div>
+                                        <div class="row border-bottom mt-2">
+                                            <div class="col-md-12">
+                                                <h6 class="fw-bold">Pickup Schedule:
+                                                    <span class="fw-normal fs-6 mb-2">{{ user_request.schedule|date:"F d, Y H:i" }}</span>
+                                                </h6>
+                                                <h6 class="fw-bold">Expected Release Date:
+                                                    <span class="fw-normal fs-6 mb-2">{{ user_request.date_release|date:"F d, Y" }}</span>
+                                                </h6>
                                             </div>
                                         </div>
                                         <div class="row mt-2">
@@ -119,6 +132,17 @@
                                                 <option value="Completed">Completed</option>
                                                 <option value="Declined">Declined</option>
                                             </select>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="pickupSchedule" class="form-label fw-bold">Pickup Schedule:</label>
+                                            <input type="datetime-local" class="form-control" id="pickupSchedule" name="pickupSchedule" 
+                                                   value="{% if user_request.schedule %}{{ user_request.schedule|date:'Y-m-d\TH:i' }}{% endif %}">
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="dateRelease" class="form-label fw-bold">Date of Release:</label>
+                                            <input type="datetime-local" class="form-control" id="dateRelease" name="dateRelease"
+                                                   value="{% if user_request.date_release %}{{ user_request.date_release|date:'Y-m-d\TH:i' }}{% endif %}">
+                                            <small class="form-text text-muted">If not set, will be calculated based on processing time.</small>
                                         </div>
                                         <div class="mb-3">
                                             <label for="processingTime" class="form-label fw-bold">Processing Time (days):</label>
@@ -214,24 +238,38 @@
                 var csrftoken = getCookie('csrftoken');
                 let formData = new FormData();
                 
-                formData.append('new_status', document.getElementById("newStatus").value);
+                const newStatus = document.getElementById("newStatus").value;
+                const currentStatus = document.getElementById("requestStatus").textContent.trim();
+                
+                formData.append('new_status', newStatus);
                 formData.append('payment_status', document.querySelector("#payment_status").value);
                 formData.append('processing_time', document.getElementById("processingTime").value);
                 formData.append('remarks', document.getElementById("remarks").value);
+
+                // Add the new fields
+                if (document.getElementById("pickupSchedule").value) {
+                    formData.append('pickupSchedule', document.getElementById("pickupSchedule").value);
+                }
+                
+                if (document.getElementById("dateRelease").value) {
+                    formData.append('dateRelease', document.getElementById("dateRelease").value);
+                }
 
                 if (document.getElementById("requestedFile").files.length > 0) {
                     formData.append('requested_file', document.getElementById("requestedFile").files[0]);
                 }
 
-                if (document.getElementById("newStatus").value.toLowerCase() === "completed") {
-                    if (document.getElementById("requestedFile").files.length === 0) {
-                        showToast({
-                            'message': 'Please upload a file before marking the request as "Completed"',
-                            'color': '#FF0000',
-                            'duration': 4000,
-                        });
-                        return;
-                    }
+                // Check if completion requires a file (only if we're not coming from "For Pickup" status)
+                if (newStatus.toLowerCase() === "completed" &&
+                    document.getElementById("requestedFile").files.length === 0 &&
+                    currentStatus !== "For Pickup" &&
+                    !document.querySelector("a[download].btn-success")) {
+                    showToast({
+                        'message': 'Please upload a file before marking the request as "Completed" or ensure it was already For Pickup',
+                        'color': '#FF0000',
+                        'duration': 4000,
+                    });
+                    return;
                 }
 
                 $.ajax({

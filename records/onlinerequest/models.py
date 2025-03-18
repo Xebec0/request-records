@@ -61,13 +61,13 @@ class Code(models.Model):
 
 class User(AbstractBaseUser):
       USER_TYPE_CHOICES = (
-        (0, 'unspecified'),  # Add unspecified as 0
+        (0, 'unspecified'),
         (1, 'student'),
-        (2, 'teacher'),
+        (2, 'faculty'),  # Changed from 'teacher' to 'faculty'
         (3, 'alumni'),
-        (4, 'supervisor'),
         (5, 'admin'),
         (6, 'guest'),
+        (7, 'authorized person'),  # Added new option
       )
 
       student_number = models.CharField(max_length=64, unique=True)
@@ -136,6 +136,8 @@ class User_Request(models.Model):
     number_of_copies = models.IntegerField(default=1)
     uploaded_payment = models.TextField(blank=True)
     payment_status = models.CharField(max_length=10, default="Processing", blank=True)
+    schedule = models.DateTimeField(null=True, blank=True)  # Pickup schedule
+    date_release = models.DateTimeField(null=True, blank=True)  # Date of release/pickup
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -159,6 +161,22 @@ class User_Request(models.Model):
     def uploads_as_list(self):
         return self.get_uploads()
     
+    def calculate_date_release(self):
+        """Calculate expected release date based on processing time"""
+        if self.schedule:
+            return self.schedule
+        
+        # Default: 3 business days from creation date if no schedule is set
+        processing_days = 3
+        
+        if hasattr(self, 'processing_time'):
+            try:
+                processing_days = int(self.processing_time)
+            except (ValueError, AttributeError):
+                pass
+                
+        release_date = self.created_at + timezone.timedelta(days=processing_days)
+        return release_date    
 class Purpose(models.Model):
     description = models.CharField(max_length=256)
     active = models.BooleanField(default=True)
