@@ -152,7 +152,8 @@
                                             <label for="remarks" class="form-label fw-bold">Remarks:</label>
                                             <textarea class="form-control" id="remarks" rows="3" placeholder="Enter any additional remarks"></textarea>
                                         </div>
-                                        <button class="btn btn-primary" onclick="saveChanges('{{user_request.id}}')">Save Changes</button>
+                                        <button class="btn btn-primary" onclick="saveChanges('{{user_request.id}}')" 
+                                            data-has-payment="{% if user_request.uploaded_payment %}true{% else %}false{% endif %}">Save Changes</button>
                                     </div>
                                 </div>
                             </div>
@@ -175,7 +176,8 @@
             </div>
         </div>
 
-        {% include 'footer.html' %}     
+        {% include 'footer.html' %}
+        
         <script>
             function showToast(options){
                 let toast = Toastify({
@@ -223,21 +225,26 @@
             });
 
             function saveChanges(id) {
+                // Get the button that was clicked
+                const saveButton = document.querySelector(".btn-primary[onclick^='saveChanges']");
+                // Get the payment status from the data attribute
+                const hasPayment = saveButton.getAttribute('data-has-payment') === 'true';
+                
                 var csrftoken = getCookie('csrftoken');
                 let formData = new FormData();
                 
                 const newStatus = document.getElementById("newStatus").value;
                 const currentStatus = document.getElementById("requestStatus").textContent.trim();
                 
-                // Check if payment exists
-                {% if not user_request.uploaded_payment %}
-                showToast({
-                    'message': 'Error: User has not uploaded payment receipt yet. Cannot proceed with request processing.',
-                    'color': '#FF0000',
-                    'duration': 5000
-                });
-                return; // Stop execution and prevent saving if no payment uploaded
-                {% endif %}
+                // Check if payment exists using the data attribute
+                if (!hasPayment) {
+                    showToast({
+                        'message': 'Error: User has not uploaded payment receipt yet. Cannot proceed with request processing.',
+                        'color': '#FF0000',
+                        'duration': 5000
+                    });
+                    return; // Stop execution and prevent saving if no payment uploaded
+                }
                 
                 formData.append('new_status', newStatus);
                 
