@@ -174,9 +174,26 @@ function submitRequest(id, request){
         formData.append(`${file.id}`, file.files[0]);
     });
 
-    // Additional appends
-    formData.append('purpose', document.querySelector("#drpPurpose").value);
-    // formData.append('number_of_copies', document.querySelector("#numCopies").value);
+
+    // Add null check for drpPurpose
+    const purposeElement = document.querySelector("#drpPurpose");
+    if (purposeElement) {
+        formData.append('purpose', purposeElement.value);
+    } else {
+
+
+        // Use a default value or get it from request object if available
+        formData.append('purpose', request?.purpose?.[0]?.description || 'General Purpose');
+        console.warn("Purpose dropdown not found in DOM, using fallback value");
+    }
+    
+    // Get number_of_copies from the outer form instead of the dynamically created form
+    const numberOfCopiesElement = document.querySelector("#number_of_copies");
+    if (numberOfCopiesElement) {
+        formData.append('number_of_copies', numberOfCopiesElement.value);
+    } else {
+        formData.append('number_of_copies', '1'); // Default to 1 if not found
+    }
     
     // Create temp_user_info object if profile form exists
     if (document.getElementById('profile-form')) {
@@ -236,9 +253,8 @@ function submitRequest(id, request){
             });
         }
     });
-}
 
-function openPaymentTab(formData, requestID){
+}function openPaymentTab(formData, requestID){
     sessionStorage.clear();
     sessionStorage.setItem("data", formData);
     return openNewTab("/request/checkout/" + requestID, 800, 800);
