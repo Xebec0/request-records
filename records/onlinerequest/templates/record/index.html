@@ -1,10 +1,9 @@
 <!DOCTYPE html>
-
 <html>
     <head>
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <title></title>
+        <title>User Management</title>
         <meta name="description" content="">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <link rel="stylesheet" href="">
@@ -20,96 +19,38 @@
             <div id="layoutSidenav_content">
                 <main>
                     <div class="container-fluid px-4">
-                        <h1 class="mt-4">Add Users</h1>
+                        <h1 class="mt-4">User Management</h1>
                         <ol class="breadcrumb mb-4">
-                            <li class="breadcrumb-item active">Add new user information</li>
+                            <li class="breadcrumb-item active">Manage user profiles and records</li>
                         </ol>
                         <div class="card mb-4">
                             <div class="card-header">
                                 <div class="d-flex justify-content-between">
-                                    <span class="fs-6"> <i class="fa fa-list" aria-hidden="true"></i> List of users</span>
-                                    <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#recordModal">
-                                        <i class="fas fa-plus me-2"></i>Add Student Record
-                                    </button>
+                                    <span class="fs-6"> <i class="fa fa-list" aria-hidden="true"></i> List of Users</span>
                                 </div>
                             </div>
                             <div class="card-body">
                                 <!-- List of users table -->
-
                                 <div id="record">
-                                    <table id="datatable">
+                                    <table id="datatable" class="table table-striped">
                                         <thead>
                                         <tr>
                                             <th>Student Number</th>
                                             <th>First Name</th>
                                             <th>Last Name</th>
-                                            <th>Course Code</th>
+                                            <th>Email</th>
+                                            <th>User Type</th>
+                                            <th>Status</th>
+                                            <th>Record Status</th>
                                             <th>Actions</th> 
                                         </tr>
                                         </thead>
                                         <tbody></tbody>
                                     </table>
                                 </div>
-
-                                <!-- Modal -->
-                                <div class="modal fade" id="recordModal" tabindex="-1" aria-labelledby="recordModalLabel" aria-hidden="true">
-                                    <div class="modal-dialog">
-                                      <div class="modal-content">
-                                        <div class="modal-header">
-                                          <h5 class="modal-title" id="recordModalLabel">Add Student Record</h5>
-                                          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                        </div>
-                                        <div class="modal-body">
-                                          <form id="recordForm" method="POST">
-                                            {% csrf_token %}
-                                            <div class="mb-3">
-                                              <label for="userNumber" class="form-label">Student Number</label>
-                                              <input type="number" class="form-control form-control-sm" id="userNumber" name="user_number" oninput="limitInputLength(event, 10)" required>
-                                            </div>
-                                            <div class="mb-3">
-                                              <label for="firstName" class="form-label">First Name</label>
-                                              <input type="text" class="form-control form-control-sm" id="firstName" name="fname" required>
-                                            </div>
-                                            <div class="mb-3">
-                                                <label for="middleName" class="form-label">Middle Name</label>
-                                                <input type="text" class="form-control form-control-sm" id="middleName" name="middle_name" required>
-                                            </div>
-                                            <div class="mb-3">
-                                              <label for="lastName" class="form-label">Last Name</label>
-                                              <input type="text" class="form-control form-control-sm" id="lastName" name="lname" required>
-                                            </div>
-                                            <div class="mb-3">
-                                              <label for="courseCode" class="form-label">Course Code</label>
-                                              <select class="form-select form-select-sm" id="courseCode" name="course" required>
-                                                <option value="" disabled selected>Select a course</option>
-                                                {% for course in courses %}
-                                                    <option value="{{ course.code }}">{{ course.code }} - {{ course.description }}</option>
-                                                {% endfor %}
-                                              </select>
-                                            </div>
-
-                                            <div class="mb-3">
-                                                <label for="contactNumber" class="form-label">Contact Number</label>
-                                                <input type="number" class="form-control form-control-sm" id="contactNumber" name="contact_no" oninput="limitInputLength(event, 11)" required>
-                                            </div>
-                                            <div class="mb-3">
-                                                <label for="entryYearFrom" class="form-label">Entry Year From</label>
-                                                <input type="number" value="2024" class="form-control form-control-sm" id="entryYearFrom" name="entry_year_from" required>
-                                            </div>
-                                            <div class="mb-3">
-                                                <label for="entryYearTo" class="form-label">Entry Year To</label>
-                                                <input type="number" value="2024" class="form-control form-control-sm" id="entryYearTo" name="entry_year_to" required>
-                                            </div>
-                                          </form>
-                                        </div>
-                                        <div class="modal-footer">
-                                          <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
-                                          <button type="button" id="submitBtn" form="recordForm" class="btn btn-primary btn-sm">Save Record</button>
-                                        </div>
-                                      </div>
-                                    </div>
-                                  </div>
-                                </div>  
+                            </div>
+                        </div>
+                    </div>  
                 </main>
                 <footer class="py-4 bg-light mt-auto">
                     <div class="container-fluid px-4">
@@ -124,112 +65,46 @@
                     </div>
                 </footer>
             </div>
-    </div>
+        </div>
 
         {% include 'footer.html' %}
+        {% include 'admin/user/profile_modal.html' %}
 
-        <script src="" async defer></script>
         <script>
-            function limitInputLength(event, maxLength) {
-                const input = event.target;
-                if (input.value.length > maxLength) {
-                    input.value = input.value.slice(0, maxLength);
-                }
-            }
-            
             $(document).ready(function() {
-                init()
+                // Initialize
+                getUserData();
 
-                function init(){
-                    getUserRecords();
-                }
-
-                function showToast(options){
-                    let toast = Toastify({
+                function showToast(options) {
+                    Toastify({
                         text: options.message,
-                        duration: 4000,
-                        newWindow: true,
-                        close: true,
+                        duration: 3000,
                         gravity: "top",
                         position: "right",
-                        stopOnFocus: true,
-                        style: {
-                            background: options.color,
-                        },
-                    });
-
-                    toast.showToast();
+                        backgroundColor: options.color,
+                        stopOnFocus: true
+                    }).showToast();
                 }
 
-                $('#submitBtn').click(function() {
-                    // Get form data
-                    var formData = new FormData($('#recordForm')[0]);
-
-                    // CSRF Token
-                    var csrftoken = getCookie('csrftoken');
-
-                    // Send AJAX POST request
-                    $.ajax({
-                        type: 'POST',
-                        url: '/record/', // Replace with your Django URL
-                        data: formData,
-                        processData: false,
-                        contentType: false,
-                        headers: {
-                            'X-CSRFToken': csrftoken
-                        },
-                        success: function(response) {
-                            if (response.status){
-                                showToast({
-                                        'message': response.message,
-                                        'color': '#008000'
-                                });
-                                
-                                getUserRecords();
-                                resetInputFields();
-
-                                $('#recordModal').modal('hide');
-                            }else{
-                                console.log(response.errors)
-                                if (response.errors){
-                                    for (const [key, value] of Object.entries(response.errors)) {
-                                            showToast({
-                                                'message': value,
-                                                'color': response.status ? '#008000' : '#FF0000'
-                                            });
-                                    }
-                                }else{
-                                    showToast({
-                                        'message': response.message,
-                                        'color': '#FF0000'
-                                    });
-                                }
-                            }
-                        },
-                        error: function(xhr, errmsg, err) {
-                            console.log("TEST")
-                            console.log(errmsg);
-                        }
-                    });
-                });
-
-                function getUserRecords(){
-                    // Send AJAX POST request
+                function getUserData() {
                     $.ajax({
                         type: 'GET',
                         url: '/record/list/',
                         success: function(response) {
                             let data = JSON.parse(response);
-                            createUserRecordTable(data);
-                            console.log(data);
+                            createUserTable(data);
                         },
                         error: function(xhr, errmsg, err) {
                             console.log(errmsg);
+                            showToast({
+                                'message': 'Error loading user data',
+                                'color': '#FF0000'
+                            });
                         }
                     });
                 }
 
-                function createUserRecordTable(data) {
+                function createUserTable(data) {
                     // Destroy existing DataTable if it exists
                     if ($.fn.DataTable.isDataTable('#datatable')) {
                         $('#datatable').DataTable().destroy();
@@ -239,80 +114,78 @@
                     var table = $('#datatable').DataTable({
                         data: data,
                         columns: [
-                            { data: 'fields.user_number' },
-                            { data: 'fields.first_name' },
-                            { data: 'fields.last_name' },
-                            { data: 'fields.course_code' },
+                            { data: 'student_number' },
+                            { data: 'first_name' },
+                            { data: 'last_name' },
+                            { data: 'email' },
+                            { data: 'user_type' },
+                            { 
+                                data: 'is_active',
+                                render: function(data) {
+                                    return data ? 
+                                        '<span class="badge bg-success">Active</span>' : 
+                                        '<span class="badge bg-warning">Inactive</span>';
+                                }
+                            },
+                            { 
+                                data: 'has_record',
+                                render: function(data) {
+                                    return data ? 
+                                        '<span class="badge bg-success">Record Exists</span>' : 
+                                        '<span class="badge bg-danger">No Record</span>';
+                                }
+                            },
                             { 
                                 data: null,
-                                render: function(data, type, row) {
-                                    return '<button type="button" class="btn btn-danger btn-sm delete-record" data-id="' + row.pk + '">' +
-                                           '<i class="fas fa-trash"></i> Delete</button>';
+                                render: function(data) {
+                                    let buttonText = data.has_record ? 
+                                        'View Profile' : 
+                                        '<i class="fas fa-exclamation-triangle text-warning"></i> (New User) View Profile';
+                                    
+                                    return '<button type="button" class="btn btn-primary btn-sm view-profile" data-id="' + data.id + '">' +
+                                           buttonText + '</button>';
                                 }
                             }
                         ],
                         responsive: true
                     });
                     
-                    // Add event listener for delete buttons
-                    $('#datatable tbody').on('click', '.delete-record', function() {
-                        var id = $(this).data('id');
-                        if (confirm('Are you sure you want to delete this record? This action cannot be undone.')) {
-                            deleteRecord(id);
-                        }
+                    // Add event listener for profile view buttons
+                    $('#datatable tbody').on('click', '.view-profile', function() {
+                        var userId = $(this).data('id');
+                        openProfileModal(userId);
                     });
                 }
 
-                function deleteRecord(id) {
-                    // Get CSRF token
-                    var csrftoken = getCookie('csrftoken');
+                function openProfileModal(userId) {
+                    const modal = $('#profileModal');
                     
+                    // Show loading spinner
+                    modal.find('.modal-content').html('<div class="modal-body text-center"><div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div></div>');
+                    
+                    // Open the modal
+                    modal.modal('show');
+                    
+                    // Load profile data
                     $.ajax({
-                        type: 'POST',
-                        url: '/record/delete/' + id + '/',
-                        headers: {
-                            'X-CSRFToken': csrftoken
-                        },
+                        url: '/admin-panel/user-accounts/profile/' + userId + '/',
+                        type: 'GET',
                         success: function(response) {
-                            showToast({
-                                'message': response.message,
-                                'color': response.status ? '#008000' : '#FF0000'
-                            });
-                            
-                            if (response.status) {
-                                getUserRecords(); // Refresh the table
-                            }
+                            modal.find('.modal-content').html(response);
                         },
-                        error: function(xhr, errmsg, err) {
-                            console.log(errmsg);
-                            showToast({
-                                'message': 'An error occurred while deleting the record.',
-                                'color': '#FF0000'
-                            });
+                        error: function() {
+                            modal.find('.modal-content').html('<div class="modal-body"><div class="alert alert-danger">Error loading profile data</div></div>');
                         }
                     });
                 }
-                
-                function resetInputFields() {
-                    const inputFields = document.querySelectorAll('#recordForm input, #recordForm select');
-                    inputFields.forEach(field => {
-                        if (field.id == "entryYearTo" || field.id == "entryYearFrom"){
-                            field.value = '2024';
-                        }else{
-                            field.value = ''
-                        }
 
-                    });
-                }
-
-                // Function to get CSRF cookie value
+                // Get CSRF token for AJAX requests
                 function getCookie(name) {
                     var cookieValue = null;
                     if (document.cookie && document.cookie !== '') {
                         var cookies = document.cookie.split(';');
                         for (var i = 0; i < cookies.length; i++) {
                             var cookie = cookies[i].trim();
-                            // Does this cookie string begin with the name we want?
                             if (cookie.substring(0, name.length + 1) === (name + '=')) {
                                 cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
                                 break;

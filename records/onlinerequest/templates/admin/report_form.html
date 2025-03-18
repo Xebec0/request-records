@@ -1,0 +1,118 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+        <meta name="description" content="" />
+        <meta name="author" content="" />
+        <title>Report Form</title>
+        {% include 'header.html' %}
+    </head>
+
+    <body class="sb-nav-fixed">
+        {% include 'admin/admin-topnav.html' %}
+
+        <div id="layoutSidenav">
+            {% include 'admin/admin-sidenav.html' %}
+
+            <div id="layoutSidenav_content">
+                <main>
+                    <div class="container-fluid px-4">
+                        <h1 class="mt-4">Generate Report: {{ template.name }}</h1>
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <i class="fas fa-file-alt me-1"></i>
+                                Fill Report Information
+                            </div>
+                            <div class="card-body">
+                                <form method="post" action="{% url 'admin_generate_report_pdf' template.id %}">
+                                    {% csrf_token %}
+                                    <div class="row mb-3">
+                                        <div class="col-md-6">
+                                            <div class="form-group mb-3">
+                                                <label for="first_name">First Name</label>
+                                                <input type="text" class="form-control" id="first_name" name="first_name" required>
+                                            </div>
+                                            <div class="form-group mb-3">
+                                                <label for="middle_name">Middle Name</label>
+                                                <input type="text" class="form-control" id="middle_name" name="middle_name">
+                                            </div>
+                                            <div class="form-group mb-3">
+                                                <label for="last_name">Last Name</label>
+                                                <input type="text" class="form-control" id="last_name" name="last_name" required>
+                                            </div>
+                                            <div class="form-group mb-3">
+                                                <label for="contact_no">Contact Number</label>
+                                                <input type="text" class="form-control" id="contact_no" name="contact_no">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group mb-3">
+                                                <label for="entry_year_from">Entry Year (From)</label>
+                                                <input type="text" class="form-control" id="entry_year_from" name="entry_year_from">
+                                            </div>
+                                            <div class="form-group mb-3">
+                                                <label for="entry_year_to">Entry Year (To)</label>
+                                                <input type="text" class="form-control" id="entry_year_to" name="entry_year_to">
+                                            </div>
+                                            <div class="form-group mb-3">
+                                                <label for="course">Course</label>
+                                                <input type="text" class="form-control" id="course" name="course">
+                                            </div>
+                                            <div class="form-group mb-3">
+                                                <label for="student_number">Student Number</label>
+                                                <input type="text" class="form-control" id="student_number" name="student_number">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="row mb-3">
+                                        <div class="col-md-6">
+                                            <div class="form-group mb-3">
+                                                <label for="email">Email</label>
+                                                <input type="email" class="form-control" id="email" name="email">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group mb-3">
+                                                <label for="purpose">Purpose</label>
+                                                <select class="form-select" id="purpose" name="purpose" required>
+                                                    <option value="">Select Purpose</option>
+                                                    {% for purpose in purposes %}
+                                                        <option value="{{ purpose.description }}">{{ purpose.description }}</option>
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="text-end">
+                                        <a href="{% url 'admin_reports' %}" class="btn btn-secondary">Cancel</a>
+                                        <button type="submit" class="btn btn-primary">Generate Report</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </main>
+                <footer class="py-4 bg-light mt-auto">
+                    <div class="container-fluid px-4">
+                        <div class="d-flex align-items-center justify-content-between small">
+                            <div class="text-muted">Copyright © Academic File Request System 2024</div>
+                            <div>
+                                <a href="#">Privacy Policy</a>
+                                ·
+                                <a href="#">Terms & Conditions</a>
+                            </div>
+                        </div>
+                    </div>
+                </footer>
+            </div>
+        </div>
+        
+        {% include 'footer.html' %}
+    </body>
+</html>

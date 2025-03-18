@@ -2,7 +2,7 @@ from django.shortcuts import render
 from django.http import HttpResponse
 from django.contrib.auth import logout
 from django.shortcuts import redirect
-from onlinerequest.models import Request, Requirement, User_Request
+from onlinerequest.models import Request, Requirement, User_Request, Profile
 
 def index(request):
     request_forms = Request.objects.all()
@@ -91,3 +91,56 @@ def get_request_stats(request):
         'processing_times': processing_times
     })
 
+# Add the new API endpoint for detailed request data
+def get_request_details(request):
+    # Get all user requests
+    user_requests = User_Request.objects.select_related(
+        'user', 'request', 'request__document'
+    ).prefetch_related(
+        'user__profile'
+    ).order_by('-created_at')
+    
+    # Prepare data for DataTable
+    data = []
+    for req in user_requests:
+        # Calculate processing time
+        processing_time = ""
+        date_completed = ""
+        
+        if req.status == "Completed":
+            # Use updated_at as completion date for completed requests
+            date_completed = req.updated_at.strftime('%b %d, %Y')
+            
+            # Calculate processing time
+            time_diff = req.updated_at - req.created_at
+            days = time_diff.days
+            hours = time_diff.seconds // 3600
+            processing_time = f"{days} days, {hours} hours"
+        
+        # Get profile information if available
+        try:
+            profile = Profile.objects.get(user=req.user)
+            name = f"{profile.first_name} {profile.middle_name} {profile.last_name}"
+            contact = profile.contact_no
+        except Profile.DoesNotExist:
+            name = req.user.student_number
+            contact = "N/A"
+        
+        # Add request to data
+        data.append({
+            'reference_number': f"REQ-{req.id:06d}",
+            'date_requested': req.created_at.strftime('%b %d, %Y'),
+            'client_type': req.user.get_user_type_display(),
+            'requested_by': name,
+            'contact_details': contact,
+            'email': req.user.email,
+            'service_type': req.request.document.description,
+            'purpose': req.purpose,
+            'status': req.status,
+            'schedule': "N/A",  # This field isn't available in the current model
+            'date_completed': date_completed,
+            'date_released': "N/A",  # This field isn't available in the current model
+            'processing_time': processing_time
+        })
+    
+    return JsonResponse(data, safe=False)

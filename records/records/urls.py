@@ -1,6 +1,20 @@
 from django.contrib import admin
 from django.urls import path
-from onlinerequest.views import views, register, login, dummy, request, request_user, record, codetable, user_approval_view, profile, reference_login, reports
+from onlinerequest.views import (
+    views,
+    register,
+    login,
+    dummy,
+    request,
+    request_user,
+    record,
+    codetable,
+    user_approval_view,
+    profile,
+    reference_login,
+    reports,
+    admin_reports
+)
 
 # Define URL paths here
 urlpatterns = [
@@ -80,9 +94,18 @@ urlpatterns = [
     path('user/reports/', reports.index, name='reports'),
     path('user/reports/generate/<int:template_id>/', reports.generate_pdf, name='generate_report_pdf'),
 
+    # Admin report URLs
+    path('admin-panel/reports/', admin_reports.admin_reports, name='admin_reports'),
+    path('admin-panel/reports/form/<int:template_id>/', admin_reports.admin_report_form, name='admin_report_form'),
+    path('admin-panel/reports/generate/<int:template_id>/', admin_reports.admin_generate_report_pdf, name='admin_generate_report_pdf'),
+
     #Analytics
     path('admin-panel/analytics/', views.request_analytics, name='request_analytics'),
     path('api/request-stats/', views.get_request_stats, name='request_stats'),
+    path('api/request-details/', views.get_request_details, name='api_request_details'),
+
+    path('admin-panel/user-accounts/profile/<int:user_id>/', record.get_user_profile, name='user_profile'),
+    path('admin-panel/user-accounts/save-profile/', record.save_user_profile, name='save_user_profile'),
 ]
 
 
